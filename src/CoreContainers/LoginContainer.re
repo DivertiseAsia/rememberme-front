@@ -6,7 +6,7 @@ type state = {
   sendingLogin: bool,
   loginHasSuccess: bool,
   loginError: option(string),
-  email: string,
+  usename: string,
   password: string,
 };
 
@@ -17,14 +17,14 @@ type action =
   | LoginFailed(string)
   | LoginSuccess(string);
 
-let login = (email, password) => {
+let login = (usename, password) => {
   let payload =
     Json.Encode.(
-      object_([("email", email |> Js.Json.string), ("password", password |> Js.Json.string)])
+      object_([("username", usename |> Js.Json.string), ("password", password |> Js.Json.string)])
     );
   requestJsonResponseToAction(
     ~headers=buildHeader(~verb=Post, ~body=payload, None),
-    ~url="", /* TODO: Login URL */
+    ~url=RememberMeApi.URL.login,
     ~successAction=
       json => {
         let token = Json_decode.(field("token", Json_decode.string, json));
@@ -37,14 +37,14 @@ let login = (email, password) => {
 let component = ReasonReact.reducerComponent("LoginContainerRe");
 let make = (~afterLoginUrl: option(string)=?, _children) => {
   ...component,
-  initialState: () => {sendingLogin: false, loginError: None, email: "", password: "", loginHasSuccess: false},
+  initialState: () => {sendingLogin: false, loginError: None, usename: "", password: "", loginHasSuccess: false},
   reducer: (action, state) =>
     switch (action) {
     | Login =>
       UpdateWithSideEffects(
         {...state, sendingLogin: true, loginError: None},
         ({send, state}) =>
-          Js.Promise.(login(state.email, state.password) |> then_(action => send(action) |> resolve) |> ignore),
+          Js.Promise.(login(state.usename, state.password) |> then_(action => send(action) |> resolve) |> ignore),
       )
     | LoginSuccess(token) =>
       UpdateWithSideEffects(
@@ -57,7 +57,7 @@ let make = (~afterLoginUrl: option(string)=?, _children) => {
           };
         },
       )
-    | SetEmail(email) => Update({...state, email})
+    | SetEmail(usename) => Update({...state, usename})
     | SetPassword(password) => Update({...state, password})
     | LoginFailed(error) => Update({...state, loginError: Some(error), sendingLogin: false})
     },

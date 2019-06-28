@@ -40,6 +40,7 @@ let make = _children => {
   render: ({state: {route}}) => {
     let token = loadToken();
     let isLoggedIn = token !== "";
+    Js.log2("!! route.path", route.path);
     switch (route.path, isLoggedIn) {
     | ([], true)
     | ([""], true) => <PageHome isLoggedIn />

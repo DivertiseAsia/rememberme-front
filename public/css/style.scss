@@ -1,5 +1,10 @@
 $text-color: black;
-
+$text-birthday-color: pink;
+$bg-birthday-color: rgba(255, 192, 203, 0.42);
+$vacation-color: rgba(7, 208, 8, 0.54);
+$not-vacation-color: rgba(128, 128, 128, 0.51);
+$bg-dark: rgba(31, 31, 30, 0.44);
+$bg-light: #dae5ef;
 html, body, #container {
   min-width: 100vw;
   min-height: 100vh;
@@ -8,9 +13,90 @@ html, body, #container {
   overflow: hidden;
 }
 
+td{
+  min-width: 100px;
+  min-height: 100px;
+}
+
 .icon-click{
   cursor: pointer;
   &:hover{
     color: lighten($text-color, 50)
   }
+}
+
+.day.today{
+  color: red
+}
+.not-vacation{
+  background-color: $not-vacation-color;
+}
+.vacation{
+  background-color: $vacation-color;
+}
+
+
+.form-control {
+  margin-bottom: 15px;
+  background: $bg-light;
+  div{
+    margin-top: 3em;
+  }
+}
+.form-control:focus { background-color: $bg-light; }
+
+.loading-wrapper{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: $bg-dark;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  div{
+    position: relative;
+    margin-top: 50%;
+  }
+  img {width: 30px;}
+}
+.loading { width: 30px; }
+.loading-wrapper.image-loading{
+  background: #43424280;
+}
+
+.modal-wrapper{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: $bg-dark;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .modal-inner{
+    position: relative;
+    background-color: white;
+    padding: 5em 2em;
+    width: 50%;
+    height: 80%;
+  }
+}
+
+.close-icon{
+  position: absolute;
+  top: 0;
+  right: 12px;
+  font-size: 2em;
+  cursor: pointer;
+}
+.birth-day{
+  color: white;
+  background-color: $bg-birthday-color;
 }

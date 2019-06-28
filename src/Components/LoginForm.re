@@ -17,9 +17,9 @@ let make =
         <input
           disabled=loading
           className="login-filled"
-          placeholder="Email"
+          placeholder="Username"
           onChange={e => e |> getValueOfForm |> setEmail}
-          type_="email"
+          type_="text"
         />
         <input
           disabled=loading

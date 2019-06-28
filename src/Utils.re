@@ -1,3 +1,5 @@
+let errorMessage = "Something went wrong please try again later.";
+
 let getErrorMsgFromJson = json =>
   Js.String.replaceByRe(Js.Re.fromStringWithFlags("[{}\"[\\]]", ~flags="g"), " ", json)
   |> Js.String.split(",")
@@ -81,3 +83,17 @@ let checkEmail = text =>
   | None => false
   | Some(_) => true
   };
+let getLocalStorage = key => Dom.Storage.getItem(key, Dom.Storage.localStorage);
+
+let getLocalStorageWithDefault = (~default="", key) =>
+    Js.Option.getWithDefault(default, getLocalStorage(key));
+
+
+let getToken = () => getLocalStorage("token")
+  let mapOpt = (opt, ~defaultValue) =>
+    switch (opt) {
+    | None => defaultValue
+    | Some(value) => value
+    };
+
+  let mapOptStr = optStr => optStr |> mapOpt(~defaultValue="");

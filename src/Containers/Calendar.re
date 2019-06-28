@@ -1,7 +1,9 @@
 open ReasonReact;
+open RememberMeApi;
 
 let str = ReasonReact.string;
 
+type birthDay = RememberMeApi.birthDay;
 type month =
   | Jan
   | Feb
@@ -63,9 +65,17 @@ type state = {
   loadState,
   month,
   year: float,
+  holidayList: list(holiday),
+  listBirthDay: list(birthDay),
 };
 
 type action =
+  | FetchHolidayList
+  | FetchHolidayListSuccess(list(holiday))
+  | FetchHolidayListFail
+  | FetchBirthDayList
+  | FetchBirthDayListSuccess(list(birthDay))
+  | FetchBirthDayListFail
   | NextMonth
   | PreviousMonth
   | OnChangeMonth(month);
@@ -78,10 +88,6 @@ let getMonthType = idx =>
   | Some(month) => month
   };
 
-let getDates = () => {
-  Js.Date.makeWithYM(~year=2019.0, ~month=6.0) |> Js.log2("date");
-};
-
 let getLastDateObj = [%bs.raw {|
 function f (year, month){
   var date = new Date(year, month, 0);
@@ -91,7 +97,53 @@ function f (year, month){
 
 let getLastDate = (~year, ~realMonth) => getLastDateObj(year, realMonth) |> Js.Date.getDate;
 
-let dates = (month, year) => {
+let getDateOnlyDate = date => {
+  Js.Date.makeWithYMD(
+    ~year={
+      date |> Js.Date.getFullYear;
+    },
+    ~month={
+      date |> Js.Date.getMonth;
+    },
+    ~date={
+      date |> Js.Date.getDate;
+    },
+    (),
+  );
+};
+
+let mocks: list(holiday) = [
+  {name: "DAY 1 ", date: "2019-06-01" |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf, isVacation: true},
+  {name: "DAY 2 ", date: "2019-06-27" |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf, isVacation: true},
+];
+
+let getHolidayData = (holidayList, date) => {
+  switch (
+    holidayList
+    |> List.find(vacation => {
+         Js.log2("vacationDate", vacation.date |> Js.Date.fromFloat);
+         vacation.date === date;
+       })
+  ) {
+  | holiday => {Js.log2("holiday",holiday); Some(holiday)}
+  | exception Not_found => None
+  };
+};
+
+let getBirthDayElement = (birthList, date) => {
+  switch (
+    birthList
+    |> List.find((data:birthDay) => {
+          (data.birthDate |> getDateOnlyDate |> Js.Date.valueOf)  === date;
+//false
+       })
+  ) {
+  | data => Some(<p>{data.name ++ " BirthDay" |> str }</p>)
+  | exception Not_found => None
+  };
+};
+
+let dates = (month, year, holidayList, birthDayList) => {
   let col = 7;
   let row = 6;
   let boxs = col * row;
@@ -105,13 +157,62 @@ let dates = (month, year) => {
     |> int_of_float;
   let startDayInWeek = Js.Date.makeWithYM(~year, ~month, ()) |> Js.Date.getDay |> int_of_float;
   let emptyEl = key => <td key />;
-
+  let today =
+    Js.Date.make()
+    |> (
+      date =>
+        Js.Date.makeWithYMD(
+          ~year={
+            date |> Js.Date.getFullYear;
+          },
+          ~month={
+            date |> Js.Date.getMonth;
+          },
+          ~date={
+            date |> Js.Date.getDate;
+          },
+          (),
+        )
+    )
+    |> Js.Date.valueOf;
   Array.make(boxs, null)
   |> Array.mapi((idx, _) =>
        if (idx < startDayInWeek || idx - startDayInWeek + 1 > lastDate) {
          idx |> string_of_int |> emptyEl;
        } else {
-         <td> {idx - startDayInWeek + 1 |> string_of_int |> str} </td>;
+         let date = idx - startDayInWeek + 1;
+         let jsDate =
+           Js.Date.makeWithYMD(
+             ~year,
+             ~month,
+             ~date={
+               date |> float_of_int;
+             },
+             (),
+           )
+           |> Js.Date.valueOf;
+         let classThisDay =
+           switch (jsDate) {
+           | date when today === date => "today"
+           | _ => ""
+           };
+         let (classHoliday, holidayName) =
+           switch (getHolidayData(holidayList, jsDate)) {
+           | None => ("", "")
+           | Some(holiday) => (holiday.isVacation ? "vacation" : "not-vacation", holiday.name)
+           };
+           let (classBirthDay, birthDayEl) =
+           switch (getBirthDayElement(birthDayList, jsDate)) {
+           | None => ("", null)
+           | Some(el) => ("birth-day", el)
+           };
+
+
+         <td key={idx |> string_of_int} className={j|day $classThisDay $classHoliday $classBirthDay|j}>
+           {holidayName |> str}
+           {birthDayEl}
+           {date |> string_of_int |> str}
+         </td>;
        }
      )
   |> (
@@ -120,11 +221,25 @@ let dates = (month, year) => {
       |> Array.mapi((idx, _) => {
            let end_ = (idx + 1) * col;
            let start = idx > 0 ? idx * col : idx;
-           <tr> {arr |> Js.Array.slice(~start, ~end_) |> array} </tr>;
+           <tr key={j|row-$idx|j}> {arr |> Js.Array.slice(~start, ~end_) |> array} </tr>;
          });
     }
   )
   |> array;
+};
+
+let fetchHolidayList = ({send}) => {
+  fetchHoliday(
+    ~successAction=holidayList => send(FetchHolidayListSuccess(holidayList)),
+    ~failAction=_ => send(FetchHolidayListFail),
+  );
+};
+
+let fetchBirthDay = ({send}) => {
+  fetchBirthDay(
+    ~successAction=holidayList => send(FetchBirthDayListSuccess(holidayList)),
+    ~failAction=_ => send(FetchBirthDayListFail),
+  );
 };
 
 let component = ReasonReact.reducerComponent("Calendar");
@@ -135,9 +250,18 @@ let make = _children => {
     loadState: Idle,
     month: Js.Date.make() |> Js.Date.getMonth |> getMonthType,
     year: Js.Date.make() |> Js.Date.getFullYear,
+    holidayList: [],
+    listBirthDay: [],
   },
+  didMount: ({send}) => {send(FetchHolidayList)send(FetchBirthDayList)},
   reducer: (action, state) => {
     switch (action) {
+    | FetchHolidayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchHolidayList)
+    | FetchHolidayListSuccess(holidayList) => Update({...state, loadState: Succeed, holidayList})
+    | FetchHolidayListFail => Update({...state, loadState: Failed, holidayList: []})
+    | FetchBirthDayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchBirthDay)
+    | FetchBirthDayListSuccess(listBirthDay) => Update({...state, loadState: Succeed, listBirthDay})
+    | FetchBirthDayListFail => Update({...state, loadState: Failed, listBirthDay: []})
     | NextMonth =>
       switch (state.month) {
       | Dec => Update({...state, month: Jan, year: state.year +. 1.})
@@ -167,17 +291,19 @@ let make = _children => {
     <div className="container">
       <div className="row">
         <h1>
-          <span className="icon-click" onClick=(_ => send(PreviousMonth))> {{j|<|j} |> str} </span>
+          <span className="icon-click" onClick={_ => send(PreviousMonth)}> {{j|<|j} |> str} </span>
           {state.month |> mapMonthStr |> str}
-          <span className="icon-click" onClick=(_ => send(NextMonth))> {{j|>|j} |> str} </span>
+          <span className="icon-click" onClick={_ => send(NextMonth)}> {{j|>|j} |> str} </span>
         </h1>
-        <h1 className="col">{state.year |> Js.Float.toString |> str}</h1>
+        <h1 className="col"> {state.year |> Js.Float.toString |> str} </h1>
       </div>
       <table className="table">
         <thead>
           <tr> {days |> List.map(day => <th> {day |> mapDayStr |> str} </th>) |> Array.of_list |> array} </tr>
         </thead>
-        <tbody> {dates(state.month |> getMonthFloat, state.year)} </tbody>
+        <tbody> {state.loadState === Loading ? null:
+        {dates(state.month |> getMonthFloat, state.year, state.holidayList, state.listBirthDay)}
+        } </tbody>
       </table>
     </div>,
 };
