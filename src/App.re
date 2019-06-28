@@ -48,6 +48,7 @@ let make = _children => {
       let _ = clearToken();
       let _ = ReasonReact.Router.push("/?logout=true");
       <PageLogin queryString={route.search} />;
+    | ([x], false) when routeMatches(x, Links.register) => <PageRegister />
     | (_, false) =>
       let queryParams = "next=" ++ encodeURIComponent(path());
       let _ = ReasonReact.Router.push("/login?" ++ queryParams);

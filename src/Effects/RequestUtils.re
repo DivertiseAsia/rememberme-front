@@ -1,21 +1,20 @@
-let buildHeader = (~verb: Fetch.requestMethod=Get, ~body: option(Js.Dict.t(Js.Json.t))=?, token: option(string)) => {
-  let headers =
-    switch (token) {
-    | None => Fetch.HeadersInit.make({"Content-Type": "application/json"})
-    | Some(token) => Fetch.HeadersInit.make({"Content-Type": "application/json", "Authorization": "Token " ++ token})
+let buildHeader = (~verb: Fetch.requestMethod=Get, ~body: option(Js.Json.t)=?, token: option(string)) => {
+    let headers =
+      switch (token) {
+      | None => Fetch.HeadersInit.make({"Content-Type": "application/json"})
+      | Some(token) => Fetch.HeadersInit.make({"Content-Type": "application/json", "Authorization": "Token " ++ token})
+      };
+    switch (body) {
+    | None => Fetch.RequestInit.make(~method_=verb, ~headers, ())
+    | Some(body) =>
+      Fetch.RequestInit.make(
+        ~method_=verb,
+        ~body=Fetch.BodyInit.make(Js.Json.stringify(body)),
+        ~headers,
+        (),
+      )
     };
-
-  switch (body) {
-  | None => Fetch.RequestInit.make(~method_=verb, ~headers, ())
-  | Some(body) =>
-    Fetch.RequestInit.make(
-      ~method_=verb,
-      ~body=Fetch.BodyInit.make(Js.Json.stringify(Js.Json.object_(body))),
-      ~headers,
-      (),
-    )
   };
-};
 
 let buildFileHeader = (~body, token: option(string)) => {
   let headers =
@@ -64,19 +63,22 @@ let requestWithoutHeader = (~url, ~decoder=?, ()) =>
        })
   );
 
-let requestJsonResponseToAction = (~headers, ~url, ~successAction, ~failAction) =>
-  Js.Promise.(
-    Fetch.fetchWithInit(url, headers)
-    |> then_(response =>
-         response
-         |> Fetch.Response.status
-         |> (
-           fun
-           | status when status / 100 == 2 =>
-             Fetch.Response.json(response)
-             |> then_(json => successAction(json) |> resolve)
-             |> catch(_err => successAction(Js.Json.null) |> resolve)
-           | _ => Fetch.Response.json(response) |> then_(json => failAction(json) |> resolve)
+  let requestJsonResponseToAction = (~headers, ~url, ~successAction, ~failAction) =>
+    Js.Promise.(
+      Fetch.fetchWithInit(url, headers)
+      |> then_(response =>
+           response
+           |> Fetch.Response.status
+           |> (
+             fun
+             | status when status / 100 == 2 =>
+               Fetch.Response.json(response)
+               |> then_(json => successAction(json) |> resolve)
+               |> catch(_err => successAction(Js.Json.null) |> resolve)
+             | _ => Fetch.Response.json(response)
+                    |> then_(json => failAction(json) |> resolve)
+                    |> catch(_err => failAction(Js.Json.null) |> resolve)
+           )
          )
-       )
-  );
+      |> catch(_err => failAction(Js.Json.null) |> resolve)
+    );

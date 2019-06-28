@@ -1,4 +1,5 @@
-let component = ReasonReact.statelessComponent("PopupRe");
+open Utils;
+let component = ReasonReact.statelessComponent("LoginForm");
 
 let make =
     (
@@ -17,14 +18,14 @@ let make =
           disabled=loading
           className="login-filled"
           placeholder="Email"
-          onChange={e => setEmail(ReactEvent.Form.target(e)##value)}
+          onChange={e => e |> getValueOfForm |> setEmail}
           type_="email"
         />
         <input
           disabled=loading
           className="login-filled"
           placeholder="Password"
-          onChange={e => setPassword(ReactEvent.Form.target(e)##value)}
+          onChange={e => e |> getValueOfForm |> setPassword}
           type_="password"
           required=true
         />

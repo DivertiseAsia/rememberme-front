@@ -5,7 +5,7 @@ let component = ReasonReact.statelessComponent("PageLogin");
 
 let regex = Js.Re.fromStringWithFlags("next=([^&#]*)", ~flags="g");
 
-let make = (~queryString: string, _children) => {
+let make = (~queryString="", _children) => {
   ...component,
   render: _self => {
     let afterLoginUrl = {
@@ -20,10 +20,10 @@ let make = (~queryString: string, _children) => {
       };
     };
     <div className="auth-page login-page">
-      <Logo className="auth-page_logo" />
-      <h2 className="-text-space"> {string("Login")} </h2>
-      <LoginContainer ?afterLoginUrl />
-      <Link href=Links.forgot> {string("forgot password")} </Link>
-    </div>;
+        <h1> {"Remember Me" |> string} </h1>
+        <h2 className="-text-space"> {string("Login")} </h2>
+        <LoginContainer ?afterLoginUrl />
+        <Link href=Links.register> {string("Sign up")} </Link>
+      </div>;
   },
 };

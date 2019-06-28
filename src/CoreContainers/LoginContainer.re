@@ -18,10 +18,10 @@ type action =
   | LoginSuccess(string);
 
 let login = (email, password) => {
-  let payload = Js.Dict.empty();
-  Js.Dict.set(payload, "email", Js.Json.string(email));
-  Js.Dict.set(payload, "password", Js.Json.string(password));
-
+  let payload =
+    Json.Encode.(
+      object_([("email", email |> Js.Json.string), ("password", password |> Js.Json.string)])
+    );
   requestJsonResponseToAction(
     ~headers=buildHeader(~verb=Post, ~body=payload, None),
     ~url="", /* TODO: Login URL */
@@ -30,7 +30,7 @@ let login = (email, password) => {
         let token = Json_decode.(field("token", Json_decode.string, json));
         LoginSuccess(token);
       },
-    ~failAction=json => LoginFailed(getErrorMsgFromJson(json)),
+    ~failAction=json => LoginFailed((json |> Json.stringify)),
   );
 };
 
@@ -43,23 +43,19 @@ let make = (~afterLoginUrl: option(string)=?, _children) => {
     | Login =>
       UpdateWithSideEffects(
         {...state, sendingLogin: true, loginError: None},
-        (
-          ({send, state}) =>
-            Js.Promise.(login(state.email, state.password) |> then_(action => send(action) |> resolve) |> ignore)
-        ),
+        ({send, state}) =>
+          Js.Promise.(login(state.email, state.password) |> then_(action => send(action) |> resolve) |> ignore),
       )
     | LoginSuccess(token) =>
       UpdateWithSideEffects(
         {...state, sendingLogin: false},
-        (
-          _self => {
-            Dom.Storage.(localStorage |> setItem("token", token));
-            switch (afterLoginUrl) {
-            | Some(route) => ReasonReact.Router.push(route)
-            | None => ReasonReact.Router.push(Links.home)
-            };
-          }
-        ),
+        _self => {
+          Dom.Storage.(localStorage |> setItem("token", token));
+          switch (afterLoginUrl) {
+          | Some(route) => ReasonReact.Router.push(route)
+          | None => ReasonReact.Router.push(Links.home)
+          };
+        },
       )
     | SetEmail(email) => Update({...state, email})
     | SetPassword(password) => Update({...state, password})
@@ -71,25 +67,19 @@ let make = (~afterLoginUrl: option(string)=?, _children) => {
         loading={self.state.sendingLogin}
         setEmail={input => self.send(SetEmail(input))}
         setPassword={password => self.send(SetPassword(password))}
-        onSubmit={
-          e => {
-            ReactEvent.Form.preventDefault(e);
-            Js.log(e);
-            self.send(Login);
-          }
-        }
+        onSubmit={e => {
+          ReactEvent.Form.preventDefault(e);
+          Js.log(e);
+          self.send(Login);
+        }}
       />
       {self.state.sendingLogin === true ? <Loading /> : ReasonReact.null}
-      {
-        self.state.loginHasSuccess ?
-          <div className="text-info"> {string("Logged in. Redirecting..")} </div> : ReasonReact.null
-      }
-      {
-        switch (self.state.loginError) {
-        | Some("")
-        | None => ReasonReact.null
-        | Some(x) => <div className="text-error"> {string(x)} </div>
-        }
-      }
+      {self.state.loginHasSuccess ?
+         <div className="text-info"> {string("Logged in. Redirecting..")} </div> : ReasonReact.null}
+      {switch (self.state.loginError) {
+       | Some("")
+       | None => ReasonReact.null
+       | Some(x) => x |> getErrorMsgFromJson |> array
+       }}
     </div>,
 };
