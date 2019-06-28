@@ -1,0 +1,124 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+jobs:
+  unit-test: #execute on every branch
+    docker:
+      - image: circleci/node:8.11
+    working_directory: ~/artcrm-front
+
+    steps:
+      - checkout
+
+       # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run:
+          name: Install dependencies
+          command: npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      # run tests!
+      - run:
+          name: Run tests
+          command: npm test
+
+      - run:
+          name: Notify on fail
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "production" ]; then
+              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Prod: artcrm-front unit test fail frontend commit '$CIRCLE_SHA1' - maybe memory issue?"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+            fi
+            if [ "${CIRCLE_BRANCH}" == "staging" ]; then
+              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Staging: artcrm-front unit test fail frontend commit '$CIRCLE_SHA1' - maybe memory issue?"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+            fi
+          when: on_fail
+  build-and-push:
+    docker:
+      - image: circleci/node:8.11
+
+    working_directory: ~/artcrm-front
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      # install awscil
+      - run:
+          name: Install awscli
+          command: |
+            sudo apt-get -y update
+            sudo apt-get -y install python3.4-dev
+            sudo curl -O "https://bootstrap.pypa.io/get-pip.py"
+            sudo python3.4 get-pip.py
+            sudo pip install --upgrade awscli
+
+      # deploy to aws
+      - deploy:
+          name: Deploy if tests pass and branch is Production
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "production" ]; then
+              npm run build
+              npm run webpack:production
+              aws s3 sync build $PROD_BUCKET_PATH --metadata-directive REPLACE --cache-control max-age=43200 --delete
+              aws s3 cp $PROD_BUCKET_PATH/index.html $PROD_BUCKET_PATH/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html
+              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Prod: Deployed artcrm-front frontend commit '$CIRCLE_SHA1'"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+            else
+              echo "Not production branch so not deploying to production s3"
+            fi
+
+      - deploy:
+          name: Deploy if tests pass and branch is Staging
+          command: |
+            if  [ "${CIRCLE_BRANCH}" == "staging" ]; then
+              npm run build
+              npm run webpack:staging
+              aws s3 sync build $STAGING_BUCKET_PATH --metadata-directive REPLACE --cache-control max-age=43200 --delete
+              aws s3 cp $STAGING_BUCKET_PATH/index.html $STAGING_BUCKET_PATH/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html
+              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Staging: Deployed artcrm-front frontend commit '$CIRCLE_SHA1'"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+            else
+              echo "Not staging branch so not deploying to staging s3"
+            fi
+      - run:
+          name: Notify on fail
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "production" ]; then
+              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Prod: deploy artcrm-front frontend commit '$CIRCLE_SHA1' failed???"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+            fi
+            if [ "${CIRCLE_BRANCH}" == "staging" ]; then
+              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Staging: deploy artcrm-front frontend commit '$CIRCLE_SHA1' failed???"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+            fi
+          when: on_fail
+workflows:
+  version: 2
+  build-deploy-flow:
+    jobs:
+      - build-and-push:
+          filters:
+            branches:
+              only:
+                - production
+                - staging

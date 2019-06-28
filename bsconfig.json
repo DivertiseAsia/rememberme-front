@@ -1,0 +1,23 @@
+{
+  "name": "diver-template",
+  "sources": {
+    "dir" : "src",
+    "subdirs" : true
+  },
+  "package-specs": [{
+    "module": "commonjs",
+    "in-source": false
+  }],
+  "suffix": ".bs.js",
+  "namespace": true,
+  "bs-dependencies": [
+    "reason-react",
+    "bs-css",
+    "bs-fetch",
+    "bs-webapi",
+    "@glennsl/bs-json",
+    "bs-promise-monad"
+  ],
+  "reason": { "react-jsx": 2 },
+  "refmt": 3
+}
