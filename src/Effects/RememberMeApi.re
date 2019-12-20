@@ -35,7 +35,7 @@ type birthDay = {
 //   "to_date": "2019-06-27",
 //   "reason": "Trust me, I'm sick.",
 //   "is_approved": true
-let baseApiUrl = "http://192.168.1.40:8000";
+let baseApiUrl = "https://rememberme-server.herokuapp.com";
 
 module URL = {
   let login = {j|$baseApiUrl/account/login/|j};
