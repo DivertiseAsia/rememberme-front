@@ -1,3 +1,4 @@
+open ReasonReact;
 open Utils;
 let component = ReasonReact.statelessComponent("LoginForm");
 
@@ -12,24 +13,25 @@ let make =
     ) => {
   ...component,
   render: _self =>
-    <form className={"form form-login " ++ Js.Option.getWithDefault("", className)} onSubmit>
+    <form className={"form-group form-login " ++ Js.Option.getWithDefault("", className)} onSubmit>
       <div className="section-login content -text-center">
+        <small>{string("Email")}</small>
         <input
           disabled=loading
-          className="login-filled"
-          placeholder="Username"
+          className="form-control"
+          placeholder="Email"
           onChange={e => e |> getValueOfForm |> setEmail}
           type_="text"
         />
         <input
           disabled=loading
-          className="login-filled"
+          className="form-control"
           placeholder="Password"
           onChange={e => e |> getValueOfForm |> setPassword}
           type_="password"
           required=true
         />
-        <input disabled=loading className="btn-filled-blue btn-line" type_="submit" value="Login" />
+        <input disabled=loading className="btn-filled-blue btn-line btn-login btn-main-color" type_="submit" value="Login" />
       </div>
     </form>,
 };

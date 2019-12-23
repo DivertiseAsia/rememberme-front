@@ -5,6 +5,11 @@ $vacation-color: rgba(7, 208, 8, 0.54);
 $not-vacation-color: rgba(128, 128, 128, 0.51);
 $bg-dark: rgba(31, 31, 30, 0.44);
 $bg-light: #dae5ef;
+
+$bg-color: #2D506D;
+$main-btn-color: #52C4BB;
+$sub-btn-color: #FFA227;
+
 html, body, #container {
   min-width: 100vw;
   min-height: 100vh;
@@ -16,6 +21,87 @@ html, body, #container {
 td{
   min-width: 100px;
   min-height: 100px;
+}
+
+.btn-main-color {
+  background-color: $main-btn-color;
+  border: none;
+  color: white;
+}
+
+.form-control {
+  margin-bottom: 30px;
+  background-color: transparent !important;
+  border-radius: 0px;
+  color: white !important;
+}
+.form-control:focus {
+  box-shadow: none !important;
+}
+
+.auth-page {
+  background-color: $bg-color;
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  padding: 20px;
+
+  .row-logo {
+    .logo- {
+      width: auto;
+      margin: auto;
+    }
+  }
+  .row-login-container, .row-register-container {
+    overflow-y: auto;
+    small {
+      color: white;
+      display: block;
+    }
+    .form-control {
+      margin-bottom: 30px;
+      background-color: transparent !important;
+    }
+    .btn-login, .btn-signup {
+      display: block;
+      margin: auto;
+      margin-top: 40px;
+      border-radius: 40px;
+      padding: 10px;
+      width: 50%;
+      max-width: 200px;
+    }
+    .link-signup, .link-login {
+      margin-top: 20px;
+      a { 
+        color: white;
+      }
+    }
+  }
+}
+.form-control {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid white;
+}
+.login-page {
+  .row-logo {
+    height: 40%;
+    .logo- {height: 30%;}
+  }
+  .row-login-container {height: 60%;}
+}
+.register-page {
+  .row-logo {
+    height: 30%;
+    .logo- {height: 50%;}
+  }
+  .row-register-container {
+    height: 70%;
+    padding: 20px;
+  }
 }
 
 .icon-click{

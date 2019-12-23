@@ -49,6 +49,7 @@ module.exports = {
     }),
     new HtmlWebpackExcludeAssetsPlugin(),
     new CopyWebpackPlugin([
+      { from: 'public' },
       { from: 'public/images/favicon.png' }
     ]),
   ],

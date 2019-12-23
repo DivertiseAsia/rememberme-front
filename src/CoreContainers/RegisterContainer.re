@@ -103,6 +103,7 @@ let make = _children => {
         {state.loading ? <Loading /> : null}
         <form id="signup-form">
           <div className="row justify-content-between">
+            <small>{string("Email")}</small>
               <input
                 type_="email"
                 id="inputEmail"
@@ -144,19 +145,20 @@ let make = _children => {
                   ~invalid={state.firstName |> isStringEmpty},
                   (),
                 )}
-                placeholder="Name"
+                placeholder="Your Name"
                 value={state.firstName}
                 onChange={e => send(SetBirthDate(valueFromEvent(e)))}
               />
+              <small>{string("Birthday")}</small>
               <input
-                type_="surname"
-                id="surname"
+                type_="date"
+                id="birthday"
                 className={getClassName(
                   ~extraStyle="form-control-smaller",
                   ~invalid={state.lastName |> isStringEmpty},
                   (),
                 )}
-                placeholder="Last Name"
+                placeholder="Birthday"
                 value={state.lastName}
                 onChange={e => send(SetBirthDate(valueFromEvent(e)))}
               />
@@ -172,7 +174,7 @@ let make = _children => {
             {state.password |> Js.String.length > 0 && !checkPassword(state.password) ?
                <p id="error_password"> {"The password must be at least 8 characters long." |> str} </p> : null}
           </div>
-          <button id="signup_btn" className="btn btn-blue" disabled=buttonDisabled onClick={_ => send(SignUp)}>
+          <button id="signup_btn" className="btn btn-blue btn-signup" disabled=buttonDisabled onClick={_ => send(SignUp)}>
             {"Sign Up" |> str}
           </button>
         </form>
