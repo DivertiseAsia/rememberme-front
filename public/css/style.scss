@@ -10,6 +10,13 @@ $bg-color: #2D506D;
 $main-btn-color: #52C4BB;
 $sub-btn-color: #FFA227;
 
+* {
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
+
 html, body, #container {
   min-width: 100vw;
   min-height: 100vh;
@@ -21,6 +28,10 @@ html, body, #container {
 td{
   min-width: 100px;
   min-height: 100px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .btn-main-color {
@@ -37,6 +48,13 @@ td{
 }
 .form-control:focus {
   box-shadow: none !important;
+}
+
+.col-calendar, .col-schedule {
+  min-height: 50%;
+}
+.col-schedule {
+  background-color: white;
 }
 
 .auth-page {
@@ -102,6 +120,67 @@ td{
     height: 70%;
     padding: 20px;
   }
+}
+.scheduler-status {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+}
+.btn-rounded {
+  border-radius: 40px;
+}
+.home-page {
+  background-color: $bg-color;
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  .schedule-container {
+    height: 100%;
+    color: $bg-color;
+    padding: 20px;
+    .form-icon {
+      height: 20px;
+    }
+
+    .btn-rounded { width: 100%; font-size: 12px;}
+    .active-menu {
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    .none-active-menu {
+      background-color: transparent;
+    }
+  }
+}
+
+.btn-request {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: $main-btn-color;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  font-size: 9px;
+  color: white;
+
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  .requestform-icon {
+    margin: auto;
+    width: 30px;
+    height: 30px;
+    display: block;
+  }
+}
+
+.btn-form- {
+  background-color: transparent;
+  color: $bg-color;
+}
+.btn-form-active {
+  background: $sub-btn-color !important;
+  color: white;
 }
 
 .icon-click{
@@ -186,3 +265,21 @@ td{
   color: white;
   background-color: $bg-birthday-color;
 }
+
+
+@media screen and (min-width: 768px) { 
+  
+  .home-page {
+    overflow-y: auto;
+  }
+  .schedule-container {
+    height: 100vh;
+  }
+}
+@media screen and (max-width: 767px) { 
+  
+  .home-page {
+    overflow-y: auto;
+  }
+}
+

@@ -23,17 +23,18 @@ let make = (~isLoggedIn: bool, _children) => {
     };
   },
   render: ({state: {showRequestLeave, showRequestUserLeave}, send}) =>
-    <div className="container">
-      <h1> {string("Remember Me")} </h1>
-      <div className="row">
-        <div className="col-12 col-sm-12 col-md-7 col-lg-8 col-xl-8"> /*<Calendar />*/ </div>
-        <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4">
+    <div className="home-page container-fluid">
+      <div className="row row-main" style=(ReactDOMRe.Style.make(~height="100%", ()))>
+        <div className="col-12 col-sm-12 col-md-7 col-lg-8 col-xl-8 col-calendar"> 
+        /*<Calendar />*/ 
+          {string("Calendar")}
+        </div>
+        <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
           /*<div className="row">
             <button onClick={_ => send(ToggleRequestLeave)}> {"RequestLeave" |> str} </button>
             <button onClick={_ => send(ToggleRequestUserLeave)}> {"UserLeave" |> str} </button>
           </div>*/
-          <button onClick={_ => send(ToggleRequestLeave)}> {"RequestLeave" |> str} </button>
-            <button onClick={_ => send(ToggleRequestUserLeave)}> {"UserLeave" |> str} </button>
+          <Schedule />
         </div>
       </div>
       {showRequestLeave ? <RequestLeave onClose={_ => send(ToggleRequestLeave)} /> : null}
