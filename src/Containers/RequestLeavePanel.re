@@ -6,6 +6,7 @@ open Utils;
 type state = {
   loadState,
   formMenu,
+  requestLeaves: list(string),
 };
 
 type action =
@@ -17,7 +18,8 @@ let make = (_children) => {
   ...component,
   initialState: () => {
     loadState: Idle, 
-    formMenu: MyForm
+    formMenu: MyForm,
+    requestLeaves: ["", ""],
   },
   reducer: (action, state) => {
     switch (action) {
@@ -28,7 +30,7 @@ let make = (_children) => {
     <div className="container request-form-container">
       <div className="row mt-4"> 
         <div className="col-7 col-md-8 col-xl-9"> 
-          <p onClick=(_ => send(ChangeFormMenu(MyForm)))>{string("My Form")}</p>
+          <p className="cursor-pointer" onClick=(_ => send(ChangeFormMenu(MyForm)))>{string("My Form")}</p>
         </div>
         <div className="col-5 col-md-4 col-xl-3"> 
           <button 
@@ -47,6 +49,11 @@ let make = (_children) => {
           ~borderTop="2px solid #52C4BB",
         ()))
       >
+        {
+          state.requestLeaves |> List.map((requestLeave) => {
+            <RequestLeave />
+          }) |> Array.of_list |> array
+        }
       </div>
     </div>;
   },

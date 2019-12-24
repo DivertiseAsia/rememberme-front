@@ -70,7 +70,7 @@ let make = (_children) => {
       <p>{string("Create Form")}</p>
     </div>
     <div 
-      className="row justify-content-center pt-5 pb-5" 
+      className="row justify-content-center pt-5 pb-2" 
       style=(ReactDOMRe.Style.make(
         ~backgroundColor="white", 
         ~borderTop="2px solid #FFA227",
