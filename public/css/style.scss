@@ -154,6 +154,11 @@ td{
   }
 }
 
+.input-request {
+  border-bottom: 1px solid $bg-color;
+  color: $bg-color !important;
+}
+
 .btn-request {
   width: 80px;
   height: 80px;
@@ -163,7 +168,7 @@ td{
   font-size: 9px;
   color: white;
 
-  position: absolute;
+  position: fixed;
   right: 20px;
   bottom: 20px;
   .requestform-icon {
@@ -266,6 +271,33 @@ td{
   background-color: $bg-birthday-color;
 }
 
+.popup-bg {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: 9;
+  background-color: rgba(0,0,0,0.3);
+}
+.popup-container {
+  z-index: 10;
+  position: fixed;
+  background-color: white;
+  border-radius: 30px;
+  margin: auto;
+
+  .row-icon {height: 20%;}
+  .row-text {height: 60%;}
+  .row-btn {height: 20%;}
+  .col-12 {
+    height: 100%;
+  }
+  img {
+    max-height: 100%;
+  }
+}
+
 
 @media screen and (min-width: 768px) { 
   
@@ -275,11 +307,26 @@ td{
   .schedule-container {
     height: 100vh;
   }
+  .col-note {
+    text-align: right;
+  }
+  .popup-container {
+    top: 35%;
+    left: 30%;
+    width: 50%;
+    height: 45%;
+  }
 }
 @media screen and (max-width: 767px) { 
   
   .home-page {
     overflow-y: auto;
+  }
+  .popup-container {
+    top: 20%;
+    left: 10%;
+    width: 80%;
+    height: 60%;
   }
 }
 

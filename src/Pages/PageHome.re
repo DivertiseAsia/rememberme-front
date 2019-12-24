@@ -37,7 +37,8 @@ let make = (~isLoggedIn: bool, _children) => {
           <Schedule />
         </div>
       </div>
-      {showRequestLeave ? <RequestLeave onClose={_ => send(ToggleRequestLeave)} /> : null}
+      /*{showRequestLeave ? <RequestLeave onClose={_ => send(ToggleRequestLeave)} /> : null}
       {showRequestUserLeave ? <UserLeave onClose={_ => send(ToggleRequestUserLeave)} /> : null}
+      */
     </div>,
 };

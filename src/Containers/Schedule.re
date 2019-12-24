@@ -138,7 +138,7 @@ let make = (_children) => {
             </button>
           </>
         | RequestForm => <RequestForm />
-        | MyForm => null
+        | MyForm => <RequestLeavePanel />
         };
       }
       
