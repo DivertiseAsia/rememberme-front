@@ -6,7 +6,7 @@ $not-vacation-color: rgba(128, 128, 128, 0.51);
 $bg-dark: rgba(31, 31, 30, 0.44);
 $bg-light: #dae5ef;
 
-$bg-color: #2D506D;
+$main-color: #2D506D;
 $main-btn-color: #52C4BB;
 $sub-btn-color: #FFA227;
 
@@ -58,7 +58,7 @@ td{
 }
 
 .auth-page {
-  background-color: $bg-color;
+  background-color: $main-color;
   position: absolute;
   left: 0px;
   right: 0px;
@@ -129,8 +129,12 @@ td{
 .btn-rounded {
   border-radius: 40px;
 }
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid $main-color;
+}
 .home-page {
-  background-color: $bg-color;
+  background-color: $main-color;
   position: absolute;
   left: 0px;
   right: 0px;
@@ -138,7 +142,7 @@ td{
   bottom: 0px;
   .schedule-container {
     height: 100%;
-    color: $bg-color;
+    color: $main-color;
     padding: 20px;
     .form-icon {
       height: 20px;
@@ -155,8 +159,8 @@ td{
 }
 
 .input-request {
-  border-bottom: 1px solid $bg-color;
-  color: $bg-color !important;
+  border-bottom: 1px solid $main-color;
+  color: $main-color !important;
 }
 
 .btn-request {
@@ -178,12 +182,35 @@ td{
     display: block;
   }
 }
+.btn-cancel-request {
+  width: 20%;
+  min-width: 70px;
+  max-width: 80px;
+  padding: 2px 5px;
+}
 
 .btn-form- {
   background-color: transparent;
-  color: $bg-color;
+  color: $main-color;
 }
-.btn-form-active {
+
+.request-status {
+  text-align: center;
+  padding: 2px 5px;
+  font-size: 10px;
+}
+
+.btn-form-active, .btn-approve {
+  background: $sub-btn-color !important;
+  color: white;
+}
+
+.btn-fail {
+  background: #FF4427 !important;
+  color: white;
+}
+
+.btn-pending {
   background: $sub-btn-color !important;
   color: white;
 }

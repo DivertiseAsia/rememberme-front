@@ -80,7 +80,7 @@ let make = (_children) => {
         requestMenus |> List.mapi((i, menu:formType) => {
           <div 
             key=("form-type-" ++ (menu |> RememberMeUtils.requestMenuToStr)) 
-            className="col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3"
+            className="col-6 col-sm-6 col-md-6 col-lg-5 col-xl-4"
           >
             <button 
               type_="button" 
@@ -147,7 +147,7 @@ let make = (_children) => {
                 >
                   <div className="row"> 
                     <div className="col-4 text-center"> 
-                      <img className="m-auto" src="/images/upload.svg" />
+                      <img className="m-auto" src="/images/upload.svg" style=(ReactDOMRe.Style.make(~width="80%", ())) />
                     </div>
                     <div className="col-8 p-0"> 
                       <p className="mb-1">{string("Please, Upload the Medical certificate.")}</p>

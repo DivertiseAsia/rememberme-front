@@ -28,7 +28,7 @@ type day =
   | Sat;
 
 let months = [Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec];
-let days = [Sun, Mon, Tue, Wed, Thu, Fri, Sat];
+let days = [Mon, Tue, Wed, Thu, Fri, Sat, Sun];
 
 let mapDayStr = day =>
   switch (day) {
@@ -290,6 +290,17 @@ let make = _children => {
   render: ({state, send}) =>
     <div className="container">
       <div className="row">
+        <button 
+          type_="button" 
+          className="btn btn-rounded btn-main-color active-menu pl-4 pr-4"
+          onClick=(_ => ())
+          
+        >
+          <img src="/images/calendar.svg" style=(ReactDOMRe.Style.make(~width="35px", ~height="35px", ())) />
+          {string(" 2019")}
+        </button>
+      </div>
+      <div className="row">
         <h1>
           <span className="icon-click" onClick={_ => send(PreviousMonth)}> {{j|<|j} |> str} </span>
           {state.month |> mapMonthStr |> str}
@@ -301,9 +312,12 @@ let make = _children => {
         <thead>
           <tr> {days |> List.map(day => <th> {day |> mapDayStr |> str} </th>) |> Array.of_list |> array} </tr>
         </thead>
-        <tbody> {state.loadState === Loading ? null:
-        {dates(state.month |> getMonthFloat, state.year, state.holidayList, state.listBirthDay)}
-        } </tbody>
+        <tbody> 
+        {state.loadState === Loading ? 
+          null:
+          dates(state.month |> getMonthFloat, state.year, state.holidayList, state.listBirthDay)
+        } 
+        </tbody>
       </table>
     </div>,
 };

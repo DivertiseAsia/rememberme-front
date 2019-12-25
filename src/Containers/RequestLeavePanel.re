@@ -28,17 +28,28 @@ let make = (_children) => {
   },
   render: ({state, send}) => { 
     <div className="container request-form-container">
-      <div className="row mt-4"> 
-        <div className="col-7 col-md-8 col-xl-9"> 
-          <p className="cursor-pointer" onClick=(_ => send(ChangeFormMenu(MyForm)))>{string("My Form")}</p>
+      <div className="row mt-4 mb-2"> 
+        <div className="col-7 col-md-6 col-lg-7 col-xl-9"> 
+          <p 
+            className="cursor-pointer" 
+            onClick=(_ => send(ChangeFormMenu(MyForm)))
+            style=(ReactDOMRe.Style.make(~marginTop="8px", ~marginBottom="0px", ()))
+          >
+            {string("My Form")}
+          </p>
         </div>
-        <div className="col-5 col-md-4 col-xl-3"> 
+        <div className="col-5 col-md-6 col-lg-5 col-xl-3 pl-0"> 
           <button 
             type_="button" 
-            className=("btn btn-rounded " ++ (state.formMenu === History ? " btn-main-color active-menu" : ""))
+            className=("btn btn-rounded " ++ (state.formMenu === History ? "btn-main-color active-menu" : "btn-outline"))
             onClick=(_ => send(ChangeFormMenu(History)))
           >
-            {string("History")}
+            (state.formMenu === History ? 
+              <img src="/images/history.svg" />
+              : 
+              <img src="/images/history_blue.svg" />
+            )
+            {string(" History")}
           </button>
         </div>
       </div>
@@ -50,8 +61,12 @@ let make = (_children) => {
         ()))
       >
         {
-          state.requestLeaves |> List.map((requestLeave) => {
-            <RequestLeave />
+          state.requestLeaves |> List.mapi((i, requestLeave) => {
+            <div key=("RequestLeave-" ++ (i |> string_of_int)) className="container " style=(ReactDOMRe.Style.make(~width="100%", ()))>
+              (i === 0 ? <hr /> : null)
+              <RequestLeave onCancel=(_ => ()) />
+              <hr />
+            </div>
           }) |> Array.of_list |> array
         }
       </div>
