@@ -19,6 +19,7 @@ type state = {
   confirmPassword,
   firstName,
   lastName,
+  userName:string,
   birthDate,
   err: option(string),
 };
@@ -32,6 +33,7 @@ type action =
   | SetConfirmPassword(string)
   | SetFirstName(firstName)
   | SetLastName(lastName)
+  | SetUsername(string)
   | SetBirthDate(birthDate);
 
 let signup = ({send, state}) => {
@@ -72,6 +74,7 @@ let make = _children => {
     confirmPassword: "",
     firstName: "",
     lastName: "",
+    userName: "",
     birthDate: "",
     err: None,
   },
@@ -87,6 +90,7 @@ let make = _children => {
     | SetBirthDate(birthDate) => Update({...state, birthDate})
     | SetFirstName(firstName) => Update({...state, firstName})
     | SetLastName(lastName) => Update({...state, lastName})
+    | SetUsername(userName) => Update({...state, userName})
     };
   },
   render: ({state, send}) => {
@@ -103,52 +107,79 @@ let make = _children => {
         {state.loading ? <Loading /> : null}
         <form id="signup-form">
           <div className="row justify-content-between">
-            <small>{string("Email")}</small>
+            <div className="col-6 pl-0">
               <input
-                type_="email"
-                id="inputEmail"
-                className={getClassName(~invalid={!checkEmail(state.email)}, ())}
-                placeholder="Your Email"
-                value={state.email}
-                onChange={e => send(SetEmail(e |> valueFromEvent))}
-              />
-              <input
-                type_="password"
-                id="inputPassword"
-                className={getClassName(
-                  ~extraStyle="form-control-small",
-                  ~invalid={!checkPassword(state.password)},
-                  (),
-                )}
-                placeholder="Password"
-                value={state.password}
-                onChange={e => send(SetPassword(e |> valueFromEvent))}
-              />
-              <input
-                type_="password"
-                id="inputConfirmPassword"
-                className={getClassName(
-                  ~extraStyle="form-control-small",
-                  ~invalid=!{checkIsSamePassword(~password=state.password, ~confirmPassword=state.confirmPassword)},
-                  (),
-                )}
-                placeholder="Password Confirmation"
-                value={state.confirmPassword}
-                onChange={e => send(SetConfirmPassword(e |> valueFromEvent))}
-              />
-            <div className="line-signup" />
-              <input
-                type_="name"
-                id="name"
+                type_="text"
+                id="firstname"
                 className={getClassName(
                   ~extraStyle="form-control-smaller mr-2",
                   ~invalid={state.firstName |> isStringEmpty},
                   (),
                 )}
-                placeholder="Your Name"
+                placeholder="First Name"
                 value={state.firstName}
-                onChange={e => send(SetBirthDate(valueFromEvent(e)))}
+                onChange={e => send(SetFirstName(valueFromEvent(e)))}
               />
+            </div>
+            <div className="col-6 pr-0">
+              <input
+                type_="text"
+                id="lastname"
+                className={getClassName(
+                  ~extraStyle="form-control-smaller mr-2",
+                  ~invalid={state.lastName |> isStringEmpty},
+                  (),
+                )}
+                placeholder="Last Name"
+                value={state.lastName}
+                onChange={e => send(SetLastName(valueFromEvent(e)))}
+              />
+            </div>
+            <input
+              type_="email"
+              id="inputEmail"
+              className={getClassName(~invalid={!checkEmail(state.email)}, ())}
+              placeholder="Your Email"
+              value={state.email}
+              onChange={e => send(SetEmail(e |> valueFromEvent))}
+            />
+            <input
+              type_="text"
+              id="username"
+              className={getClassName(
+                ~extraStyle="form-control-smaller mr-2",
+                ~invalid={state.userName |> isStringEmpty},
+                (),
+              )}
+              placeholder="Username"
+              value={state.userName}
+              onChange={e => send(SetUsername(valueFromEvent(e)))}
+            />
+            <input
+              type_="password"
+              id="inputPassword"
+              className={getClassName(
+                ~extraStyle="form-control-small",
+                ~invalid={!checkPassword(state.password)},
+                (),
+              )}
+              placeholder="Password"
+              value={state.password}
+              onChange={e => send(SetPassword(e |> valueFromEvent))}
+            />
+            <input
+              type_="password"
+              id="inputConfirmPassword"
+              className={getClassName(
+                ~extraStyle="form-control-small",
+                ~invalid=!{checkIsSamePassword(~password=state.password, ~confirmPassword=state.confirmPassword)},
+                (),
+              )}
+              placeholder="Password Confirmation"
+              value={state.confirmPassword}
+              onChange={e => send(SetConfirmPassword(e |> valueFromEvent))}
+            />
+            <div className="line-signup" />
               <small>{string("Birthday")}</small>
               <input
                 type_="date"

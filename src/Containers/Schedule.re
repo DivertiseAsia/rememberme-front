@@ -21,6 +21,7 @@ type state = {
   scheduleMenu,
   contentForm,
   scheduleList: list(string),
+  showPopover: bool,
 };
 
 type action =
@@ -28,7 +29,8 @@ type action =
   | RequestScheduleSuccess(list(string))
   | RequestScheduleFail
   | ChangeScheduleMenu(scheduleMenu)
-  | ChangeContentForm(contentForm);
+  | ChangeContentForm(contentForm)
+  | TogglePopover(bool);
 
 let component = ReasonReact.reducerComponent("Schedule");
 
@@ -38,7 +40,8 @@ let make = (_children) => {
     loadState: Idle, 
     scheduleMenu: All,
     contentForm: Idle,
-    scheduleList: []
+    scheduleList: [],
+    showPopover: false,
   },
   didMount: ({send}) => send(RequestSchedule),
   reducer: (action, state) => {
@@ -48,6 +51,7 @@ let make = (_children) => {
     | RequestScheduleFail => Update({...state, loadState: Failed})
     | ChangeScheduleMenu(scheduleMenu) => Update({...state, scheduleMenu})
     | ChangeContentForm(contentForm) => Update({...state, contentForm})
+    | TogglePopover(showPopover) => Update({...state, showPopover})
     };
   },
   render: ({state, send}) => {
@@ -92,7 +96,8 @@ let make = (_children) => {
           </div>
         </div>
         <div className="col-6 text-right">
-          <span className="cursor-pointer">{string("Nameeeeee  e ")}</span>
+          <span className="cursor-pointer" onClick=(_ => send(TogglePopover(!state.showPopover))) >{string("Nameeeeee  e ")}</span>
+          (state.showPopover ? <Popover onClose=(_ => send(TogglePopover(false))) /> : null)
         </div>
       </div>
       {

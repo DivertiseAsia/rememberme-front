@@ -46,7 +46,7 @@ td{
 }
 
 .form-control {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   background-color: transparent !important;
   border-radius: 0px;
   color: white !important;
@@ -84,7 +84,7 @@ td{
       display: block;
     }
     .form-control {
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       background-color: transparent !important;
     }
     .btn-login, .btn-signup {
@@ -118,11 +118,11 @@ td{
 }
 .register-page {
   .row-logo {
-    height: 30%;
+    height: 20%;
     .logo- {height: 50%;}
   }
   .row-register-container {
-    height: 70%;
+    height: 80%;
     padding: 20px;
   }
 }
@@ -324,6 +324,36 @@ td{
   }
   img {
     max-height: 100%;
+  }
+}
+
+.popover-bg {
+  position: fixed;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  background-color: transparent;
+  z-index: 9;
+}
+.popover {
+  margin-top: 30px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: $main-color;
+  color: white;
+  z-index: 10;
+  .popover-arrow {
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid $main-color;
+
+    position: absolute;
+    top: -5px;
+    right: 25px;
   }
 }
 

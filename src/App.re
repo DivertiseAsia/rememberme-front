@@ -44,6 +44,7 @@ let make = _children => {
     switch (route.path, isLoggedIn) {
     | ([], true)
     | ([""], true) => <PageHome isLoggedIn />
+    | ([x], true) when routeMatches(x, Links.profile) => null
     | ([x], _) when routeMatches(x, Links.login) => <PageLogin queryString={route.search} />
     | ([x], _) when routeMatches(x, Links.logout) =>
       let _ = clearToken();
