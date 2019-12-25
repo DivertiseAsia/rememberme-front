@@ -207,7 +207,7 @@ let dates = (month, year, holidayList, birthDayList) => {
            <span className=(String.length(date |> string_of_int) === 1 ? "single-char" : "")>{date |> string_of_int |> str}</span>
            (List.length(holidayList |> List.find_all(holiday => holiday.date === jsDate)) > 0 ||
             List.length(birthDayList |> List.find_all(birthDay => (birthDay.birthDate |> getDateOnlyDate |> Js.Date.valueOf) === jsDate)) > 0 ?
-              <div className="points" >
+              <div className="points">
                 {holidayList 
                   |> List.find_all(holiday => holiday.date === jsDate) 
                   |> List.map(holiday => <div className="point point-holiday" />) |> Array.of_list |> array
@@ -218,7 +218,6 @@ let dates = (month, year, holidayList, birthDayList) => {
                 }
               </div> : null
            )
-           
          </td>;
        }
      )
@@ -249,7 +248,12 @@ let fetchBirthDay = ({send}) => {
 
 let component = ReasonReact.reducerComponent("Calendar");
 
-let make = _children => {
+let make = (
+    ~isMini=false, 
+    ~month=(Js.Date.make() |> Js.Date.getMonth |> int_of_float), 
+    ~year=(Js.Date.make() |> Js.Date.getFullYear),
+    _children
+  ) => {
   ...component,
   initialState: () => {
     loadState: Idle,
@@ -293,40 +297,58 @@ let make = _children => {
     };
   },
   render: ({state, send}) =>
-    <div className="container calendar-container">
-      <div className="row">
-        <div className="col">
-          <button 
-            type_="button" 
-            className="btn btn-rounded btn-main-color active-menu pl-4 pr-4"
-            onClick=(_ => ())
-          >
-            <img src="/images/calendar.svg" style=(ReactDOMRe.Style.make(~width="35px", ~height="35px", ())) />
-            {string(" " ++ (state.year |> Js.Float.toString))}
-          </button>
+    {
+      let isCurrentMonth = (isMini && (month |> float_of_int |> getMonthType) === state.month ? " current-month" : "");
+      <div 
+        className=("container calendar-container" ++ isCurrentMonth ++ (isMini ? " mini-calendar" : ""))
+        onClick=(_ => (isMini ? Router.push("") : ()))
+      >
+        <div className="row">
+          <div className="col">
+            (isMini ? 
+              null:
+              <button 
+                type_="button" 
+                className="btn btn-rounded btn-main-color active-menu pl-4 pr-4"
+                onClick=(_ => Router.push("all-month"))
+              >
+                <img src="/images/calendar.svg" style=(ReactDOMRe.Style.make(~width="35px", ~height="35px", ())) />
+                {string(" " ++ (state.year |> Js.Float.toString))}
+              </button>
+            )
+          </div>
         </div>
+        <div className=("row" ++ (isMini? " mt-1 mb-1" : " mt-5 mb-5"))>
+          (isMini ?
+            <div className="col-12 text-center" style=(ReactDOMRe.Style.make(~fontSize="14px", ()))>
+              <b>{((month |> float_of_int |> getMonthType |> mapFullMonthStr) ++ " " ++ (state.year |> Js.Float.toString)) |> str}</b>
+            </div>
+            : 
+            <> 
+              <div className="col-2 pr-0">
+                <img className="cursor-pointer" src="/images/arrow_left.svg" onClick={_ => send(PreviousMonth)} />
+              </div>
+              <div className="col-8 text-center" style=(ReactDOMRe.Style.make(~fontSize="20px", ()))>
+                <b>{((state.month |> mapFullMonthStr) ++ "   " ++ (state.year |> Js.Float.toString)) |> str}</b>
+              </div>
+              <div className="col-2 pl-0 text-right">
+                <img className="cursor-pointer" src="/images/arrow_right.svg" onClick={_ => send(NextMonth)} />
+              </div>
+            </>
+          )
+          
+        </div>
+        <table className="table calendar-table">
+          <thead>
+            <tr> {days |> List.map(day => <th> {day |> mapDayStr |> str} </th>) |> Array.of_list |> array} </tr>
+          </thead>
+          <tbody> 
+          {state.loadState === Loading ? 
+            null:
+            dates((isMini ? (month |> float_of_int |> getMonthType) : state.month) |> getMonthFloat, state.year, state.holidayList, state.listBirthDay)
+          } 
+          </tbody>
+        </table>
       </div>
-      <div className="row mt-5 mb-5">
-        <div className="col-2 pr-0">
-          <img className="cursor-pointer" src="/images/arrow_left.svg" onClick={_ => send(PreviousMonth)} />
-        </div>
-        <div className="col-8 text-center" style=(ReactDOMRe.Style.make(~fontSize="20px", ()))>
-          <b>{((state.month |> mapFullMonthStr) ++ " " ++ (state.year |> Js.Float.toString)) |> str}</b>
-        </div>
-        <div className="col-2 pl-0 text-right">
-          <img className="cursor-pointer" src="/images/arrow_right.svg" onClick={_ => send(NextMonth)} />
-        </div>
-      </div>
-      <table className="table calendar-table">
-        <thead>
-          <tr> {days |> List.map(day => <th> {day |> mapDayStr |> str} </th>) |> Array.of_list |> array} </tr>
-        </thead>
-        <tbody> 
-        {state.loadState === Loading ? 
-          null:
-          dates(state.month |> getMonthFloat, state.year, state.holidayList, state.listBirthDay)
-        } 
-        </tbody>
-      </table>
-    </div>,
+    },
 };

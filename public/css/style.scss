@@ -49,7 +49,7 @@ td{
   margin-bottom: 20px;
   background-color: transparent !important;
   border-radius: 0px;
-  color: white !important;
+  color: white;
 }
 .form-control:focus {
   box-shadow: none !important;
@@ -124,6 +124,56 @@ td{
   .row-register-container {
     height: 80%;
     padding: 20px;
+  }
+}
+.profile-page {
+  background-color: #F1F1F1;
+  color: $main-color;
+  input {
+    border-bottom: 1px solid $main-color;
+  }
+  .row-title {
+    height: 30%;
+    .col-12 {display: contents;}
+  }
+  .row-profile-container {
+    height: 70%;
+    padding: 20px;
+  }
+  overflow-y: auto;
+    small {
+      display: block;
+    }
+    .form-control {
+      color: $main-color;
+      margin-bottom: 20px;
+      background-color: transparent !important;
+    }
+    .btn-signup {
+      display: block;
+      margin: auto;
+      margin-top: 40px;
+      border-radius: 40px;
+      padding: 10px;
+      width: 50%;
+      max-width: 200px;
+    }
+}
+.allmonth-page {
+  background-color: $main-color;
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  padding: 20px;
+  overflow-y: auto;
+  .current-month {
+    border: 1px solid $main-btn-color;
+    color: $main-btn-color !important;
+    .today {
+      color: white !important;
+    }
   }
 }
 .scheduler-status {
@@ -432,6 +482,39 @@ td{
   }
 }
 
+.mini-calendar {
+  padding: 0px 10px !important;
+  border: 1px solid #567289;
+}
+
+.dropwdown-year {
+  position: fixed;
+  top: 40px;
+  left: 5%;
+  z-index: 999;
+  width: 170px;
+}
+.dropdown-items {
+  position: fixed;
+  top: 60px;
+  left: 5%;
+  width: 170px;
+  height: 200px;
+  overflow-y: auto;
+  
+  background-color: $main-btn-color;
+  z-index: 998;
+  padding: 10px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  text-align: center;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  .dropdown-item {
+    color: white;
+    padding: 10px 5px;
+  }
+}
 
 @media screen and (min-width: 768px) { 
   
@@ -474,6 +557,7 @@ td{
       margin-top: -32px !important;
     }
   }
+  
 }
 @media screen and (max-width: 767px) { 
   
