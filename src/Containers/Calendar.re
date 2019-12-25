@@ -55,6 +55,23 @@ let mapMonthStr = month =>
   | Nov => "Nov"
   | Dec => "Dec"
   };
+
+let mapFullMonthStr = month =>
+  switch (month) {
+  | Jan => "January"
+  | Feb => "February"
+  | Mar => "March"
+  | Apr => "April"
+  | May => "May"
+  | Jun => "June"
+  | Jul => "July"
+  | Aug => "August"
+  | Sep => "September"
+  | Oct => "October"
+  | Nov => "November"
+  | Dec => "December"
+  };
+
 type loadState =
   | Idle
   | Loading
@@ -121,7 +138,7 @@ let getHolidayData = (holidayList, date) => {
   switch (
     holidayList
     |> List.find(vacation => {
-         Js.log2("vacationDate", vacation.date |> Js.Date.fromFloat);
+         /*Js.log2("vacationDate", vacation.date |> Js.Date.fromFloat);*/
          vacation.date === date;
        })
   ) {
@@ -143,88 +160,76 @@ let getBirthDayElement = (birthList, date) => {
   };
 };
 
+let getDayByStartOnMonday = (dayInWeek:int) => {
+  (dayInWeek === 0 ? 6 : dayInWeek - 1)
+};
+
 let dates = (month, year, holidayList, birthDayList) => {
   let col = 7;
   let row = 6;
   let boxs = col * row;
-  let lastDate =
-    getLastDate(
-      ~year,
-      ~realMonth={
-        month +. 1.;
-      },
-    )
-    |> int_of_float;
-  let startDayInWeek = Js.Date.makeWithYM(~year, ~month, ()) |> Js.Date.getDay |> int_of_float;
+  let lastDatePreviousMonth = getLastDate(~year, ~realMonth=month) |> int_of_float;
+  let lastDate = getLastDate(~year, ~realMonth={month +. 1.;}) |> int_of_float;
+  let startDayInWeek = Js.Date.makeWithYM(~year, ~month, ()) |> Js.Date.getDay |> int_of_float |> getDayByStartOnMonday;
   let emptyEl = key => <td key />;
   let today =
     Js.Date.make()
-    |> (
-      date =>
+    |> (date =>
         Js.Date.makeWithYMD(
-          ~year={
-            date |> Js.Date.getFullYear;
-          },
-          ~month={
-            date |> Js.Date.getMonth;
-          },
-          ~date={
-            date |> Js.Date.getDate;
-          },
+          ~year=date |> Js.Date.getFullYear,
+          ~month=date |> Js.Date.getMonth,
+          ~date=date |> Js.Date.getDate,
           (),
         )
-    )
-    |> Js.Date.valueOf;
+      ) |> Js.Date.valueOf;
+
   Array.make(boxs, null)
   |> Array.mapi((idx, _) =>
-       if (idx < startDayInWeek || idx - startDayInWeek + 1 > lastDate) {
-         idx |> string_of_int |> emptyEl;
+       if (idx < startDayInWeek) {
+          <td key={idx |> string_of_int} className={j|day not-current-month|j}>
+            {(lastDatePreviousMonth - (startDayInWeek - (idx + 1))) |> string_of_int |> str}
+          </td>
+       } else if (idx - startDayInWeek + 1 > lastDate) {
+          <td key={idx |> string_of_int} className={j|day not-current-month|j}>
+            {(idx - startDayInWeek + 1 - lastDate) |> string_of_int |> str}
+          </td>
        } else {
          let date = idx - startDayInWeek + 1;
-         let jsDate =
-           Js.Date.makeWithYMD(
-             ~year,
-             ~month,
-             ~date={
-               date |> float_of_int;
-             },
-             (),
-           )
-           |> Js.Date.valueOf;
+         let jsDate = Js.Date.makeWithYMD(~year,~month,~date={date |> float_of_int}, ()) |> Js.Date.valueOf;
          let classThisDay =
            switch (jsDate) {
            | date when today === date => "today"
            | _ => ""
            };
-         let (classHoliday, holidayName) =
-           switch (getHolidayData(holidayList, jsDate)) {
-           | None => ("", "")
-           | Some(holiday) => (holiday.isVacation ? "vacation" : "not-vacation", holiday.name)
-           };
-           let (classBirthDay, birthDayEl) =
-           switch (getBirthDayElement(birthDayList, jsDate)) {
-           | None => ("", null)
-           | Some(el) => ("birth-day", el)
-           };
-
-
-         <td key={idx |> string_of_int} className={j|day $classThisDay $classHoliday $classBirthDay|j}>
-           {holidayName |> str}
-           {birthDayEl}
-           {date |> string_of_int |> str}
+          
+         <td key={idx |> string_of_int} className={j|day $classThisDay|j}>
+           <div className="circle-today" />
+           <span className=(String.length(date |> string_of_int) === 1 ? "single-char" : "")>{date |> string_of_int |> str}</span>
+           (List.length(holidayList |> List.find_all(holiday => holiday.date === jsDate)) > 0 ||
+            List.length(birthDayList |> List.find_all(birthDay => (birthDay.birthDate |> getDateOnlyDate |> Js.Date.valueOf) === jsDate)) > 0 ?
+              <div className="points" >
+                {holidayList 
+                  |> List.find_all(holiday => holiday.date === jsDate) 
+                  |> List.map(holiday => <div className="point point-holiday" />) |> Array.of_list |> array
+                }
+                {birthDayList 
+                  |> List.find_all(birthDay => (birthDay.birthDate |> getDateOnlyDate |> Js.Date.valueOf) === jsDate) 
+                  |> List.map(birthDay => <div className="point point-birthday" />) |> Array.of_list |> array
+                }
+              </div> : null
+           )
+           
          </td>;
        }
      )
-  |> (
-    arr => {
+  |> (arr => {
       Array.make(row, null)
       |> Array.mapi((idx, _) => {
            let end_ = (idx + 1) * col;
            let start = idx > 0 ? idx * col : idx;
            <tr key={j|row-$idx|j}> {arr |> Js.Array.slice(~start, ~end_) |> array} </tr>;
          });
-    }
-  )
+    })
   |> array;
 };
 
@@ -288,27 +293,31 @@ let make = _children => {
     };
   },
   render: ({state, send}) =>
-    <div className="container">
+    <div className="container calendar-container">
       <div className="row">
-        <button 
-          type_="button" 
-          className="btn btn-rounded btn-main-color active-menu pl-4 pr-4"
-          onClick=(_ => ())
-          
-        >
-          <img src="/images/calendar.svg" style=(ReactDOMRe.Style.make(~width="35px", ~height="35px", ())) />
-          {string(" 2019")}
-        </button>
+        <div className="col">
+          <button 
+            type_="button" 
+            className="btn btn-rounded btn-main-color active-menu pl-4 pr-4"
+            onClick=(_ => ())
+          >
+            <img src="/images/calendar.svg" style=(ReactDOMRe.Style.make(~width="35px", ~height="35px", ())) />
+            {string(" " ++ (state.year |> Js.Float.toString))}
+          </button>
+        </div>
       </div>
-      <div className="row">
-        <h1>
-          <span className="icon-click" onClick={_ => send(PreviousMonth)}> {{j|<|j} |> str} </span>
-          {state.month |> mapMonthStr |> str}
-          <span className="icon-click" onClick={_ => send(NextMonth)}> {{j|>|j} |> str} </span>
-        </h1>
-        <h1 className="col"> {state.year |> Js.Float.toString |> str} </h1>
+      <div className="row mt-5 mb-5">
+        <div className="col-2 pr-0">
+          <img className="cursor-pointer" src="/images/arrow_left.svg" onClick={_ => send(PreviousMonth)} />
+        </div>
+        <div className="col-8 text-center" style=(ReactDOMRe.Style.make(~fontSize="20px", ()))>
+          <b>{((state.month |> mapFullMonthStr) ++ " " ++ (state.year |> Js.Float.toString)) |> str}</b>
+        </div>
+        <div className="col-2 pl-0 text-right">
+          <img className="cursor-pointer" src="/images/arrow_right.svg" onClick={_ => send(NextMonth)} />
+        </div>
       </div>
-      <table className="table">
+      <table className="table calendar-table">
         <thead>
           <tr> {days |> List.map(day => <th> {day |> mapDayStr |> str} </th>) |> Array.of_list |> array} </tr>
         </thead>

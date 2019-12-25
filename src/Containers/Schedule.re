@@ -92,7 +92,7 @@ let make = (_children) => {
           </div>
         </div>
         <div className="col-6 text-right">
-          <span className="cursor-pointer">{string("Name")}</span>
+          <span className="cursor-pointer">{string("Nameeeeee  e ")}</span>
         </div>
       </div>
       {

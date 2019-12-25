@@ -10,6 +10,11 @@ $main-color: #2D506D;
 $main-btn-color: #52C4BB;
 $sub-btn-color: #FFA227;
 
+$event-color: #4998FF;
+$birthday-color: #AE6CF9;
+$leave-color: #FD5CA6;
+$holiday-color: #F9573F;
+
 * {
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
@@ -222,9 +227,6 @@ td{
   }
 }
 
-.day.today{
-  color: red
-}
 .not-vacation{
   background-color: $not-vacation-color;
 }
@@ -325,6 +327,81 @@ td{
   }
 }
 
+.calendar-container {
+  height: 100%;
+  width: 100%;
+  padding: 20px 0px;
+
+  color: white;
+  .calendar-table, thead, tbody {
+    width: 100%;
+  }
+
+  thead tr {
+    width: 100%;
+    margin-bottom: 40px;
+    th {
+      text-align: center;
+      width: 14.2%;
+      padding: 10px 5px;
+      color: #688296 !important;
+      border: none;
+      border-bottom: 1px solid #dee2e6;
+    }
+  }
+  tbody tr {
+    width: 100%;
+    td {
+      text-align: center;
+      width: 14.2%;
+      padding: 10px 5px;
+      min-width: 14.2%;
+      border: none;
+    }
+    td:nth-child(6), td:nth-child(7) {
+      color: #7D93A5;
+    }
+    .today .circle-today {
+      border-radius: 50%;
+      background-color: $main-btn-color;
+    }
+    .today span {
+      position: absolute;
+    }
+    .single-char {
+      margin-left: -4px !important;
+    }
+    .points {
+      width: 100%;
+      height: 5px;
+      margin-top: -17px;
+
+      .point {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 1px;
+      }
+      .point-event {
+        background-color: $event-color;
+      }
+      .point-birthday {
+        background-color: $birthday-color;
+      }
+      .point-holiday {
+        background-color: $holiday-color;
+      }
+      .point-leave {
+        background-color: $leave-color;
+      }
+    }
+  }
+  .not-current-month {
+    color: #45647D !important;
+  }
+}
+
 
 @media screen and (min-width: 768px) { 
   
@@ -343,6 +420,30 @@ td{
     width: 50%;
     height: 45%;
   }
+
+  .calendar-container {
+    padding-top: 70px;
+    padding-left: 50px;
+    padding-right: 20px;
+    tbody tr {
+      td {
+        height: 70px;
+      }
+    }
+    .today .circle-today {
+      width: 50px;
+      height: 50px;
+      margin-top: -10px;
+      margin-left: calc(50% - 25px);
+    }
+    .today span {
+      margin-top: -40px;
+      margin-left: -8px;
+    }
+    .today .points {
+      margin-top: -32px !important;
+    }
+  }
 }
 @media screen and (max-width: 767px) { 
   
@@ -354,6 +455,18 @@ td{
     left: 10%;
     width: 80%;
     height: 60%;
+  }
+  .today .circle-today {
+    width: 30px;
+    height: 30px;
+    margin: auto;
+  }
+  .today span {
+    margin-top: -30px;
+    margin-left: -8px;
+  }
+  .today .points {
+    margin-top: -25px !important;
   }
 }
 
