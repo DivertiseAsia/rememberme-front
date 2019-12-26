@@ -10,45 +10,30 @@ type contentForm =
   | RequestForm
   | MyForm;
 
-type loadState =
-  | Idle
-  | Loading
-  | Succeed
-  | Failed;
-
 type state = {
   loadState,
   scheduleMenu,
   contentForm,
-  scheduleList: list(string),
   showPopover: bool,
 };
 
 type action =
-  | RequestSchedule
-  | RequestScheduleSuccess(list(string))
-  | RequestScheduleFail
   | ChangeScheduleMenu(scheduleMenu)
   | ChangeContentForm(contentForm)
   | TogglePopover(bool);
 
 let component = ReasonReact.reducerComponent("Schedule");
 
-let make = (_children) => {
+let make = (~holidayList=[], ~listBirthDay=[], _children) => {
   ...component,
   initialState: () => {
     loadState: Idle, 
     scheduleMenu: All,
     contentForm: Idle,
-    scheduleList: [],
     showPopover: false,
   },
-  didMount: ({send}) => send(RequestSchedule),
   reducer: (action, state) => {
     switch (action) {
-    | RequestSchedule => UpdateWithSideEffects({...state, loadState: Loading}, (_ => ()))
-    | RequestScheduleSuccess(scheduleList) => Update({...state, loadState: Succeed, scheduleList})
-    | RequestScheduleFail => Update({...state, loadState: Failed})
     | ChangeScheduleMenu(scheduleMenu) => Update({...state, scheduleMenu})
     | ChangeContentForm(contentForm) => Update({...state, contentForm})
     | TogglePopover(showPopover) => Update({...state, showPopover})
@@ -65,7 +50,7 @@ let make = (_children) => {
           }), 
         ()))
     >
-      <div className="row">
+      <div className="row schedule-row-menu">
         <div className="col-6">
           <div 
             className="cursor-pointer" 
@@ -104,38 +89,57 @@ let make = (_children) => {
         switch state.contentForm {
         | Idle => 
           <>
-            <div className="row pt-4">
-              {
-                menus |> List.mapi((i, menu:scheduleMenu) => {
-                  <div key=("menu-" ++ (menu |> RememberMeUtils.scheduleMenuToStr)) className="col-3 p-2 text-center">
-                    <button 
-                      type_="button" 
-                      className=("btn btn-rounded" ++ (state.scheduleMenu === menu ? " btn-main-color active-menu " : " none-active-menu"))  
-                      onClick=(_ => send(ChangeScheduleMenu(menu)))
-                    >
-                      {string(menu |> RememberMeUtils.scheduleMenuToStr)}
-                    </button>
-                  </div>
-                }) |> Array.of_list |> array
-              }
-              {
-                /* Filter */
-                switch state.scheduleList {
-                | x when x === [] => {
-                  <>
-                    <SchedulerDate />
-                    <SchedulerDate />
-                    <SchedulerDate />
-                    <SchedulerDate />
-                    <SchedulerDate />
-                    </>
+            <div className="row schedule-row-content pt-4">
+              <div className="col-12 menu-schedule-">
+                <div className="row">
+                  {
+                    menus |> List.mapi((i, menu:scheduleMenu) => {
+                      <div key=("menu-" ++ (menu |> RememberMeUtils.scheduleMenuToStr)) className="col-3 p-2 text-center">
+                        <button 
+                          type_="button" 
+                          className=("btn btn-rounded" ++ (state.scheduleMenu === menu ? " btn-main-color active-menu " : " none-active-menu"))  
+                          onClick=(_ => send(ChangeScheduleMenu(menu)))
+                        >
+                          {string(menu |> RememberMeUtils.scheduleMenuToStr)}
+                        </button>
+                      </div>
+                    }) |> Array.of_list |> array
                   }
-                | _ => 
-                  <div className="col-12 text-center pt-5 pb-5">
-                    <p>{string("Scheduler not found")}</p>
-                  </div>
-                };
-              }
+                </div>
+              </div>
+              <div className="col-12 content-schedule- p-0">
+                {
+                  /* Filter */
+                  switch (state.scheduleMenu, listBirthDay, holidayList) {
+                  | (All, birthDay, allHoliday) when (allHoliday !== [] || birthDay !== []) => {
+                      null
+                    }
+                  | (Leave, _, _) => null
+                  | (Holiday, _, allHoliday) when allHoliday !== [] => {
+                      <>
+                      {
+                        allHoliday 
+                        |> List.filter(holiday => (holiday.date >= Js.Date.now()))
+                        |> List.sort((holiday1:holiday, holiday2:holiday) => compare(holiday1.date, holiday2.date))
+                        |> List.map(holiday => {
+                          let datetime = 
+                            (holiday.date |> Js.Date.fromFloat |> Js.Date.getDay |> int_of_float |> RememberMeUtils.mapDayInt) ++ " " ++
+                            (holiday.date |> Js.Date.fromFloat |> Js.Date.getDate |> int_of_float |> string_of_int) ++ " " ++
+                            (holiday.date |> Js.Date.fromFloat |> Js.Date.getMonth |> int_of_float |> RememberMeUtils.mapFullMonthInt) ++ " " ++
+                            (holiday.date |> Js.Date.fromFloat |> Js.Date.getFullYear |> int_of_float |> string_of_int);
+                          <SchedulerDate datetime schedule=(holiday |> RememberMeUtils.mapHolidayToSchedule) />
+                        }) |> Array.of_list |> array
+                      }
+                      </>
+                    }
+                    
+                  | _ =>
+                    <div className="col-12 text-center pt-5 pb-5">
+                      <p>{string("Data not found")}</p>
+                    </div>
+                  };
+                }
+              </div>
             </div>
             <button type_="button" className="btn btn-request" onClick=(_ => send(ChangeContentForm(RequestForm)))>
               <img className="requestform-icon" src="/images/request_form.svg" />

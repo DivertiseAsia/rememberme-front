@@ -39,6 +39,32 @@ td{
   cursor: pointer;
 }
 
+.border-schedule-event {
+  border: 2px solid $event-color;
+}
+.border-schedule-birthday {
+  border: 2px solid $birthday-color;
+}
+.border-schedule-leave {
+  border: 2px solid $leave-color;
+}
+.border-schedule-holiday {
+  border: 2px solid $holiday-color;
+}
+
+.bg-schedule-event {
+  background-color: $event-color;
+}
+.bg-schedule-birthday {
+  background-color: $birthday-color;
+}
+.bg-schedule-leave {
+  background-color: $leave-color;
+}
+.bg-schedule-holiday {
+  background-color: $holiday-color;
+}
+
 .btn-main-color {
   background-color: $main-btn-color;
   border: none;
@@ -55,9 +81,6 @@ td{
   box-shadow: none !important;
 }
 
-.col-calendar, .col-schedule {
-  min-height: 50%;
-}
 .col-schedule {
   background-color: white;
 }
@@ -180,6 +203,8 @@ td{
   width: 15px;
   height: 15px;
   border-radius: 50%;
+  margin-left: 80%;
+  margin-top: 5px;
 }
 .btn-rounded {
   border-radius: 40px;
@@ -529,11 +554,22 @@ td{
 
 @media screen and (min-width: 768px) { 
   
-  .home-page {
-    overflow-y: auto;
+  .col-calendar, .col-schedule {
+    height: 100%;
   }
   .schedule-container {
     height: 100vh;
+    .schedule-row-menu {height: 35px;}
+    .schedule-row-content {
+      height: calc(100% - 35px);
+      .menu-schedule- {
+        height: 50px;
+      }
+      .content-schedule- {
+        height: calc(100% - 50px);
+        overflow-y: auto;
+      }
+    }
   }
   .col-note {
     text-align: right;
@@ -574,6 +610,9 @@ td{
   
   .home-page {
     overflow-y: auto;
+  }
+  .col-calendar, .col-schedule {
+    min-height: 50%;
   }
   .popup-container {
     top: 20%;

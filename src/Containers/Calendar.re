@@ -139,11 +139,10 @@ let getHolidayData = (holidayList, date) => {
   switch (
     holidayList
     |> List.find(vacation => {
-         /*Js.log2("vacationDate", vacation.date |> Js.Date.fromFloat);*/
          vacation.date === date;
        })
   ) {
-  | holiday => {Js.log2("holiday",holiday); Some(holiday)}
+  | holiday => Some(holiday)
   | exception Not_found => None
   };
 };
@@ -242,6 +241,7 @@ let fetchHolidayList = ({send}) => {
 
 let fetchBirthDay = ({send}) => {
   fetchBirthDay(
+    ~token=Utils.getToken(),
     ~successAction=holidayList => send(FetchBirthDayListSuccess(holidayList)),
     ~failAction=_ => send(FetchBirthDayListFail),
   );
@@ -300,7 +300,6 @@ let make = (
   },
   render: ({state, send}) =>
     {
-      Js.log(state.year);
       let isCurrentMonth = (isMini && 
         ((Js.Date.make() |> Js.Date.getMonth |> int_of_float |> float_of_int |> getMonthType) === state.month &&
         (Js.Date.make() |> Js.Date.getFullYear |> int_of_float) === (year |> int_of_float)) ? " current-month" : "");

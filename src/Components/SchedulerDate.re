@@ -2,20 +2,27 @@ open ReasonReact;
 
 let component = ReasonReact.statelessComponent("SchedulerDate");
 
-let make = (~isToday=false, ~datetimeStr="Day 00 Month Year", ~scheduleList=[], _children) => {
+let make = (
+    ~isToday=false, 
+    ~scheduleList=[], 
+    ~datetime="",
+    ~schedule:RememberMeType.schedule,
+    _children
+  ) => {
   ...component,
   render: _self => {
-    let styleStatus = 
-      ReactDOMRe.Style.make(
-        ~border="2px solid blue", 
-        ~backgroundColor=(isToday ? "blue" : "none"),
-        ~marginLeft="80%",
-      ());
+    let (backgroundColor, border) = switch schedule.scheduleMenu {
+    | Leave => ((isToday ? " bg-schedule-leave" : " "), " border-schedule-leave")
+    | Holiday => ((isToday ? " bg-schedule-holiday" : " "), " border-schedule-holiday")
+    | Event => ((isToday ? " bg-schedule-event" : " "), " border-schedule-event")
+    | Birthday => ((isToday ? " bg-schedule-birthday" : " "), " border-schedule-birthday")
+    | _ => ((isToday ? " bg-schedule-event" : " "), " border-schedule-event")
+    };
     <div className="container mt-3">
       <div className="row">
         <div className="col">
           <p className="mb-2">
-            {string(datetimeStr)}
+            {string(datetime)}
           </p>
           <hr 
             className="mt-0"  
@@ -26,10 +33,10 @@ let make = (~isToday=false, ~datetimeStr="Day 00 Month Year", ~scheduleList=[], 
       </div>
       <div className="row">
         <div className="col-2 p-0 text-right">
-          <div className="scheduler-status" style=styleStatus /> 
+          <div className=("scheduler-status" ++ backgroundColor ++ border) /> 
         </div>
         <div className="col-10">
-          {string("Event")}
+          {string(schedule.title)}
         </div>
       </div>
     </div>;

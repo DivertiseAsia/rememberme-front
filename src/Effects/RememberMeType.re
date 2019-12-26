@@ -3,6 +3,7 @@ type scheduleMenu =
   | Leave
   | Holiday
   | Event
+  | Birthday
   | All;
 
 type formType = 
@@ -23,5 +24,11 @@ type loadState =
   | Loading
   | Succeed
   | Failed;
+
+type schedule = {
+  scheduleMenu,
+  title:string,
+  date: float,
+};
 
 

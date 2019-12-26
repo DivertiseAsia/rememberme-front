@@ -127,9 +127,9 @@ let fetchHoliday = (~successAction, ~failAction) =>
   )
   |> ignore;
 
-let fetchBirthDay = (~successAction, ~failAction) =>
+let fetchBirthDay = (~token, ~successAction, ~failAction) =>
   requestJsonResponseToAction(
-    ~headers=buildHeader(None),
+    ~headers=buildHeader(token),
     ~url=URL.birthday,
     ~successAction=json => json |> Decode.birthDayList |> successAction,
     ~failAction,
