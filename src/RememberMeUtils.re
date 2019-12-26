@@ -100,6 +100,13 @@ let mapFullMonthInt = (month:int) =>
   | 11 => "December"
   };
 
+let getDatetimeStr = (datetime:float) => {
+  (datetime |> Js.Date.fromFloat |> Js.Date.getDay |> int_of_float |> mapDayInt) ++ " " ++
+  (datetime |> Js.Date.fromFloat |> Js.Date.getDate |> int_of_float |> string_of_int) ++ " " ++
+  (datetime |> Js.Date.fromFloat |> Js.Date.getMonth |> int_of_float |> mapFullMonthInt) ++ " " ++
+  (datetime |> Js.Date.fromFloat |> Js.Date.getFullYear |> int_of_float |> string_of_int);
+}
+
 let mapHolidayToSchedule = (holiday:RememberMeApi.holiday) => {
   let schedule = {
     scheduleMenu: Holiday,

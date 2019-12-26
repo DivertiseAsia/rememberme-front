@@ -109,6 +109,7 @@ let make = (~holidayList=[], ~listBirthDay=[], _children) => {
               </div>
               <div className="col-12 content-schedule- p-0">
                 {
+                  Js.log2("listBirthDay: ",listBirthDay);
                   /* Filter */
                   switch (state.scheduleMenu, listBirthDay, holidayList) {
                   | (All, birthDay, allHoliday) when (allHoliday !== [] || birthDay !== []) => {
@@ -122,12 +123,7 @@ let make = (~holidayList=[], ~listBirthDay=[], _children) => {
                         |> List.filter(holiday => (holiday.date >= Js.Date.now()))
                         |> List.sort((holiday1:holiday, holiday2:holiday) => compare(holiday1.date, holiday2.date))
                         |> List.map(holiday => {
-                          let datetime = 
-                            (holiday.date |> Js.Date.fromFloat |> Js.Date.getDay |> int_of_float |> RememberMeUtils.mapDayInt) ++ " " ++
-                            (holiday.date |> Js.Date.fromFloat |> Js.Date.getDate |> int_of_float |> string_of_int) ++ " " ++
-                            (holiday.date |> Js.Date.fromFloat |> Js.Date.getMonth |> int_of_float |> RememberMeUtils.mapFullMonthInt) ++ " " ++
-                            (holiday.date |> Js.Date.fromFloat |> Js.Date.getFullYear |> int_of_float |> string_of_int);
-                          <SchedulerDate datetime schedule=(holiday |> RememberMeUtils.mapHolidayToSchedule) />
+                          <SchedulerDate datetime=(holiday.date |> RememberMeUtils.getDatetimeStr) schedule=(holiday |> RememberMeUtils.mapHolidayToSchedule) />
                         }) |> Array.of_list |> array
                       }
                       </>

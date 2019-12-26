@@ -33,7 +33,7 @@ let fetchHolidayList = ({send}) => {
 let fetchBirthDay = ({send}) => {
   fetchBirthDay(
     ~token=Utils.getToken(),
-    ~successAction=holidayList => send(FetchBirthDayListSuccess(holidayList)),
+    ~successAction=birthdayList => send(FetchBirthDayListSuccess(birthdayList)),
     ~failAction=_ => send(FetchBirthDayListFail),
   );
 };

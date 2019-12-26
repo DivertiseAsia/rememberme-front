@@ -77,7 +77,7 @@ module Decode = {
 
   let birthDay = json => {
     name: json |> field("name", optional(string)) |> Utils.mapOptStr,
-    birthDate: json |> field("birth_date", (string)) |> Js.Date.fromString,
+    birthDate: json |> field("birth_date", optional(string)) |> Utils.mapOptStr |> Js.Date.fromString,
   };
   let birthDayList = json => json |> list(birthDay);
 
