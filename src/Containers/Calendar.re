@@ -95,7 +95,8 @@ type action =
   | FetchBirthDayListFail
   | NextMonth
   | PreviousMonth
-  | OnChangeMonth(month);
+  | OnChangeMonth(month)
+  | OnChangeYear(float);
 
 let getMonthFloat = month => months |> Array.of_list |> Js.Array.indexOf(month) |> float_of_int;
 
@@ -257,8 +258,8 @@ let make = (
   ...component,
   initialState: () => {
     loadState: Idle,
-    month: Js.Date.make() |> Js.Date.getMonth |> getMonthType,
-    year: Js.Date.make() |> Js.Date.getFullYear,
+    month: month |> float_of_int |> getMonthType,
+    year: year,
     holidayList: [],
     listBirthDay: [],
   },
@@ -294,14 +295,22 @@ let make = (
         })
       }
     | OnChangeMonth(month) => Update({...state, month})
+    | OnChangeYear(year) => Update({...state, year})
     };
   },
   render: ({state, send}) =>
     {
-      let isCurrentMonth = (isMini && (month |> float_of_int |> getMonthType) === state.month ? " current-month" : "");
+      Js.log(state.year);
+      let isCurrentMonth = (isMini && 
+        ((Js.Date.make() |> Js.Date.getMonth |> int_of_float |> float_of_int |> getMonthType) === state.month &&
+        (Js.Date.make() |> Js.Date.getFullYear |> int_of_float) === (year |> int_of_float)) ? " current-month" : "");
+      let targetYear = (isMini ? year : state.year);
       <div 
         className=("container calendar-container" ++ isCurrentMonth ++ (isMini ? " mini-calendar" : ""))
-        onClick=(_ => (isMini ? Router.push("") : ()))
+        onClick=(_ => (isMini ? 
+          Router.push("dashboard/" ++ 
+          ((month + 1) |> string_of_int) ++ "-" ++ 
+          (targetYear |> int_of_float |> string_of_int)) : ()))
       >
         <div className="row">
           <div className="col">
@@ -310,10 +319,12 @@ let make = (
               <button 
                 type_="button" 
                 className="btn btn-rounded btn-main-color active-menu pl-4 pr-4"
-                onClick=(_ => Router.push("all-month"))
+                onClick=(_ => {
+                  Router.push("all-month");
+                })
               >
                 <img src="/images/calendar.svg" style=(ReactDOMRe.Style.make(~width="35px", ~height="35px", ())) />
-                {string(" " ++ (state.year |> Js.Float.toString))}
+                {string(" " ++ (targetYear |> Js.Float.toString))}
               </button>
             )
           </div>
@@ -321,7 +332,7 @@ let make = (
         <div className=("row" ++ (isMini? " mt-1 mb-1" : " mt-5 mb-5"))>
           (isMini ?
             <div className="col-12 text-center" style=(ReactDOMRe.Style.make(~fontSize="14px", ()))>
-              <b>{((month |> float_of_int |> getMonthType |> mapFullMonthStr) ++ " " ++ (state.year |> Js.Float.toString)) |> str}</b>
+              <b>{((month |> float_of_int |> getMonthType |> mapFullMonthStr) ++ " " ++ (targetYear |> Js.Float.toString)) |> str}</b>
             </div>
             : 
             <> 
@@ -329,7 +340,7 @@ let make = (
                 <img className="cursor-pointer" src="/images/arrow_left.svg" onClick={_ => send(PreviousMonth)} />
               </div>
               <div className="col-8 text-center" style=(ReactDOMRe.Style.make(~fontSize="20px", ()))>
-                <b>{((state.month |> mapFullMonthStr) ++ "   " ++ (state.year |> Js.Float.toString)) |> str}</b>
+                <b>{((state.month |> mapFullMonthStr) ++ "   " ++ (targetYear |> Js.Float.toString)) |> str}</b>
               </div>
               <div className="col-2 pl-0 text-right">
                 <img className="cursor-pointer" src="/images/arrow_right.svg" onClick={_ => send(NextMonth)} />
@@ -343,10 +354,11 @@ let make = (
             <tr> {days |> List.map(day => <th> {day |> mapDayStr |> str} </th>) |> Array.of_list |> array} </tr>
           </thead>
           <tbody> 
-          {state.loadState === Loading ? 
+          /*{state.loadState === Loading ? 
             null:
-            dates((isMini ? (month |> float_of_int |> getMonthType) : state.month) |> getMonthFloat, state.year, state.holidayList, state.listBirthDay)
-          } 
+            dates((isMini ? (month |> float_of_int |> getMonthType) : state.month) |> getMonthFloat, targetYear, state.holidayList, state.listBirthDay)
+          } */
+          {dates((isMini ? (month |> float_of_int |> getMonthType) : state.month) |> getMonthFloat, targetYear, state.holidayList, state.listBirthDay)}
           </tbody>
         </table>
       </div>

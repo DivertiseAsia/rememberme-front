@@ -13,7 +13,12 @@ type action =
 
 let component = ReasonReact.reducerComponent("PageHome");
 
-let make = (~isLoggedIn: bool, _children) => {
+let make = (
+    ~isLoggedIn: bool, 
+    ~month=(Js.Date.make() |> Js.Date.getMonth |> int_of_float),
+    ~year=(Js.Date.make() |> Js.Date.getFullYear), 
+    _children
+  ) => {
   ...component,
   initialState: () => {showRequestLeave: false, showRequestUserLeave: false},
   reducer: (action, state) => {
@@ -26,7 +31,7 @@ let make = (~isLoggedIn: bool, _children) => {
     <div className="home-page container-fluid">
       <div className="row row-main" style=(ReactDOMRe.Style.make(~height="100%", ()))>
         <div className="col-12 col-sm-12 col-md-7 col-lg-8 col-xl-8 col-calendar"> 
-          <Calendar />
+          <Calendar month year />
         </div>
         <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
           /*<div className="row">

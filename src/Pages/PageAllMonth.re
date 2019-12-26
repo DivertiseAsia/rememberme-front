@@ -48,20 +48,23 @@ let make = (_children) => {
             {string(" " ++ (state.targetYear |> Js.Float.toString))}
           </button>
           (state.openDropdown ?
+            <>
+            <div className="dropdown-items-bg" onClick=(_ => send(ToggleDropdown(false))) />
             <div className="dropdown-items">
               {
                 years |> List.mapi((i, year) => {
                   <div className="dropdown-item" 
                     onClick=(_ => {
                       send(ChangeYear(year));
-                      send(ToggleDropdown(false))
+                      send(ToggleDropdown(false));
                     })
                   >
                     {string(year |> int_of_float |> string_of_int)}
                   </div>
                 }) |> Array.of_list |> array
               }
-            </div> : null
+            </div>
+            </> : null
           )
         </div>
       </div>

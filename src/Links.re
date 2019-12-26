@@ -1,4 +1,5 @@
 let home = "/";
+let dashboard = "/dashboard";
 let login = "/login";
 let logout = "/logout";
 let forgot = "/forgot";

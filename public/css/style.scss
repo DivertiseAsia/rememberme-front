@@ -494,6 +494,9 @@ td{
   z-index: 999;
   width: 170px;
 }
+.dropwdown-year:focus {
+  box-shadow: none;
+}
 .dropdown-items {
   position: fixed;
   top: 60px;
@@ -514,6 +517,14 @@ td{
     color: white;
     padding: 10px 5px;
   }
+}
+.dropdown-items-bg {
+  z-index: 997;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
 }
 
 @media screen and (min-width: 768px) { 
