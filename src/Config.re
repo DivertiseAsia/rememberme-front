@@ -1,3 +1,3 @@
 module Info = {
-  let name = "ArtCRM";
+  let name = "RememberME";
 };

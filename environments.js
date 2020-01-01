@@ -11,14 +11,14 @@ const environments = {
     ENV_NAME: 'staging',
     FB_PIXEL_ID: '', // empty => no tracking
     GOOGLE_ANALYTICS_ID: '', // empty => no tracking
-    API_URL: 'https://api.staging.artcrm.com/',
+    API_URL: '',
   },
   prod:
   {
     ENV_NAME: 'production',
     FB_PIXEL_ID: '', // empty => no tracking
     GOOGLE_ANALYTICS_ID: '', // empty => no tracking
-    API_URL: 'https://api.artcrm.com/',
+    API_URL: 'https://rememberme-server.herokuapp.com/',
   },
 };
 
