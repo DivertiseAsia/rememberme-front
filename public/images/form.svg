@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="44.339" height="28.834" viewBox="0 0 44.339 28.834">
+  <g id="Group_191" data-name="Group 191" transform="translate(-1618.5 -183.333)">
+    <g id="document" transform="translate(1640.273 183.333)">
+      <g id="Group_187" data-name="Group 187" transform="translate(0)">
+        <g id="Group_186" data-name="Group 186" transform="translate(0)">
+          <path id="Path_190" data-name="Path 190" d="M69.756,9.4a.941.941,0,0,1-.94-.94V0H56.592a.941.941,0,0,0-.94.94V27.894a.941.941,0,0,0,.94.94H77.278a.941.941,0,0,0,.94-.94V9.4Zm-9.4,13.79a.94.94,0,1,1,.94-.94A.94.94,0,0,1,60.353,23.193Zm0-3.761a.94.94,0,1,1,.94-.94A.94.94,0,0,1,60.353,19.432Zm0-3.761a.94.94,0,1,1,.94-.94A.94.94,0,0,1,60.353,15.671Zm13.164,7.522h-9.4a.94.94,0,1,1,0-1.881h9.4a.94.94,0,0,1,0,1.881Zm0-3.761h-9.4a.94.94,0,1,1,0-1.881h9.4a.94.94,0,0,1,0,1.881Zm0-3.761h-9.4a.94.94,0,1,1,0-1.881h9.4a.94.94,0,0,1,0,1.881Z" transform="translate(-55.652)" fill="#2d506d"/>
+        </g>
+      </g>
+      <g id="Group_189" data-name="Group 189" transform="translate(15.044 0.551)">
+        <g id="Group_188" data-name="Group 188">
+          <path id="Path_191" data-name="Path 191" d="M322.783,9.783v6.971h6.971Z" transform="translate(-322.783 -9.783)" fill="#2d506d"/>
+        </g>
+      </g>
+    </g>
+    <line id="Line_42" data-name="Line 42" x2="12.392" transform="translate(1624.082 190.184)" fill="none" stroke="#2d506d" stroke-width="3"/>
+    <line id="Line_43" data-name="Line 43" x2="11.656" transform="translate(1618.5 197.546)" fill="none" stroke="#2d506d" stroke-width="3"/>
+    <line id="Line_44" data-name="Line 44" x2="12.392" transform="translate(1624.082 204.907)" fill="none" stroke="#2d506d" stroke-width="3"/>
+  </g>
+</svg>

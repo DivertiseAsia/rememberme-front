@@ -1,4 +1,6 @@
-let component = ReasonReact.statelessComponent("PopupRe");
+open ReasonReact;
+open Utils;
+let component = ReasonReact.statelessComponent("LoginForm");
 
 let make =
     (
@@ -11,24 +13,25 @@ let make =
     ) => {
   ...component,
   render: _self =>
-    <form className={"form form-login " ++ Js.Option.getWithDefault("", className)} onSubmit>
+    <form className={"form-group form-login " ++ Js.Option.getWithDefault("", className)} onSubmit>
       <div className="section-login content -text-center">
+        <small>{string("Email")}</small>
         <input
           disabled=loading
-          className="login-filled"
+          className="form-control"
           placeholder="Email"
-          onChange={e => setEmail(ReactEvent.Form.target(e)##value)}
-          type_="email"
+          onChange={e => e |> getValueOfForm |> setEmail}
+          type_="text"
         />
         <input
           disabled=loading
-          className="login-filled"
+          className="form-control"
           placeholder="Password"
-          onChange={e => setPassword(ReactEvent.Form.target(e)##value)}
+          onChange={e => e |> getValueOfForm |> setPassword}
           type_="password"
           required=true
         />
-        <input disabled=loading className="btn-filled-blue btn-line" type_="submit" value="Login" />
+        <input disabled=loading className="btn-filled-blue btn-line btn-login btn-main-color" type_="submit" value="Login" />
       </div>
     </form>,
 };

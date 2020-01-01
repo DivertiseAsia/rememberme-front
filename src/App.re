@@ -40,14 +40,22 @@ let make = _children => {
   render: ({state: {route}}) => {
     let token = loadToken();
     let isLoggedIn = token !== "";
+    Js.log2("!! route.path", route.path);
     switch (route.path, isLoggedIn) {
     | ([], true)
     | ([""], true) => <PageHome isLoggedIn />
+    | ([x, monthYear], true) when routeMatches(x, Links.dashboard) => {
+        let datetime = Js.String.split("-", monthYear);
+        <PageHome isLoggedIn year=(datetime[1] |> float_of_string) month=((datetime[0] |> int_of_string) - 1) />
+      }
+    | ([x], true) when routeMatches(x, Links.profile) => <PageProfile />
+    | ([x], true) when routeMatches(x, Links.allMonth) => <PageAllMonth />
     | ([x], _) when routeMatches(x, Links.login) => <PageLogin queryString={route.search} />
     | ([x], _) when routeMatches(x, Links.logout) =>
       let _ = clearToken();
       let _ = ReasonReact.Router.push("/?logout=true");
       <PageLogin queryString={route.search} />;
+    | ([x], false) when routeMatches(x, Links.register) => <PageRegister />
     | (_, false) =>
       let queryParams = "next=" ++ encodeURIComponent(path());
       let _ = ReasonReact.Router.push("/login?" ++ queryParams);

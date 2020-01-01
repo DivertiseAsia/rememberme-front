@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <g id="post_add-24px" transform="translate(-0.4)">
+    <g id="Bounding_Box" transform="translate(0.4)">
+      <rect id="Rectangle_19" data-name="Rectangle 19" width="48" height="48" fill="none"/>
+    </g>
+    <g id="Flat" transform="translate(5.897 4.108)">
+      <g id="Group_11" data-name="Group 11">
+        <path id="Path_23" data-name="Path 23" d="M31.753,34.2H7.108V9.108H21.484V5H7.108A4.12,4.12,0,0,0,3,9.108V33.753A4.12,4.12,0,0,0,7.108,37.86H31.753a4.12,4.12,0,0,0,4.108-4.108V19.376H31.753Z" transform="translate(-3 1.161)" fill="#fff"/>
+        <path id="Path_24" data-name="Path 24" d="M24.269,2H20.161V8.161H14c.021.021,0,4.108,0,4.108h6.161V18.41c.021.021,4.108,0,4.108,0V12.269H30.43V8.161H24.269Z" transform="translate(8.591 -2)" fill="#fff"/>
+        <rect id="Rectangle_20" data-name="Rectangle 20" width="16" height="4" transform="translate(8.503 14.892)" fill="#fff"/>
+        <path id="Path_25" data-name="Path 25" d="M7,12v4.108H23.43V12H7Z" transform="translate(1.215 8.538)" fill="#fff"/>
+        <rect id="Rectangle_21" data-name="Rectangle 21" width="16" height="4" transform="translate(8.503 25.892)" fill="#fff"/>
+      </g>
+    </g>
+  </g>
+</svg>
