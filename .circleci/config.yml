@@ -7,7 +7,7 @@ jobs:
   unit-test: #execute on every branch
     docker:
       - image: circleci/node:8.11
-    working_directory: ~/artcrm-front
+    working_directory: ~/rememberme-front
 
     steps:
       - checkout
@@ -37,17 +37,17 @@ jobs:
           name: Notify on fail
           command: |
             if [ "${CIRCLE_BRANCH}" == "production" ]; then
-              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Prod: artcrm-front unit test fail frontend commit '$CIRCLE_SHA1' - maybe memory issue?"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Prod: rememberme-front unit test fail frontend commit '$CIRCLE_SHA1' - maybe memory issue?"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
             fi
             if [ "${CIRCLE_BRANCH}" == "staging" ]; then
-              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Staging: artcrm-front unit test fail frontend commit '$CIRCLE_SHA1' - maybe memory issue?"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Staging: rememberme-front unit test fail frontend commit '$CIRCLE_SHA1' - maybe memory issue?"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
             fi
           when: on_fail
   build-and-push:
     docker:
       - image: circleci/node:8.11
 
-    working_directory: ~/artcrm-front
+    working_directory: ~/rememberme-front
 
     steps:
       - checkout
@@ -85,7 +85,7 @@ jobs:
               npm run webpack:production
               aws s3 sync build $PROD_BUCKET_PATH --metadata-directive REPLACE --cache-control max-age=43200 --delete
               aws s3 cp $PROD_BUCKET_PATH/index.html $PROD_BUCKET_PATH/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html
-              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Prod: Deployed artcrm-front frontend commit '$CIRCLE_SHA1'"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Prod: Deployed rememberme-front frontend commit '$CIRCLE_SHA1'"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
             else
               echo "Not production branch so not deploying to production s3"
             fi
@@ -98,7 +98,7 @@ jobs:
               npm run webpack:staging
               aws s3 sync build $STAGING_BUCKET_PATH --metadata-directive REPLACE --cache-control max-age=43200 --delete
               aws s3 cp $STAGING_BUCKET_PATH/index.html $STAGING_BUCKET_PATH/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html
-              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Staging: Deployed artcrm-front frontend commit '$CIRCLE_SHA1'"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Staging: Deployed rememberme-front frontend commit '$CIRCLE_SHA1'"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
             else
               echo "Not staging branch so not deploying to staging s3"
             fi
@@ -106,10 +106,10 @@ jobs:
           name: Notify on fail
           command: |
             if [ "${CIRCLE_BRANCH}" == "production" ]; then
-              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Prod: deploy artcrm-front frontend commit '$CIRCLE_SHA1' failed???"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Prod: deploy rememberme-front frontend commit '$CIRCLE_SHA1' failed???"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
             fi
             if [ "${CIRCLE_BRANCH}" == "staging" ]; then
-              curl -H "Content-Type: application/json" --data '{"keywords": ["artcrm-deploy"], "message": "Staging: deploy artcrm-front frontend commit '$CIRCLE_SHA1' failed???"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
+              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Staging: deploy rememberme-front frontend commit '$CIRCLE_SHA1' failed???"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
             fi
           when: on_fail
 workflows:

@@ -1,3 +1,3 @@
 module Info = {
-  let name = "Remember Me";
+  let name = "RememberME";
 };
