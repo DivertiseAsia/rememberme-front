@@ -4,99 +4,78 @@
 #
 version: 2
 jobs:
-  unit-test: #execute on every branch
+  build-reason-app:
     docker:
-      - image: circleci/node:8.11
+      - image: circleci/node:8.11-stretch
+      
     working_directory: ~/rememberme-front
 
     steps:
       - checkout
-
-       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-main-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
+          - v1-main-dependencies-
       - run:
-          name: Install dependencies
-          command: npm install
-
+            name: Install dependencies
+            command: npm install
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
-
-      # run tests!
+          key: v1-main-dependencies-{{ checksum "package.json" }}
       - run:
-          name: Run tests
-          command: npm test
-
-      - run:
-          name: Notify on fail
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "production" ]; then
-              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Prod: rememberme-front unit test fail frontend commit '$CIRCLE_SHA1' - maybe memory issue?"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
-            fi
-            if [ "${CIRCLE_BRANCH}" == "staging" ]; then
-              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Staging: rememberme-front unit test fail frontend commit '$CIRCLE_SHA1' - maybe memory issue?"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
-            fi
-          when: on_fail
-  build-and-push:
+            name: Build
+            command: |
+              npm run build
+              npm run webpack:production
+      - persist_to_workspace: # Persist the specified paths (workspace/echo-output)
+      # into the workspace  for use in downstream job. Must be an absolute path,
+      # or relative path from working_directory. This is a directory on the container which is
+      # taken to be the root directory of the workspace.
+          root: .
+            # Must be relative path from root
+          paths:
+            - build
+  push-build-and-firebase-items:
     docker:
-      - image: circleci/node:8.11
+      - image: circleci/node:8.11-stretch
 
     working_directory: ~/rememberme-front
 
     steps:
       - checkout
-
-      # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-main-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
-      - run: npm install
-
+          - v1-main-dependencies-
+      - run:
+            name: Install Firebase
+            command: npm install --save-dev firebase-tools
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: v1-main-dependencies-{{ checksum "package.json" }}
 
-      # install awscil
-      - run:
-          name: Install awscli
-          command: |
-            sudo apt-get -y update
-            sudo apt-get -y install python3.4-dev
-            sudo curl -O "https://bootstrap.pypa.io/get-pip.py"
-            sudo python3.4 get-pip.py
-            sudo pip install --upgrade awscli
-
-      # deploy to aws
+      - attach_workspace:
+          at: .
       - run:
           name: Deploy to Firebase
           command: ./node_modules/.bin/firebase deploy --token=$FIREBASE_TOKEN
-      - run:
-          name: Notify on fail
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "production" ]; then
-              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Prod: deploy rememberme-front frontend commit '$CIRCLE_SHA1' failed???"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
-            fi
-            if [ "${CIRCLE_BRANCH}" == "staging" ]; then
-              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Staging: deploy rememberme-front frontend commit '$CIRCLE_SHA1' failed???"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
-            fi
-          when: on_fail
 workflows:
   version: 2
   build-deploy-flow:
     jobs:
-      - build-and-push:
+      - build-reason-app:
           filters:
             branches:
               only:
                 - production
-                - staging
+      - push-build-and-firebase-items:
+          requires:
+            - build-reason-app
+          filters:
+            branches:
+              only:
+                - production
