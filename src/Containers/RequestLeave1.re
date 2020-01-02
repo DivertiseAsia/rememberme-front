@@ -1,4 +1,4 @@
-open ReasonReact;
+/*open ReasonReact;
 open RememberMeApi;
 open Utils;
 
@@ -119,4 +119,4 @@ let make = (~onClose, _children) => {
       </div>
     </div>;
   },
-};
+};*/

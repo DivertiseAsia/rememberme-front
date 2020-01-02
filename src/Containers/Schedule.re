@@ -24,7 +24,7 @@ type action =
 
 let component = ReasonReact.reducerComponent("Schedule");
 
-let make = (~holidayList=[], ~listBirthDay=[], _children) => {
+let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], _children) => {
   ...component,
   initialState: () => {
     loadState: Idle, 
@@ -110,8 +110,8 @@ let make = (~holidayList=[], ~listBirthDay=[], _children) => {
               <div className="col-12 content-schedule- p-0">
                 {
                   /* Filter */
-                  switch (state.scheduleMenu, listBirthDay, holidayList) {
-                  | (All, allBirthDay, allHoliday) when (allHoliday !== [] || allBirthDay !== []) => {
+                  switch (state.scheduleMenu, listBirthDay, holidayList, leaveList) {
+                  | (All, allBirthDay, allHoliday, allLeave) when (allHoliday !== [] || allBirthDay !== []) => {
                       {
                         let birthdaySchedules = 
                           allBirthDay 
@@ -143,8 +143,8 @@ let make = (~holidayList=[], ~listBirthDay=[], _children) => {
                         }) |> Array.of_list |> array
                       }
                     }
-                  | (Leave, _, _) => null
-                  | (Holiday, _, allHoliday) when allHoliday !== [] => {
+                  | (Leave, _, _, allLeave) when allLeave !== [] => null
+                  | (Holiday, _, allHoliday, _) when allHoliday !== [] => {
                       <>
                       {
                         allHoliday 

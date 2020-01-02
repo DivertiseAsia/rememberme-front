@@ -186,12 +186,12 @@ let dates = (month, year, holidayList, birthDayList) => {
   Array.make(boxs, null)
   |> Array.mapi((idx, _) =>
        if (idx < startDayInWeek) {
-          <td key={idx |> string_of_int} className={j|day not-current-month|j}>
-            {(lastDatePreviousMonth - (startDayInWeek - (idx + 1))) |> string_of_int |> str}
+          <td key={idx |> string_of_int} className={j|day not-current-month|j} style=(ReactDOMRe.Style.make(~paddingTop="20px", ()))>
+            <span>{(lastDatePreviousMonth - (startDayInWeek - (idx + 1))) |> string_of_int |> str}</span>
           </td>
        } else if (idx - startDayInWeek + 1 > lastDate) {
-          <td key={idx |> string_of_int} className={j|day not-current-month|j}>
-            {(idx - startDayInWeek + 1 - lastDate) |> string_of_int |> str}
+          <td key={idx |> string_of_int} className={j|day not-current-month|j} style=(ReactDOMRe.Style.make(~paddingTop="20px", ()))>
+            <span>{(idx - startDayInWeek + 1 - lastDate) |> string_of_int |> str}</span>
           </td>
        } else {
          let date = idx - startDayInWeek + 1;
@@ -202,7 +202,7 @@ let dates = (month, year, holidayList, birthDayList) => {
            | _ => ""
            };
           
-         <td key={idx |> string_of_int} className={j|day $classThisDay|j}>
+         <td key={idx |> string_of_int} className={j|day $classThisDay|j} style=(ReactDOMRe.Style.make(~paddingTop="20px", ()))>
            <div className="circle-today" />
            <span className=(String.length(date |> string_of_int) === 1 ? "single-char" : "")>{date |> string_of_int |> str}</span>
            (List.length(holidayList |> List.find_all(holiday => holiday.date === jsDate)) > 0 ||

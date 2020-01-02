@@ -11,6 +11,7 @@ type leaveType =
 
 type leaveDetail = {
   id: string,
+  user:string,
   leaveType,
   fromDate: Js.Date.t,
   toDate: Js.Date.t,
@@ -42,6 +43,7 @@ module URL = {
   let signUp = {j|$baseApiUrl/account/register/|j};
   let birthday = {j|$baseApiUrl/account/birthday/|j};
   let leave = {j|$baseApiUrl/leave/|j};
+  let allLeave = {j|$baseApiUrl/leave/all/|j};
   let holiday = {j|$baseApiUrl/holiday/|j};
 };
 
@@ -91,6 +93,7 @@ module Decode = {
 
   let leaveDetail = json => {
     id: json |> field("rid", string),
+    user: json |> field("user", string),
     leaveType: json |> field("type", int) |> mapLeaveType,
     fromDate: json |> field("from_date", string) |> Js.Date.fromString,
     toDate: json |> field("to_date", string) |> Js.Date.fromString,
@@ -113,6 +116,15 @@ let fetchUserLeaves = (~token, ~successAction, ~failAction) =>
   requestJsonResponseToAction(
     ~headers=buildHeader(token),
     ~url=URL.leave,
+    ~successAction=json => json |> Decode.leaveList |> successAction,
+    ~failAction,
+  )
+  |> ignore;
+
+let fetchAllLeaves = (~token, ~successAction, ~failAction) =>
+  requestJsonResponseToAction(
+    ~headers=buildHeader(token),
+    ~url=URL.allLeave,
     ~successAction=json => json |> Decode.leaveList |> successAction,
     ~failAction,
   )

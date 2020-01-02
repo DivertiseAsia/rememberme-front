@@ -135,6 +135,15 @@ let mapBirthDayToSchedule = (birthday:RememberMeApi.birthDay) => {
   schedule
 };
 
+let mapLeaveToSchedule = (leaveDetail:RememberMeApi.leaveDetail, date) => {
+  let schedule = {
+    scheduleMenu: Leave,
+    title: leaveDetail.user ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
+    date,
+  };
+  schedule
+};
+
 let validateBirthday = (birthday:Js.Date.t, month, date) => {
   (birthday |> Js.Date.getMonth === month && birthday |> Js.Date.getDate === date)
 };

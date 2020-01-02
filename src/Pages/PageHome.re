@@ -11,6 +11,7 @@ type state = {
   showRequestUserLeave: bool,
   holidayList: list(holiday),
   listBirthDay: list(birthDay),
+  leaveList: list(leaveDetail),
 };
 
 type action =
@@ -21,7 +22,10 @@ type action =
   | FetchHolidayListFail
   | FetchBirthDayList
   | FetchBirthDayListSuccess(list(birthDay))
-  | FetchBirthDayListFail;
+  | FetchBirthDayListFail
+  | FetchLeaveList
+  | FetchLeaveListSuccess(list(leaveDetail))
+  | FetchLeaveListFail;
 
 let fetchHolidayList = ({send}) => {
   fetchHoliday(
@@ -35,6 +39,14 @@ let fetchBirthDay = ({send}) => {
     ~token=Utils.getToken(),
     ~successAction=birthdayList => send(FetchBirthDayListSuccess(birthdayList)),
     ~failAction=_ => send(FetchBirthDayListFail),
+  );
+};
+
+let fetchRequestLeave = ({send}) => {
+  fetchAllLeaves(
+    ~token=Utils.getToken(),
+    ~successAction=birthdayList => send(FetchLeaveListSuccess(birthdayList)),
+    ~failAction=_ => send(FetchLeaveListFail),
   );
 };
 
@@ -53,6 +65,7 @@ let make = (
     showRequestUserLeave: false,
     holidayList: [],
     listBirthDay: [],
+    leaveList: [],
   },
   reducer: (action, state) => {
     switch (action) {
@@ -64,9 +77,12 @@ let make = (
     | FetchBirthDayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchBirthDay)
     | FetchBirthDayListSuccess(listBirthDay) => Update({...state, loadState: Succeed, listBirthDay})
     | FetchBirthDayListFail => Update({...state, loadState: Failed, listBirthDay: []})
+    | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchRequestLeave)
+    | FetchLeaveListSuccess(leaveList) => Update({...state, loadState: Succeed, leaveList})
+    | FetchLeaveListFail => Update({...state, loadState: Failed, leaveList: []})
     };
   },
-  didMount: ({send}) => {send(FetchHolidayList)send(FetchBirthDayList)},
+  didMount: ({send}) => {send(FetchHolidayList)send(FetchBirthDayList)send(FetchLeaveList)},
   render: ({state, send}) =>
     <div className="home-page container-fluid">
       <div className="row row-main" style=(ReactDOMRe.Style.make(~height="100%", ()))>
@@ -74,15 +90,8 @@ let make = (
           <Calendar month year />
         </div>
         <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
-          /*<div className="row">
-            <button onClick={_ => send(ToggleRequestLeave)}> {"RequestLeave" |> str} </button>
-            <button onClick={_ => send(ToggleRequestUserLeave)}> {"UserLeave" |> str} </button>
-          </div>*/
-          <Schedule holidayList=state.holidayList listBirthDay=state.listBirthDay />
+          <Schedule holidayList=state.holidayList listBirthDay=state.listBirthDay leaveList=state.leaveList />
         </div>
       </div>
-      /*{showRequestLeave ? <RequestLeave onClose={_ => send(ToggleRequestLeave)} /> : null}
-      {showRequestUserLeave ? <UserLeave onClose={_ => send(ToggleRequestUserLeave)} /> : null}
-      */
     </div>,
 };
