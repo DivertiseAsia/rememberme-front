@@ -77,31 +77,9 @@ jobs:
             sudo pip install --upgrade awscli
 
       # deploy to aws
-      - deploy:
-          name: Deploy if tests pass and branch is Production
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "production" ]; then
-              npm run build
-              npm run webpack:production
-              aws s3 sync build $PROD_BUCKET_PATH --metadata-directive REPLACE --cache-control max-age=43200 --delete
-              aws s3 cp $PROD_BUCKET_PATH/index.html $PROD_BUCKET_PATH/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html
-              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Prod: Deployed rememberme-front frontend commit '$CIRCLE_SHA1'"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
-            else
-              echo "Not production branch so not deploying to production s3"
-            fi
-
-      - deploy:
-          name: Deploy if tests pass and branch is Staging
-          command: |
-            if  [ "${CIRCLE_BRANCH}" == "staging" ]; then
-              npm run build
-              npm run webpack:staging
-              aws s3 sync build $STAGING_BUCKET_PATH --metadata-directive REPLACE --cache-control max-age=43200 --delete
-              aws s3 cp $STAGING_BUCKET_PATH/index.html $STAGING_BUCKET_PATH/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html
-              curl -H "Content-Type: application/json" --data '{"keywords": ["rememberme-deploy"], "message": "Staging: Deployed rememberme-front frontend commit '$CIRCLE_SHA1'"}' -X POST https://us-central1-divertisebot.cloudfunctions.net/Deploy
-            else
-              echo "Not staging branch so not deploying to staging s3"
-            fi
+      - run:
+          name: Deploy to Firebase
+          command: ./node_modules/.bin/firebase deploy --token=$FIREBASE_TOKEN
       - run:
           name: Notify on fail
           command: |
