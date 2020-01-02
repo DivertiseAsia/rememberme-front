@@ -6,8 +6,8 @@ version: 2
 jobs:
   build-reason-app:
     docker:
-      - image: circleci/node:8.11-stretch
-      
+      - image: circleci/node:8.13.0-stretch
+
     working_directory: ~/rememberme-front
 
     steps:
@@ -39,7 +39,7 @@ jobs:
             - build
   push-build-and-firebase-items:
     docker:
-      - image: circleci/node:8.11-stretch
+      - image: circleci/node:8.13.0-stretch
 
     working_directory: ~/rememberme-front
 
