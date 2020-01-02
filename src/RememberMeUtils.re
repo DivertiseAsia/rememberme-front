@@ -120,16 +120,21 @@ let mapBirthDayToSchedule = (birthday:RememberMeApi.birthDay) => {
   let schedule = {
     scheduleMenu: Birthday,
     title: birthday.name ++ "'s birthday",
-    date: birthday.birthDate |> Js.Date.valueOf,
+    date: 
+      Js.Date.makeWithYMD(
+        ~year={
+          Js.Date.now() |> Js.Date.fromFloat |> Js.Date.getFullYear;
+        },
+        ~month={
+          birthday.birthDate  |> Js.Date.getMonth;
+        },
+        ~date={
+          birthday.birthDate  |> Js.Date.getDate;
+        }, ()) |> Js.Date.valueOf,
   };
   schedule
 };
 
 let validateBirthday = (birthday:Js.Date.t, month, date) => {
-  Js.log2("date: ",date);
-  Js.log2("month: ",month);
-  Js.log2("birthday: ",birthday);
-  Js.log2("birthday date: ",birthday |> Js.Date.getDate);
-  Js.log2("birthday month: ",birthday |> Js.Date.getMonth);
   (birthday |> Js.Date.getMonth === month && birthday |> Js.Date.getDate === date)
 };

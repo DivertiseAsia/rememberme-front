@@ -113,15 +113,33 @@ let make = (~holidayList=[], ~listBirthDay=[], _children) => {
                   switch (state.scheduleMenu, listBirthDay, holidayList) {
                   | (All, allBirthDay, allHoliday) when (allHoliday !== [] || allBirthDay !== []) => {
                       {
-                        allBirthDay 
-                        |> List.map(birthDay => {
-                          (birthDay.name !== "" ?
+                        let birthdaySchedules = 
+                          allBirthDay 
+                          |> List.filter((birthDay) => birthDay.name !== "")
+                          |> List.map(birthDay => birthDay |> RememberMeUtils.mapBirthDayToSchedule);
+                        let holidaySchedules = allHoliday |> List.map(holiday => holiday |> RememberMeUtils.mapHolidayToSchedule);
+                        let allSchedules = List.append(holidaySchedules, birthdaySchedules);
+                        allSchedules 
+                        |> List.sort((schedule1:schedule, schedule2:schedule) => compare(schedule1.date, schedule2.date))
+                        |> List.map((schedule:schedule) => {
+                            let (datetime, schedules) = switch schedule.scheduleMenu {
+                            | Leave => ("", [schedule])
+                            | Holiday => (schedule.date |> RememberMeUtils.getDatetimeStr, [schedule])
+                            | Event => ("", [schedule])
+                            | Birthday => (schedule.date |> RememberMeUtils.getDatetimeStr(~formCurrentYear=true), [schedule])
+                            | _ => ("", [schedule])
+                            };
                             <SchedulerDate 
-                              datetime=(birthDay.birthDate |> Js.Date.valueOf |> RememberMeUtils.getDatetimeStr(~formCurrentYear=true)) 
-                              schedules=[(birthDay |> RememberMeUtils.mapBirthDayToSchedule)] 
+                              datetime=datetime
+                              schedules=(
+                                List.append(
+                                  schedules, 
+                                  allSchedules 
+                                  |> List.find_all((s:schedule) => 
+                                    (s.date === schedule.date && s.title !== schedule.title))
+                                )
+                              )
                             />
-                            : null
-                          )
                         }) |> Array.of_list |> array
                       }
                     }
