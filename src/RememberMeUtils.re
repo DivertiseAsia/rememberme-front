@@ -100,12 +100,12 @@ let mapFullMonthInt = (month:int) =>
   | 11 => "December"
   };
 
-let getDatetimeStr = (datetime:float) => {
+let getDatetimeStr = (~formCurrentYear=false, datetime:float) => {
   (datetime |> Js.Date.fromFloat |> Js.Date.getDay |> int_of_float |> mapDayInt) ++ " " ++
   (datetime |> Js.Date.fromFloat |> Js.Date.getDate |> int_of_float |> string_of_int) ++ " " ++
   (datetime |> Js.Date.fromFloat |> Js.Date.getMonth |> int_of_float |> mapFullMonthInt) ++ " " ++
-  (datetime |> Js.Date.fromFloat |> Js.Date.getFullYear |> int_of_float |> string_of_int);
-}
+  ((formCurrentYear ? Js.Date.now() : datetime) |> Js.Date.fromFloat |> Js.Date.getFullYear |> int_of_float |> string_of_int);
+};
 
 let mapHolidayToSchedule = (holiday:RememberMeApi.holiday) => {
   let schedule = {
@@ -114,4 +114,22 @@ let mapHolidayToSchedule = (holiday:RememberMeApi.holiday) => {
     date: holiday.date,
   };
   schedule
+};
+
+let mapBirthDayToSchedule = (birthday:RememberMeApi.birthDay) => {
+  let schedule = {
+    scheduleMenu: Birthday,
+    title: birthday.name ++ "'s birthday",
+    date: birthday.birthDate |> Js.Date.valueOf,
+  };
+  schedule
+};
+
+let validateBirthday = (birthday:Js.Date.t, month, date) => {
+  Js.log2("date: ",date);
+  Js.log2("month: ",month);
+  Js.log2("birthday: ",birthday);
+  Js.log2("birthday date: ",birthday |> Js.Date.getDate);
+  Js.log2("birthday month: ",birthday |> Js.Date.getMonth);
+  (birthday |> Js.Date.getMonth === month && birthday |> Js.Date.getDate === date)
 };

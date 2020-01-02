@@ -86,7 +86,7 @@ module Decode = {
     date: json |> field("date", string) |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf,
     isVacation: json |> field("is_vacation", bool),
   };
-
+  /*json |> field("date", withDefault(true, nullAs(0. |> ))), */
   let holidayList = json => json |> list(holiday);
 
   let leaveDetail = json => {

@@ -109,11 +109,21 @@ let make = (~holidayList=[], ~listBirthDay=[], _children) => {
               </div>
               <div className="col-12 content-schedule- p-0">
                 {
-                  Js.log2("listBirthDay: ",listBirthDay);
                   /* Filter */
                   switch (state.scheduleMenu, listBirthDay, holidayList) {
-                  | (All, birthDay, allHoliday) when (allHoliday !== [] || birthDay !== []) => {
-                      null
+                  | (All, allBirthDay, allHoliday) when (allHoliday !== [] || allBirthDay !== []) => {
+                      {
+                        allBirthDay 
+                        |> List.map(birthDay => {
+                          (birthDay.name !== "" ?
+                            <SchedulerDate 
+                              datetime=(birthDay.birthDate |> Js.Date.valueOf |> RememberMeUtils.getDatetimeStr(~formCurrentYear=true)) 
+                              schedules=[(birthDay |> RememberMeUtils.mapBirthDayToSchedule)] 
+                            />
+                            : null
+                          )
+                        }) |> Array.of_list |> array
+                      }
                     }
                   | (Leave, _, _) => null
                   | (Holiday, _, allHoliday) when allHoliday !== [] => {
@@ -123,7 +133,7 @@ let make = (~holidayList=[], ~listBirthDay=[], _children) => {
                         |> List.filter(holiday => (holiday.date >= Js.Date.now()))
                         |> List.sort((holiday1:holiday, holiday2:holiday) => compare(holiday1.date, holiday2.date))
                         |> List.map(holiday => {
-                          <SchedulerDate datetime=(holiday.date |> RememberMeUtils.getDatetimeStr) schedule=(holiday |> RememberMeUtils.mapHolidayToSchedule) />
+                          <SchedulerDate datetime=(holiday.date |> RememberMeUtils.getDatetimeStr) schedules=[(holiday |> RememberMeUtils.mapHolidayToSchedule)] />
                         }) |> Array.of_list |> array
                       }
                       </>

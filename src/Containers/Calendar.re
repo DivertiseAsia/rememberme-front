@@ -206,14 +206,15 @@ let dates = (month, year, holidayList, birthDayList) => {
            <div className="circle-today" />
            <span className=(String.length(date |> string_of_int) === 1 ? "single-char" : "")>{date |> string_of_int |> str}</span>
            (List.length(holidayList |> List.find_all(holiday => holiday.date === jsDate)) > 0 ||
-            List.length(birthDayList |> List.find_all(birthDay => (birthDay.birthDate |> getDateOnlyDate |> Js.Date.valueOf) === jsDate)) > 0 ?
+            List.length(birthDayList |> List.find_all(birthDay => RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int))) > 0 ?
               <div className="points">
                 {holidayList 
                   |> List.find_all(holiday => holiday.date === jsDate) 
                   |> List.map(holiday => <div className="point point-holiday" />) |> Array.of_list |> array
                 }
                 {birthDayList 
-                  |> List.find_all(birthDay => (birthDay.birthDate |> getDateOnlyDate |> Js.Date.valueOf) === jsDate) 
+                  |> List.filter(birthDay => birthDay.name !== "")
+                  |> List.find_all(birthDay => RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)) 
                   |> List.map(birthDay => <div className="point point-birthday" />) |> Array.of_list |> array
                 }
               </div> : null
