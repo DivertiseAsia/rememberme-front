@@ -7,9 +7,9 @@ jobs:
   build-reason-app:
     docker:
       - image: circleci/node:8.11-stretch
-​
+      
     working_directory: ~/rememberme-front
-​
+
     steps:
       - checkout
       - restore_cache:
@@ -40,9 +40,9 @@ jobs:
   push-build-and-firebase-items:
     docker:
       - image: circleci/node:8.11-stretch
-​
+
     working_directory: ~/rememberme-front
-​
+
     steps:
       - checkout
       - restore_cache:
@@ -57,7 +57,7 @@ jobs:
           paths:
             - node_modules
           key: v1-main-dependencies-{{ checksum "package.json" }}
-​
+
       - attach_workspace:
           at: .
       - run:
@@ -79,7 +79,3 @@ workflows:
             branches:
               only:
                 - production
-
-
-
-
