@@ -42,10 +42,10 @@ let fetchBirthDay = ({send}) => {
   );
 };
 
-let fetchRequestLeave = ({send}) => {
+let fetchAllRequestLeave = ({send}) => {
   fetchAllLeaves(
     ~token=Utils.getToken(),
-    ~successAction=birthdayList => send(FetchLeaveListSuccess(birthdayList)),
+    ~successAction=leaveList => send(FetchLeaveListSuccess(leaveList)),
     ~failAction=_ => send(FetchLeaveListFail),
   );
 };
@@ -77,20 +77,29 @@ let make = (
     | FetchBirthDayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchBirthDay)
     | FetchBirthDayListSuccess(listBirthDay) => Update({...state, loadState: Succeed, listBirthDay})
     | FetchBirthDayListFail => Update({...state, loadState: Failed, listBirthDay: []})
-    | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchRequestLeave)
-    | FetchLeaveListSuccess(leaveList) => Update({...state, loadState: Succeed, leaveList})
+    | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchAllRequestLeave)
+    | FetchLeaveListSuccess(leaveList) => Js.log(leaveList);Update({...state, loadState: Succeed, leaveList})
     | FetchLeaveListFail => Update({...state, loadState: Failed, leaveList: []})
     };
   },
-  didMount: ({send}) => {send(FetchHolidayList)send(FetchBirthDayList)send(FetchLeaveList)},
+  didMount: ({send}) => {
+    send(FetchHolidayList);
+    send(FetchBirthDayList);
+    send(FetchLeaveList);
+  },
   render: ({state, send}) =>
     <div className="home-page container-fluid">
       <div className="row row-main" style=(ReactDOMRe.Style.make(~height="100%", ()))>
         <div className="col-12 col-sm-12 col-md-7 col-lg-8 col-xl-8 col-calendar"> 
-          <Calendar month year />
+          <Calendar month year leaveList=state.leaveList />
         </div>
         <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
-          <Schedule holidayList=state.holidayList listBirthDay=state.listBirthDay leaveList=state.leaveList />
+          <Schedule 
+            holidayList=state.holidayList 
+            listBirthDay=state.listBirthDay 
+            leaveList=state.leaveList 
+            onRefresh=(_ => send(FetchLeaveList))
+          />
         </div>
       </div>
     </div>,

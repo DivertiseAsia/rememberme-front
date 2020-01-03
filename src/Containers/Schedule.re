@@ -24,7 +24,7 @@ type action =
 
 let component = ReasonReact.reducerComponent("Schedule");
 
-let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], _children) => {
+let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~onRefresh, _children) => {
   ...component,
   initialState: () => {
     loadState: Idle, 
@@ -122,30 +122,44 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], _children) => {
                         allSchedules 
                         |> List.sort((schedule1:schedule, schedule2:schedule) => compare(schedule1.date, schedule2.date))
                         |> List.mapi((i, schedule:schedule) => {
-                            let (datetime, schedules) = switch schedule.scheduleMenu {
-                            | Leave => ("", [schedule])
-                            | Holiday => (schedule.date |> RememberMeUtils.getDatetimeStr, [schedule])
-                            | Event => ("", [schedule])
-                            | Birthday => (schedule.date |> RememberMeUtils.getDatetimeStr(~formCurrentYear=true), [schedule])
-                            | _ => ("", [schedule])
+                            let datetime = switch schedule.scheduleMenu {
+                            | Leave => ""
+                            | Holiday => schedule.date |> RememberMeUtils.getDatetimeStr
+                            | Event => ""
+                            | Birthday => schedule.date |> RememberMeUtils.getDatetimeStr(~formCurrentYear=true)
+                            | _ => ""
                             };
                             <div key=("scheduler-all-" ++ schedule.title ++ "-" ++ (i |> string_of_int))>
-                            <SchedulerDate 
-                              datetime=datetime
-                              schedules=(
-                                List.append(
-                                  schedules, 
-                                  allSchedules 
-                                  |> List.find_all((s:schedule) => 
-                                    (s.date === schedule.date && s.title !== schedule.title))
+                              <SchedulerDate 
+                                datetime
+                                schedules=(
+                                  List.append(
+                                    [schedule], 
+                                    allSchedules 
+                                    |> List.find_all((s:schedule) => 
+                                      (s.date === schedule.date && s.title !== schedule.title)))
                                 )
-                              )
-                            />
+                              />
                             </div>
                         }) |> Array.of_list |> array
                       }
                     }
-                  | (Leave, _, _, allLeave) when allLeave !== [] => null
+                  | (Leave, _, _, allLeave) when allLeave !== [] => {
+                      <>
+                      {
+                        allLeave 
+                        |> List.sort((requestLeave1:leaveDetail, requestLeave2:leaveDetail) => compare(requestLeave1.fromDate, requestLeave2.fromDate))
+                        |> List.mapi((i, requestLeave:leaveDetail) => {
+                          <div key=("scheduler-leave-" ++ (i |> string_of_int))>
+                            <SchedulerDate 
+                              datetime=(requestLeave.fromDate |> Js.Date.valueOf |> RememberMeUtils.getDatetimeStr) 
+                              schedules=[(requestLeave |> RememberMeUtils.mapLeaveToSchedule)]
+                            />
+                          </div>
+                        }) |> Array.of_list |> array
+                      }
+                      </>
+                    }
                   | (Holiday, _, allHoliday, _) when allHoliday !== [] => {
                       <>
                       {
@@ -174,7 +188,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], _children) => {
               {string("Request Form")}
             </button>
           </>
-        | RequestForm => <RequestForm />
+        | RequestForm => <RequestForm onRefresh />
         | MyForm => <RequestLeavePanel />
         };
       }

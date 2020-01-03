@@ -25,8 +25,7 @@ let make = (
           />
         </div>
       </div>
-      {
-        schedules |> List.mapi((i, schedule:RememberMeType.schedule) => {
+      {schedules |> List.mapi((i, schedule:RememberMeType.schedule) => {
           let (backgroundColor, border) = switch schedule.scheduleMenu {
             | Leave => ((isToday ? " bg-schedule-leave" : " "), " border-schedule-leave")
             | Holiday => ((isToday ? " bg-schedule-holiday" : " "), " border-schedule-holiday")

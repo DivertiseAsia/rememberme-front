@@ -556,6 +556,18 @@ td{
   bottom: 0px;
 }
 
+.dropdown-request-leave {
+  width: 100%;
+  border-bottom: 1px solid;
+  border-radius: 0px;
+  .dropdown-toggle {
+    width: 100%;
+  }
+  a {
+    color: $main-color;
+  }
+}
+
 @media screen and (min-width: 768px) { 
   
   .col-calendar, .col-schedule {
@@ -605,7 +617,7 @@ td{
       margin-left: -8px;
     }
     .today .points {
-      margin-top: -32px !important;
+      margin-top: -25px !important;
     }
     .day span {
       font-size: 20px;
@@ -637,7 +649,7 @@ td{
     margin-left: -8px;
   }
   .today .points {
-    margin-top: -25px !important;
+    margin-top: -20px !important;
   }
 }
 

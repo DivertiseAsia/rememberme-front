@@ -16,7 +16,7 @@ type leaveDetail = {
   fromDate: Js.Date.t,
   toDate: Js.Date.t,
   reason: string,
-  approved: bool,
+  status: RememberMeType.requestStatus,
 };
 
 type birthDay = {
@@ -73,6 +73,14 @@ let mapLeaveTypeStr = typeInt =>
   | Sick => "Sick"
   | Personal => "Personal"
   };
+let mapRequestStatus = (requestStatus:int) => {
+  open RememberMeType;
+    switch requestStatus {
+    | 2 => Pending
+    | 0 => Fail
+    | _ => Approve
+    }
+  };
 
 module Decode = {
   open Json.Decode;
@@ -98,7 +106,7 @@ module Decode = {
     fromDate: json |> field("from_date", string) |> Js.Date.fromString,
     toDate: json |> field("to_date", string) |> Js.Date.fromString,
     reason: json |> field("reason", string),
-    approved: json |> field("is_approved", bool),
+    status: json |> field("status", int) |> mapRequestStatus,
   };
   let leaveList = json => json |> list(leaveDetail);
 };
