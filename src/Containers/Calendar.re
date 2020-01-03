@@ -210,12 +210,12 @@ let dates = (month, year, holidayList, birthDayList) => {
               <div className="points">
                 {holidayList 
                   |> List.find_all(holiday => holiday.date === jsDate) 
-                  |> List.map(holiday => <div className="point point-holiday" />) |> Array.of_list |> array
+                  |> List.map(holiday => <div key=("holiday-point-" ++ (idx |> string_of_int)) className="point point-holiday" />) |> Array.of_list |> array
                 }
                 {birthDayList 
                   |> List.filter(birthDay => birthDay.name !== "")
                   |> List.find_all(birthDay => RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)) 
-                  |> List.map(birthDay => <div className="point point-birthday" />) |> Array.of_list |> array
+                  |> List.map(birthDay => <div key=("birthday-point-" ++ (idx |> string_of_int)) className="point point-birthday" />) |> Array.of_list |> array
                 }
               </div> : null
            )
@@ -351,7 +351,7 @@ let make = (
         </div>
         <table className="table calendar-table">
           <thead>
-            <tr> {days |> List.map(day => <th> {day |> mapDayStr |> str} </th>) |> Array.of_list |> array} </tr>
+            <tr> {days |> List.mapi((i, day) => <th key=("day-" ++ (day |> mapDayStr))> {day |> mapDayStr |> str} </th>) |> Array.of_list |> array} </tr>
           </thead>
           <tbody> 
           /*{state.loadState === Loading ? 

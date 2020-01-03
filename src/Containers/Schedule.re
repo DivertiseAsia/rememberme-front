@@ -81,7 +81,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], _children) => {
           </div>
         </div>
         <div className="col-6 text-right">
-          <span className="cursor-pointer" onClick=(_ => send(TogglePopover(!state.showPopover))) >{string("Nameeeeee  e ")}</span>
+          <span className="cursor-pointer" onClick=(_ => send(TogglePopover(!state.showPopover))) >{string("Name")}</span>
           (state.showPopover ? <Popover onClose=(_ => send(TogglePopover(false))) /> : null)
         </div>
       </div>
@@ -93,7 +93,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], _children) => {
               <div className="col-12 menu-schedule-">
                 <div className="row">
                   {
-                    menus |> List.mapi((i, menu:scheduleMenu) => {
+                    menus |> List.map((menu:scheduleMenu) => {
                       <div key=("menu-" ++ (menu |> RememberMeUtils.scheduleMenuToStr)) className="col-3 p-2 text-center">
                         <button 
                           type_="button" 
@@ -121,7 +121,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], _children) => {
                         let allSchedules = List.append(holidaySchedules, birthdaySchedules);
                         allSchedules 
                         |> List.sort((schedule1:schedule, schedule2:schedule) => compare(schedule1.date, schedule2.date))
-                        |> List.map((schedule:schedule) => {
+                        |> List.mapi((i, schedule:schedule) => {
                             let (datetime, schedules) = switch schedule.scheduleMenu {
                             | Leave => ("", [schedule])
                             | Holiday => (schedule.date |> RememberMeUtils.getDatetimeStr, [schedule])
@@ -129,6 +129,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], _children) => {
                             | Birthday => (schedule.date |> RememberMeUtils.getDatetimeStr(~formCurrentYear=true), [schedule])
                             | _ => ("", [schedule])
                             };
+                            <div key=("scheduler-all-" ++ schedule.title ++ "-" ++ (i |> string_of_int))>
                             <SchedulerDate 
                               datetime=datetime
                               schedules=(
@@ -140,6 +141,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], _children) => {
                                 )
                               )
                             />
+                            </div>
                         }) |> Array.of_list |> array
                       }
                     }
@@ -150,8 +152,10 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], _children) => {
                         allHoliday 
                         |> List.filter(holiday => (holiday.date >= Js.Date.now()))
                         |> List.sort((holiday1:holiday, holiday2:holiday) => compare(holiday1.date, holiday2.date))
-                        |> List.map(holiday => {
-                          <SchedulerDate datetime=(holiday.date |> RememberMeUtils.getDatetimeStr) schedules=[(holiday |> RememberMeUtils.mapHolidayToSchedule)] />
+                        |> List.mapi((i, holiday:holiday) => {
+                          <div key=("scheduler-holiday-" ++ holiday.name ++ "-" ++ (i |> string_of_int))>
+                            <SchedulerDate datetime=(holiday.date |> RememberMeUtils.getDatetimeStr) schedules=[(holiday |> RememberMeUtils.mapHolidayToSchedule)] />
+                          </div>
                         }) |> Array.of_list |> array
                       }
                       </>
