@@ -121,8 +121,6 @@ let dates = (month, year, holidayList, birthDayList, leaveList) => {
           (),
         )
       ) |> Js.Date.valueOf;
-    leaveList 
-      |> List.map(leaveDetail => Js.log(leaveDetail.fromDate |> getDateOnlyDate)) |> ignore;
   Array.make(boxs, null)
   |> Array.mapi((idx, _) =>
        if (idx < startDayInWeek) {
@@ -141,7 +139,6 @@ let dates = (month, year, holidayList, birthDayList, leaveList) => {
            | date when today === date => "today"
            | _ => ""
            };
-           Js.log2((idx|> string_of_int) ++ ": ", jsDate |> Js.Date.fromFloat);
           
           
          <td key={idx |> string_of_int} className={j|day $classThisDay|j} style=(ReactDOMRe.Style.make(~paddingTop="20px", ()))>

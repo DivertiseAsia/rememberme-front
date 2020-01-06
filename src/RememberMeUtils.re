@@ -183,6 +183,24 @@ let mapLeaveToSchedule = (leaveDetail:RememberMeApi.leaveDetail) => {
   schedule
 };
 
+let splitRequestLeave= (leaveDetail:RememberMeApi.leaveDetail) => {
+  let dateFloat = (leaveDetail.toDate |> Js.Date.valueOf) -. (leaveDetail.fromDate |> Js.Date.valueOf);
+  switch dateFloat {
+  | x when x === 0. => [leaveDetail |> mapLeaveToSchedule]
+  | _ => 
+    Array.make(((dateFloat /. (1000.*.60.*.60.*.24.) +. 1.) |> int_of_float), ReasonReact.null)
+      |> Array.mapi((idx, _) => {
+        let date = leaveDetail.fromDate;
+        let schedule = {
+          scheduleMenu: Leave,
+          title: leaveDetail.user ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
+          date: ((leaveDetail.fromDate |> Js.Date.valueOf) +. ((1000.*.60.*.60.*.24.) *. (idx |> float_of_int))),
+        };
+        schedule
+      }) |> Array.to_list
+  }
+};
+
 let mapBirthDayToSchedule = (birthday:RememberMeApi.birthDay) => {
   let schedule = {
     scheduleMenu: Birthday,
