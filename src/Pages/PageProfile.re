@@ -78,9 +78,6 @@ let make = (_children) => {
             }
           }
         </div>
-        /*<div className="col-12 text-center link-login"> 
-          <a id="signup_login" href=Links.home className="text-blue"> {"Log In" |> string} </a>
-        </div>*/
       </div>
     </div>;
   },

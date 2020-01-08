@@ -49,6 +49,7 @@ let baseApiUrl = "https://rememberme-server.herokuapp.com";
 module URL = {
   let login = {j|$baseApiUrl/account/login/|j};
   let signUp = {j|$baseApiUrl/account/register/|j};
+  let password = {j|$baseApiUrl/password/change/|j};
   let profile = {j|$baseApiUrl/account/profile/|j};
   let birthday = {j|$baseApiUrl/account/birthday/|j};
   let leave = {j|$baseApiUrl/leave/|j};
@@ -135,6 +136,15 @@ let postLeave = (~token, ~payload, ~successAction, ~failAction) =>
   requestJsonResponseToAction(
     ~headers=buildHeader(~verb=Post, ~body=payload, token),
     ~url=URL.leave,
+    ~successAction,
+    ~failAction,
+  )
+  |> ignore;
+
+let removeRequestLeave = (~token, ~id,  ~successAction, ~failAction) =>
+  requestJsonResponseToAction(
+    ~headers=buildHeader(~verb=Delete, token),
+    ~url=(URL.leave ++ id ++ "/"),
     ~successAction,
     ~failAction,
   )

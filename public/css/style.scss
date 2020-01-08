@@ -284,8 +284,12 @@ td{
   font-size: 10px;
 }
 
-.btn-form-active, .btn-approve {
+.btn-form-active {
   background: $sub-btn-color !important;
+  color: white;
+}
+.btn-approve {
+  background: $main-btn-color !important;
   color: white;
 }
 

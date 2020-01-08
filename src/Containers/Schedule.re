@@ -230,7 +230,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
           />
         }
           
-        | MyForm => <RequestLeavePanel />
+        | MyForm => <RequestLeavePanel requestLeaves=userLeaveList onRefresh />
         };
       }
       

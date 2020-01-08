@@ -6,24 +6,37 @@ open Utils;
 type state = {
   loadState,
   formMenu,
-  requestLeaves: list(string),
 };
 
 type action =
-  | ChangeFormMenu(formMenu);
+  | ChangeFormMenu(formMenu)
+  | RemoveRequestLeave(string)
+  | RemoveRequestLeaveSuccess
+  | RemoveRequestLeaveFailed;
+
+let removeRequestLeave = (id, {send}) => {
+  removeRequestLeave(
+    ~token=Utils.getToken(),
+    ~id,
+    ~successAction=_ => send(RemoveRequestLeaveSuccess),
+    ~failAction=_ => send(RemoveRequestLeaveFailed),
+  );
+};
 
 let component = ReasonReact.reducerComponent("RequestLeavePanel");
 
-let make = (_children) => {
+let make = (~requestLeaves, ~onRefresh, _children) => {
   ...component,
   initialState: () => {
     loadState: Idle, 
     formMenu: MyForm,
-    requestLeaves: ["", ""],
   },
   reducer: (action, state) => {
     switch (action) {
     | ChangeFormMenu(formMenu) => Update({...state, formMenu})
+    | RemoveRequestLeave(id) => UpdateWithSideEffects({...state, loadState: Loading}, (self) => removeRequestLeave(id, self))
+    | RemoveRequestLeaveSuccess => onRefresh(); Update({...state, loadState: Succeed})
+    | RemoveRequestLeaveFailed => Update({...state, loadState: Failed})
     };
   },
   render: ({state, send}) => { 
@@ -61,10 +74,24 @@ let make = (_children) => {
         ()))
       >
         {
-          state.requestLeaves |> List.mapi((i, requestLeave) => {
+          requestLeaves
+          |> List.filter((requestLeaves:leaveDetail) => 
+            switch (state.formMenu) {
+            | MyForm => 
+              switch requestLeaves.status {
+              | Pending => true
+              | _ => false
+              }
+            | _ => 
+              switch requestLeaves.status {
+              | Pending => false
+              | _ => true
+              }
+            })
+          |> List.mapi((i, requestLeave) => {
             <div key=("RequestLeave-" ++ (i |> string_of_int)) className="container " style=(ReactDOMRe.Style.make(~width="100%", ()))>
               (i === 0 ? <hr /> : null)
-              <RequestLeave onCancel=(_ => ()) />
+              <RequestLeave requestLeave onCancel=(_ => send(RemoveRequestLeave(requestLeave.id))) />
               <hr />
             </div>
           }) |> Array.of_list |> array
