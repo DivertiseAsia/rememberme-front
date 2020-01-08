@@ -85,7 +85,13 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
           </div>
         </div>
         <div className="col-6 text-right">
-          <span className="cursor-pointer" onClick=(_ => send(TogglePopover(!state.showPopover))) >{string(profile.firstName)}</span>
+          <span className="cursor-pointer" onClick=(_ => send(TogglePopover(!state.showPopover))) >
+            {string(
+              switch profile {
+              | Some(p) => p.firstName
+              | None => ""
+              })}
+            </span>
           (state.showPopover ? <Popover onClose=(_ => send(TogglePopover(false))) /> : null)
         </div>
       </div>
@@ -210,7 +216,11 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
         | RequestForm => {
           let schedulesHoliday = holidayList |> List.map(holiday => holiday |> RememberMeUtils.mapHolidayToSchedule)
           let schedulesLeave = userLeaveList 
-            |> List.filter((requestLeave:leaveDetail) => requestLeave.user === profile.firstName)
+            |> List.filter((requestLeave:leaveDetail) => {
+                requestLeave.user === switch profile {
+                  | Some(p) => p.firstName
+                  | None => ""
+                  }})
             |> List.map((requestLeave:leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
             |> List.concat;
           let schedules = List.append(schedulesHoliday, schedulesLeave);

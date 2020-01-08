@@ -7,6 +7,7 @@ type birthDay = RememberMeApi.birthDay;
 
 type state = {
   loadState,
+  profile: option(profile),
   showRequestLeave: bool,
   showRequestUserLeave: bool,
   holidayList: list(holiday),
@@ -29,7 +30,10 @@ type action =
   | FetchLeaveListFail
   | FetchUserLeaveList
   | FetchUserLeaveListSuccess(list(leaveDetail))
-  | FetchUserLeaveListFail;
+  | FetchUserLeaveListFail
+  | FetchProfile
+  | FetchProfileSuccess(option(profile))
+  | FetchProfileFail;
 
 let fetchHolidayList = ({send}) => {
   fetchHoliday(
@@ -62,18 +66,26 @@ let fetchUserRequestLeave = ({send}) => {
   );
 };
 
+let fetchProfile = ({state, send}) => {
+  fetchProfile(
+    ~token=Utils.getToken(),
+    ~successAction=profile => send(FetchProfileSuccess(Some(profile))),
+    ~failAction=_ => send(FetchProfileFail),
+  );
+};
+
 let component = ReasonReact.reducerComponent("PageHome");
 
 let make = (
     ~isLoggedIn: bool, 
     ~month=(Js.Date.make() |> Js.Date.getMonth |> int_of_float),
     ~year=(Js.Date.make() |> Js.Date.getFullYear), 
-    ~profile,
     _children
   ) => {
   ...component,
   initialState: () => {
     loadState: Idle,
+    profile: None,
     showRequestLeave: false, 
     showRequestUserLeave: false,
     holidayList: [],
@@ -97,9 +109,13 @@ let make = (
     | FetchUserLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchUserRequestLeave)
     | FetchUserLeaveListSuccess(userLeaveList) => Update({...state, loadState: Succeed, userLeaveList})
     | FetchUserLeaveListFail => Update({...state, loadState: Failed, userLeaveList: []})
+    | FetchProfile => UpdateWithSideEffects({...state, loadState: Loading}, fetchProfile)
+    | FetchProfileSuccess(profile) => Update({...state, loadState: Succeed, profile})
+    | FetchProfileFail => Update({...state, loadState: Failed, profile: None})
     };
   },
   didMount: ({send}) => {
+    send(FetchProfile);
     send(FetchHolidayList);
     send(FetchBirthDayList);
     send(FetchLeaveList);
@@ -119,7 +135,7 @@ let make = (
         </div>
         <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
           <Schedule 
-            profile
+            profile=state.profile
             holidayList=state.holidayList 
             listBirthDay=state.listBirthDay 
             leaveList=state.leaveList 
