@@ -190,11 +190,11 @@ let splitRequestLeave= (leaveDetail:RememberMeApi.leaveDetail) => {
   | _ => 
     Array.make(((dateFloat /. (1000.*.60.*.60.*.24.) +. 1.) |> int_of_float), ReasonReact.null)
       |> Array.mapi((idx, _) => {
-        let date = leaveDetail.fromDate;
+        let date = ((leaveDetail.fromDate |> Js.Date.valueOf) +. ((1000.*.60.*.60.*.24.) *. (idx |> float_of_int)));
         let schedule = {
           scheduleMenu: Leave,
           title: leaveDetail.user ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
-          date: ((leaveDetail.fromDate |> Js.Date.valueOf) +. ((1000.*.60.*.60.*.24.) *. (idx |> float_of_int))),
+          date,
         };
         schedule
       }) |> Array.to_list
@@ -231,4 +231,9 @@ let setStrToJsDate = (datetime:string) => {/* xxxx-xx-xx */
     ~month=(datetimeSplited[1] |> float_of_string),
     ~date=(datetimeSplited[2] |> float_of_string), 
   ());
+};
+
+let validateWeekend = (datetime:Js.Date.t) => {
+  let day = datetime |> Js.Date.getDay;
+  (day === 0. || day === 6.)
 };

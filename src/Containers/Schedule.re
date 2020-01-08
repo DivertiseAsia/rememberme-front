@@ -24,7 +24,7 @@ type action =
 
 let component = ReasonReact.reducerComponent("Schedule");
 
-let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~onRefresh, _children) => {
+let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~onRefresh, ~profile, _children) => {
   ...component,
   initialState: () => {
     loadState: Idle, 
@@ -40,6 +40,11 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~onRefresh, _child
     };
   },
   render: ({state, send}) => {
+    let leaveSchedules =
+        leaveList 
+        |> List.map((requestLeave:leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
+        |> List.concat
+        |> List.sort((schedule1:schedule, schedule2:schedule) => compare(schedule1.date, schedule2.date));
     <div 
       className="container-fluid schedule-container"
       style=(ReactDOMRe.Style.make(
@@ -81,7 +86,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~onRefresh, _child
           </div>
         </div>
         <div className="col-6 text-right">
-          <span className="cursor-pointer" onClick=(_ => send(TogglePopover(!state.showPopover))) >{string("Name")}</span>
+          <span className="cursor-pointer" onClick=(_ => send(TogglePopover(!state.showPopover))) >{string(profile.firstName)}</span>
           (state.showPopover ? <Popover onClose=(_ => send(TogglePopover(false))) /> : null)
         </div>
       </div>
@@ -110,22 +115,22 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~onRefresh, _child
               <div className="col-12 content-schedule- p-0">
                 {
                   /* Filter */
-                  switch (state.scheduleMenu, listBirthDay, holidayList, leaveList) {
-                  | (All, allBirthDay, allHoliday, allLeave) when (allHoliday !== [] || allBirthDay !== []) => {
+                  switch (state.scheduleMenu, listBirthDay, holidayList, leaveSchedules) {
+                  | (All, allBirthDay, allHoliday, allLeave) when (allHoliday !== [] && allBirthDay !== [] && allLeave !== []) => {
                       {
                         let birthdaySchedules = 
                           allBirthDay 
                           |> List.filter((birthDay) => birthDay.name !== "")
                           |> List.map(birthDay => birthDay |> RememberMeUtils.mapBirthDayToSchedule);
                         let holidaySchedules = allHoliday |> List.map(holiday => holiday |> RememberMeUtils.mapHolidayToSchedule);
-                        let allSchedules = List.append(holidaySchedules, birthdaySchedules);
+                        let allSchedules = List.append(holidaySchedules, List.append(leaveSchedules, birthdaySchedules));
                         allSchedules 
                         |> List.sort((schedule1:schedule, schedule2:schedule) => compare(schedule1.date, schedule2.date))
                         |> List.mapi((i, schedule:schedule) => {
                             let datetime = switch schedule.scheduleMenu {
-                            | Leave => ""
+                            | Leave => schedule.date |> RememberMeUtils.getDatetimeStr
                             | Holiday => schedule.date |> RememberMeUtils.getDatetimeStr
-                            | Event => ""
+                            | Event => schedule.date |> RememberMeUtils.getDatetimeStr
                             | Birthday => schedule.date |> RememberMeUtils.getDatetimeStr(~formCurrentYear=true)
                             | _ => ""
                             };
@@ -147,15 +152,27 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~onRefresh, _child
                   | (Leave, _, _, allLeave) when allLeave !== [] => {
                       <>
                       {
-                        allLeave 
-                        |> List.sort((requestLeave1:leaveDetail, requestLeave2:leaveDetail) => compare(requestLeave1.fromDate, requestLeave2.fromDate))
-                        |> List.mapi((i, requestLeave:leaveDetail) => {
-                          <div key=("scheduler-leave-" ++ (i |> string_of_int))>
-                            <SchedulerDate 
-                              datetime=(requestLeave.fromDate |> Js.Date.valueOf |> RememberMeUtils.getDatetimeStr) 
-                              schedules=[(requestLeave |> RememberMeUtils.mapLeaveToSchedule)]
-                            />
-                          </div>
+                        let lastEndDate = [|0.|];
+                        leaveSchedules |> List.mapi((i, schedule:schedule) => {
+                          switch schedule.date {
+                          | date when date >= lastEndDate[0] => {
+                              let schedules = 
+                                List.append(
+                                  [schedule], 
+                                  leaveSchedules 
+                                  |> List.find_all((s:schedule) => 
+                                    (s.title !== schedule.title && s.date === schedule.date)
+                                  ));
+                              lastEndDate[0] = (schedules |> List.rev |> List.hd).date;
+                              <div key=("scheduler-leave-" ++ (i |> string_of_int))>
+                                <SchedulerDate 
+                                  datetime=(schedule.date |> RememberMeUtils.getDatetimeStr) 
+                                  schedules=schedules
+                                />
+                              </div>
+                            }
+                          | _ => null
+                          }
                         }) |> Array.of_list |> array
                       }
                       </>
@@ -188,7 +205,21 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~onRefresh, _child
               {string("Request Form")}
             </button>
           </>
-        | RequestForm => <RequestForm onRefresh />
+        | RequestForm => {
+          let schedulesHoliday = holidayList |> List.map(holiday => holiday |> RememberMeUtils.mapHolidayToSchedule)
+          let schedulesLeave = leaveList 
+            |> List.filter((requestLeave:leaveDetail) => requestLeave.user === profile.firstName)
+            |> List.map((requestLeave:leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
+            |> List.concat;
+          let schedules = List.append(schedulesHoliday, schedulesLeave);
+          schedulesLeave 
+          |> List.sort((schedule1:schedule, schedule2:schedule) => compare(schedule1.date, schedule2.date));
+          <RequestForm 
+            onRefresh 
+            schedules
+          />
+        }
+          
         | MyForm => <RequestLeavePanel />
         };
       }

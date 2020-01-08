@@ -4,7 +4,7 @@ let component = ReasonReact.statelessComponent("PageProfile");
 
 let regex = Js.Re.fromStringWithFlags("next=([^&#]*)", ~flags="g");
 
-let make = _children => {
+let make = (~profile, _children) => {
   ...component,
   render: _self => {
     <div className="auth-page profile-page container-fluid">

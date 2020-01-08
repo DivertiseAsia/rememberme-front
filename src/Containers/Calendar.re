@@ -18,17 +18,9 @@ type state = {
   loadState,
   month:RememberMeType.month,
   year: float,
-  holidayList: list(holiday),
-  listBirthDay: list(birthDay),
 };
 
 type action =
-  | FetchHolidayList
-  | FetchHolidayListSuccess(list(holiday))
-  | FetchHolidayListFail
-  | FetchBirthDayList
-  | FetchBirthDayListSuccess(list(birthDay))
-  | FetchBirthDayListFail
   | NextMonth
   | PreviousMonth
   | OnChangeMonth(RememberMeType.month)
@@ -139,13 +131,14 @@ let dates = (month, year, holidayList, birthDayList, leaveList) => {
            | date when today === date => "today"
            | _ => ""
            };
-          
-          
+        let schedulesLeave = leaveList 
+          |> List.map((requestLeave:leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
+          |> List.concat;
          <td key={idx |> string_of_int} className={j|day $classThisDay|j} style=(ReactDOMRe.Style.make(~paddingTop="20px", ()))>
            <div className="circle-today" />
            <span className=(String.length(date |> string_of_int) === 1 ? "single-char" : "")>{date |> string_of_int |> str}</span>
            (List.length(holidayList |> List.find_all(holiday => holiday.date === jsDate)) > 0 ||
-            List.length(leaveList |> List.find_all(leaveDetail =>(leaveDetail.fromDate |> getDateOnlyDate |> Js.Date.valueOf) === jsDate)) > 0 ||
+            List.length(schedulesLeave |> List.find_all((schedule:RememberMeType.schedule) => (schedule.date) === jsDate)) > 0 ||
             List.length(birthDayList |> List.find_all(birthDay => RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int))) > 0 ?
               <div className="points">
                 {holidayList 
@@ -157,9 +150,9 @@ let dates = (month, year, holidayList, birthDayList, leaveList) => {
                   |> List.find_all(birthDay => RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)) 
                   |> List.map(birthDay => <div key=("birthday-point-" ++ (idx |> string_of_int)) className="point point-birthday" />) |> Array.of_list |> array
                 }
-                {leaveList 
-                  |> List.find_all((leaveDetail: RememberMeApi.leaveDetail) => (leaveDetail.fromDate |> getDateOnlyDate |> Js.Date.valueOf) === jsDate) 
-                  |> List.map(leaveDetail => <div key=("leave-point-" ++ (idx |> string_of_int)) className="point point-leave" />) |> Array.of_list |> array
+                {schedulesLeave
+                  |> List.filter((schedule: RememberMeType.schedule) => schedule.date === jsDate) 
+                  |> List.map(schedule => <div className="point point-leave" />) |> Array.of_list |> array
                 }
               </div> : null
            )
@@ -177,27 +170,14 @@ let dates = (month, year, holidayList, birthDayList, leaveList) => {
   |> array;
 };
 
-let fetchHolidayList = ({send}) => {
-  fetchHoliday(
-    ~successAction=holidayList => send(FetchHolidayListSuccess(holidayList)),
-    ~failAction=_ => send(FetchHolidayListFail),
-  );
-};
-
-let fetchBirthDay = ({send}) => {
-  fetchBirthDay(
-    ~token=Utils.getToken(),
-    ~successAction=holidayList => send(FetchBirthDayListSuccess(holidayList)),
-    ~failAction=_ => send(FetchBirthDayListFail),
-  );
-};
-
 let component = ReasonReact.reducerComponent("Calendar");
 
 let make = (
     ~isMini=false, 
     ~month=(Js.Date.make() |> Js.Date.getMonth |> int_of_float), 
     ~year=(Js.Date.make() |> Js.Date.getFullYear),
+    ~holidayList=[],
+    ~listBirthDay=[],
     ~leaveList=[],
     _children
   ) => {
@@ -206,18 +186,9 @@ let make = (
     loadState: Idle,
     month: month |> float_of_int |> getMonthType,
     year: year,
-    holidayList: [],
-    listBirthDay: [],
   },
-  didMount: ({send}) => {send(FetchHolidayList)send(FetchBirthDayList)},
   reducer: (action, state) => {
     switch (action) {
-    | FetchHolidayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchHolidayList)
-    | FetchHolidayListSuccess(holidayList) => Update({...state, loadState: Succeed, holidayList})
-    | FetchHolidayListFail => Update({...state, loadState: Failed, holidayList: []})
-    | FetchBirthDayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchBirthDay)
-    | FetchBirthDayListSuccess(listBirthDay) => Update({...state, loadState: Succeed, listBirthDay})
-    | FetchBirthDayListFail => Update({...state, loadState: Failed, listBirthDay: []})
     | NextMonth =>
       switch (state.month) {
       | Dec => Update({...state, month: Jan, year: state.year +. 1.})
@@ -303,8 +274,8 @@ let make = (
             (isMini ? (month |> float_of_int |> getMonthType) : state.month) 
             |> getMonthFloat, 
             targetYear, 
-            state.holidayList, 
-            state.listBirthDay,
+            holidayList, 
+            listBirthDay,
             leaveList)
         }
         </tbody>

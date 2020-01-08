@@ -56,6 +56,7 @@ let make = (
     ~isLoggedIn: bool, 
     ~month=(Js.Date.make() |> Js.Date.getMonth |> int_of_float),
     ~year=(Js.Date.make() |> Js.Date.getFullYear), 
+    ~profile,
     _children
   ) => {
   ...component,
@@ -78,7 +79,7 @@ let make = (
     | FetchBirthDayListSuccess(listBirthDay) => Update({...state, loadState: Succeed, listBirthDay})
     | FetchBirthDayListFail => Update({...state, loadState: Failed, listBirthDay: []})
     | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchAllRequestLeave)
-    | FetchLeaveListSuccess(leaveList) => Js.log(leaveList);Update({...state, loadState: Succeed, leaveList})
+    | FetchLeaveListSuccess(leaveList) => Update({...state, loadState: Succeed, leaveList})
     | FetchLeaveListFail => Update({...state, loadState: Failed, leaveList: []})
     };
   },
@@ -91,10 +92,17 @@ let make = (
     <div className="home-page container-fluid">
       <div className="row row-main" style=(ReactDOMRe.Style.make(~height="100%", ()))>
         <div className="col-12 col-sm-12 col-md-7 col-lg-8 col-xl-8 col-calendar"> 
-          <Calendar month year leaveList=state.leaveList />
+          <Calendar 
+            month 
+            year 
+            holidayList=state.holidayList 
+            listBirthDay=state.listBirthDay 
+            leaveList=state.leaveList 
+          />
         </div>
         <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
           <Schedule 
+            profile
             holidayList=state.holidayList 
             listBirthDay=state.listBirthDay 
             leaveList=state.leaveList 

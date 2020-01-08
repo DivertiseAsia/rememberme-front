@@ -28,7 +28,7 @@ type action =
   | OnSubmitRequestLeaveSuccess
   | OnSubmitRequestLeaveFailed;
 
-let dateForm = (~title="Start", ~targetDate, ~targetMonth, ~targetYear, ~onChangeDate) => {
+let dateForm = (~schedules=[], ~title="Start", ~targetDate, ~targetMonth, ~targetYear, ~onChangeDate) => {
   <>
     <div className="col-12 col-md-2 pt-3">
       {string(title)}
@@ -36,7 +36,7 @@ let dateForm = (~title="Start", ~targetDate, ~targetMonth, ~targetYear, ~onChang
     <div className="col-3 col-md-3 p-1">
       <div className="dropdown show dropdown-request-leave">
         {cloneElement(
-              <a className="btn dropdown-toggle" href="#" role="button" id="dropdown-day">
+              <a className="btn dropdown-toggle" role="button" id="dropdown-day">
                 {string(targetDate |> int_of_float |> string_of_int)}
               </a>,
             ~props={"data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"},
@@ -64,11 +64,18 @@ let dateForm = (~title="Start", ~targetDate, ~targetMonth, ~targetYear, ~onChang
                     )
                   ) |> Js.Date.valueOf;
               let datetime = Js.Date.makeWithYMD(~year=targetYear, ~month=targetMonth, ~date=((idx + 1) |> float_of_int), ());
-              let isValidate = ((datetime |> Js.Date.getMonth) === targetMonth && (datetime |> Js.Date.valueOf) >= today);
+              let isLeaveDay = switch (schedules |> List.find(schedule => schedule.date === (datetime |> Js.Date.valueOf))) {
+                | _leaveDay => true
+                | exception Not_found => false
+                };
+              let isValidate = ((datetime |> Js.Date.getMonth) === targetMonth && 
+                              (datetime |> Js.Date.valueOf) >= today && 
+                              !RememberMeUtils.validateWeekend(datetime) &&
+                              !isLeaveDay
+                              );
               (isValidate ?
                 <a 
                   className="dropdown-item" 
-                  href="#"
                   onClick=(_ => onChangeDate(datetime |> Js.Date.valueOf))
                 >
                   {string((idx + 1 |> string_of_int))}
@@ -82,7 +89,7 @@ let dateForm = (~title="Start", ~targetDate, ~targetMonth, ~targetYear, ~onChang
     <div className="col-6 col-md-4 p-1">
       <div className="dropdown show dropdown-request-leave">
         {cloneElement(
-            <a className="btn dropdown-toggle" href="#" role="button" id="dropdown-month">
+            <a className="btn dropdown-toggle" role="button" id="dropdown-month">
               {string(targetMonth |> int_of_float |> RememberMeUtils.mapFullMonthInt)}
             </a>,
             ~props={"data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"},
@@ -94,7 +101,6 @@ let dateForm = (~title="Start", ~targetDate, ~targetMonth, ~targetYear, ~onChang
               <a 
                 key=("input-month-" ++ (i |> string_of_int)) 
                 className="dropdown-item" 
-                href="#"
                 onClick=(_ => {
                   let datetime = Js.Date.makeWithYMD(~year=targetYear, ~month=(i |> float_of_int), ~date=targetDate, ());
                   onChangeDate(datetime |> Js.Date.valueOf);
@@ -110,7 +116,7 @@ let dateForm = (~title="Start", ~targetDate, ~targetMonth, ~targetYear, ~onChang
     <div className="col-3 col-md-3 p-1">
       <div className="dropdown show dropdown-request-leave">
         {cloneElement(
-              <a className="btn dropdown-toggle" href="#" role="button" id="dropdown-year">
+              <a className="btn dropdown-toggle" role="button" id="dropdown-year">
                 {string(targetYear |> int_of_float |> string_of_int)}
               </a>
             ,
@@ -123,7 +129,6 @@ let dateForm = (~title="Start", ~targetDate, ~targetMonth, ~targetYear, ~onChang
               <a 
                 key=("input-year-" ++ (i |> string_of_int)) 
                 className="dropdown-item" 
-                href="#"
                 onClick=(_ => {
                   let datetime = Js.Date.makeWithYMD(~year, ~month=targetMonth, ~date=targetDate, ());
                   onChangeDate(datetime |> Js.Date.valueOf);
@@ -162,7 +167,7 @@ let onSubmit = ({state, send}) => {
 
 let component = ReasonReact.reducerComponent("RequestForm");
 
-let make = (~onRefresh, _children) => {
+let make = (~onRefresh, ~schedules=[], _children) => {
   ...component,
   initialState: () => {
     loadState: Idle, 
@@ -229,6 +234,7 @@ let make = (~onRefresh, _children) => {
         <div className="row mt-5 pl-2 pr-2"> 
           <div className="timeline-point timeline-start" />
           {dateForm(
+            ~schedules,
             ~title="Start", 
             ~targetDate=(state.startDate |> Js.Date.fromFloat |> Js.Date.getDate), 
             ~targetMonth=(state.startDate |> Js.Date.fromFloat |> Js.Date.getMonth), 
@@ -239,6 +245,7 @@ let make = (~onRefresh, _children) => {
         <div className="row mt-4 mb-5 pl-2 pr-2"> 
           <div className="timeline-point timeline-end" />
           {dateForm(
+            ~schedules,
             ~title="End", 
             ~targetDate=(state.endDate |> Js.Date.fromFloat |> Js.Date.getDate), 
             ~targetMonth=(state.endDate |> Js.Date.fromFloat |> Js.Date.getMonth), 

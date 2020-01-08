@@ -1,4 +1,6 @@
 open ReasonReact;
+open RememberMeType;
+open RememberMeApi;
 
 let str = ReasonReact.string;
 
@@ -16,24 +18,81 @@ let years = [
 ];
 
 type state = {
+  loadState,
   openDropdown: bool,
   targetYear: float,
+  holidayList: list(holiday),
+  listBirthDay: list(birthDay),
+  leaveList: list(leaveDetail),
 };
 
 type action =
   | ToggleDropdown(bool)
-  | ChangeYear(float);
+  | ChangeYear(float)
+  | FetchHolidayList
+  | FetchHolidayListSuccess(list(holiday))
+  | FetchHolidayListFail
+  | FetchBirthDayList
+  | FetchBirthDayListSuccess(list(birthDay))
+  | FetchBirthDayListFail
+  | FetchLeaveList
+  | FetchLeaveListSuccess(list(leaveDetail))
+  | FetchLeaveListFail;
+
+let fetchHolidayList = ({send}) => {
+  fetchHoliday(
+    ~successAction=holidayList => send(FetchHolidayListSuccess(holidayList)),
+    ~failAction=_ => send(FetchHolidayListFail),
+  );
+};
+
+let fetchBirthDay = ({send}) => {
+  fetchBirthDay(
+    ~token=Utils.getToken(),
+    ~successAction=birthdayList => send(FetchBirthDayListSuccess(birthdayList)),
+    ~failAction=_ => send(FetchBirthDayListFail),
+  );
+};
+
+let fetchAllRequestLeave = ({send}) => {
+  fetchAllLeaves(
+    ~token=Utils.getToken(),
+    ~successAction=leaveList => send(FetchLeaveListSuccess(leaveList)),
+    ~failAction=_ => send(FetchLeaveListFail),
+  );
+};
 
 let component = ReasonReact.reducerComponent("PageAllMonth");
 
 let make = (_children) => {
   ...component,
-  initialState: () => {openDropdown: false, targetYear: (Js.Date.make() |> Js.Date.getFullYear)},
+  initialState: () => {
+    loadState: Idle,
+    openDropdown: false, 
+    targetYear: (Js.Date.make() |> Js.Date.getFullYear),
+    holidayList: [],
+    listBirthDay: [],
+    leaveList: [],
+  },
   reducer: (action, state) => {
     switch (action) {
     | ToggleDropdown(openDropdown) => Update({...state, openDropdown})
     | ChangeYear(targetYear) => Update({...state, targetYear})
+    | FetchHolidayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchHolidayList)
+    | FetchHolidayListSuccess(holidayList) => Update({...state, loadState: Succeed, holidayList})
+    | FetchHolidayListFail => Update({...state, loadState: Failed, holidayList: []})
+    | FetchBirthDayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchBirthDay)
+    | FetchBirthDayListSuccess(listBirthDay) => Update({...state, loadState: Succeed, listBirthDay})
+    | FetchBirthDayListFail => Update({...state, loadState: Failed, listBirthDay: []})
+    | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchAllRequestLeave)
+    | FetchLeaveListSuccess(leaveList) => Update({...state, loadState: Succeed, leaveList})
+    | FetchLeaveListFail => Update({...state, loadState: Failed, leaveList: []})
     };
+  },
+  didMount: ({send}) => {
+    send(FetchHolidayList);
+    send(FetchBirthDayList);
+    send(FetchLeaveList);
   },
   render: ({state, send}) =>
     <div className="allmonth-page container-fluid">
@@ -72,7 +131,14 @@ let make = (_children) => {
         {
           months |> List.mapi((i, month) => {
             <div key=("month-" ++ (i |> string_of_int)) className="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 mb-3"> 
-              <Calendar isMini=true month=month year=state.targetYear />
+              <Calendar 
+                isMini=true 
+                month=month 
+                year=state.targetYear 
+                holidayList=state.holidayList 
+                listBirthDay=state.listBirthDay 
+                leaveList=state.leaveList 
+              />
             </div>
           }) |> Array.of_list |> array
         }
