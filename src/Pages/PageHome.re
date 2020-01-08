@@ -12,6 +12,7 @@ type state = {
   holidayList: list(holiday),
   listBirthDay: list(birthDay),
   leaveList: list(leaveDetail),
+  userLeaveList: list(leaveDetail),
 };
 
 type action =
@@ -25,7 +26,10 @@ type action =
   | FetchBirthDayListFail
   | FetchLeaveList
   | FetchLeaveListSuccess(list(leaveDetail))
-  | FetchLeaveListFail;
+  | FetchLeaveListFail
+  | FetchUserLeaveList
+  | FetchUserLeaveListSuccess(list(leaveDetail))
+  | FetchUserLeaveListFail;
 
 let fetchHolidayList = ({send}) => {
   fetchHoliday(
@@ -50,6 +54,14 @@ let fetchAllRequestLeave = ({send}) => {
   );
 };
 
+let fetchUserRequestLeave = ({send}) => {
+  fetchUserLeaves(
+    ~token=Utils.getToken(),
+    ~successAction=leaveList => send(FetchUserLeaveListSuccess(leaveList)),
+    ~failAction=_ => send(FetchUserLeaveListFail),
+  );
+};
+
 let component = ReasonReact.reducerComponent("PageHome");
 
 let make = (
@@ -67,6 +79,7 @@ let make = (
     holidayList: [],
     listBirthDay: [],
     leaveList: [],
+    userLeaveList: [],
   },
   reducer: (action, state) => {
     switch (action) {
@@ -81,12 +94,16 @@ let make = (
     | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchAllRequestLeave)
     | FetchLeaveListSuccess(leaveList) => Update({...state, loadState: Succeed, leaveList})
     | FetchLeaveListFail => Update({...state, loadState: Failed, leaveList: []})
+    | FetchUserLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchUserRequestLeave)
+    | FetchUserLeaveListSuccess(userLeaveList) => Update({...state, loadState: Succeed, userLeaveList})
+    | FetchUserLeaveListFail => Update({...state, loadState: Failed, userLeaveList: []})
     };
   },
   didMount: ({send}) => {
     send(FetchHolidayList);
     send(FetchBirthDayList);
     send(FetchLeaveList);
+    send(FetchUserLeaveList);
   },
   render: ({state, send}) =>
     <div className="home-page container-fluid">
@@ -106,7 +123,8 @@ let make = (
             holidayList=state.holidayList 
             listBirthDay=state.listBirthDay 
             leaveList=state.leaveList 
-            onRefresh=(_ => send(FetchLeaveList))
+            userLeaveList=state.userLeaveList
+            onRefresh=(_ => {send(FetchLeaveList);send(FetchUserLeaveList);})
           />
         </div>
       </div>

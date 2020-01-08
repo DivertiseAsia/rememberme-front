@@ -188,7 +188,7 @@ let make = (~onRefresh, ~schedules=[], _children) => {
     | OnSubmitRequestLeaveSuccess => 
         UpdateWithSideEffects({...state, loadState: Succeed, startDate: Js.Date.now(), endDate: Js.Date.now(), note: ""}, 
         _ => onRefresh())
-    | OnSubmitRequestLeaveFailed => Update({...state, loadState: Failed})
+    | OnSubmitRequestLeaveFailed => Update({...state, loadState: Failed, note: ""})
     };
   },
   render: ({state, send}) =>
@@ -327,6 +327,7 @@ let make = (~onRefresh, ~schedules=[], _children) => {
     </div>
     (state.showPopup ? 
       <PopupRequestForm 
+        isSick=(state.formType === Sick)
         onConfirm=(_ => {
           send(TogglePopup(false));
           send(OnSubmitRequestLeave);

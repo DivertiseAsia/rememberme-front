@@ -1,4 +1,5 @@
 open ReasonReact;
+open RememberMeApi;
 
 let component = ReasonReact.statelessComponent("PageProfile");
 
@@ -24,7 +25,7 @@ let make = (~profile, _children) => {
           </div>
         </div>
         <div className="col-6 text-right">
-          <span className="cursor-pointer">{string("Nameeeeee  e ")}</span>
+          <span className="cursor-pointer">{string(profile.firstName)}</span>
         </div>
         <div className="col-12 text-center">
           <h2 className="m-auto">{string("My Profile")}</h2>
