@@ -1,7 +1,6 @@
 open ReasonReact;
 open RememberMeType;
 open RememberMeApi;
-open Utils;
 
 let menus = [All, Leave, Holiday, Event];
 
@@ -128,12 +127,12 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
                         allSchedules 
                         |> List.sort((schedule1:schedule, schedule2:schedule) => compare(schedule1.date, schedule2.date))
                         |> List.mapi((i, schedule:schedule) => {
-                            let datetime = switch schedule.scheduleMenu {
-                            | Birthday => schedule.date |> RememberMeUtils.getDatetimeStr(~formCurrentYear=true)
-                            | _ => schedule.date |> RememberMeUtils.getDatetimeStr
-                            };
                             switch schedule.date {
-                              | date when date >= lastEndDate[0] => {
+                              | date when date > lastEndDate[0] => {
+                                  let datetime = switch schedule.scheduleMenu {
+                                  | Birthday => schedule.date |> RememberMeUtils.getDatetimeStr(~formCurrentYear=true)
+                                  | _ => schedule.date |> RememberMeUtils.getDatetimeStr
+                                  };
                                   let schedules = List.append(
                                     [schedule], 
                                     allSchedules 
@@ -158,7 +157,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
                         let lastEndDate = [|0.|];
                         leaveSchedules |> List.mapi((i, schedule:schedule) => {
                           switch schedule.date {
-                          | date when date >= lastEndDate[0] => {
+                          | date when date > lastEndDate[0] => {
                               let schedules = 
                                 List.append(
                                   [schedule], 
@@ -215,8 +214,6 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
             |> List.map((requestLeave:leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
             |> List.concat;
           let schedules = List.append(schedulesHoliday, schedulesLeave);
-          schedulesLeave 
-          |> List.sort((schedule1:schedule, schedule2:schedule) => compare(schedule1.date, schedule2.date));
           <RequestForm 
             onRefresh 
             schedules

@@ -4,7 +4,6 @@ open Utils;
 
 let str = ReasonReact.string;
 
-type username = string;
 type email = string;
 type password = string;
 type confirmPassword = password;
@@ -19,7 +18,6 @@ type state = {
   confirmPassword,
   firstName,
   lastName,
-  userName:string,
   birthDate,
   err: option(string),
 };
@@ -33,7 +31,6 @@ type action =
   | SetConfirmPassword(string)
   | SetFirstName(firstName)
   | SetLastName(lastName)
-  | SetUsername(string)
   | SetBirthDate(birthDate);
 
 let signup = ({send, state}) => {
@@ -65,17 +62,16 @@ let getClassName = (~extraStyle="", ~invalid=false, ()) => {
 
 let component = ReasonReact.reducerComponent("ProfileContainer");
 
-let make = _children => {
+let make = (~profile:profile, _children) => {
   ...component,
   initialState: () => {
     loading: false,
-    email: "",
+    email: profile.email,
     password: "",
     confirmPassword: "",
-    firstName: "",
-    lastName: "",
-    userName: "",
-    birthDate: "",
+    firstName: profile.firstName,
+    lastName: profile.lastName,
+    birthDate: profile.birthDate |> Js.Date.valueOf |> RememberMeUtils.getDateStrRequestLeave,
     err: None,
   },
   reducer: (action, state) => {
@@ -90,7 +86,6 @@ let make = _children => {
     | SetBirthDate(birthDate) => Update({...state, birthDate})
     | SetFirstName(firstName) => Update({...state, firstName})
     | SetLastName(lastName) => Update({...state, lastName})
-    | SetUsername(userName) => Update({...state, userName})
     };
   },
   render: ({state, send}) => {
@@ -152,18 +147,17 @@ let make = _children => {
               id="birthday"
               className={getClassName(
                 ~extraStyle="form-control-smaller",
-                ~invalid={state.lastName |> isStringEmpty},
+                ~invalid={state.birthDate |> isStringEmpty},
                 (),
               )}
               placeholder="Birthday"
-              value={state.lastName}
+              value={state.birthDate}
               onChange={e => send(SetBirthDate(valueFromEvent(e)))}
             />
             <div className="col-12 p-0">
               <h6>{string("Change Password")}</h6>
               <input
                 type_="password"
-                id="inputPassword"
                 className={getClassName(
                   ~extraStyle="form-control-small",
                   ~invalid={!checkPassword(state.password)},
@@ -175,7 +169,6 @@ let make = _children => {
               />
               <input
                 type_="password"
-                id="inputPassword"
                 className={getClassName(
                   ~extraStyle="form-control-small",
                   ~invalid={!checkPassword(state.password)},
@@ -187,7 +180,6 @@ let make = _children => {
               />
               <input
                 type_="password"
-                id="inputConfirmPassword"
                 className={getClassName(
                   ~extraStyle="form-control-small",
                   ~invalid=!{checkIsSamePassword(~password=state.password, ~confirmPassword=state.confirmPassword)},

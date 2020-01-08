@@ -33,7 +33,7 @@ let make = (~profile, _children) => {
       </div>
       <div className="row row-profile-container justify-content-center"> 
         <div className="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-4"> 
-          <ProfileContainer />
+          <ProfileContainer profile />
         </div>
         /*<div className="col-12 text-center link-login"> 
           <a id="signup_login" href=Links.home className="text-blue"> {"Log In" |> string} </a>
