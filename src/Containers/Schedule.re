@@ -21,9 +21,38 @@ type action =
   | ChangeContentForm(contentForm)
   | TogglePopover(bool);
 
+let findAllSchedules = (schedules, key, today) => {
+  let lastEndDate = [|0.|];
+  schedules 
+  |> List.filter((schedule:schedule) => (schedule.date >= today))
+  |> List.sort((schedule1:schedule, schedule2:schedule) => compare(schedule1.date, schedule2.date))
+  |> List.mapi((i, schedule:schedule) => {
+    switch schedule.date {
+    | date when date > lastEndDate[0] => {
+        let schedules = 
+          List.append(
+            [schedule], 
+            schedules 
+            |> List.find_all((s:schedule) => 
+              (s.title !== schedule.title && s.date === schedule.date)
+            ));
+        lastEndDate[0] = (schedules |> List.rev |> List.hd).date;
+        <div key=(key ++ (i |> string_of_int))>
+          <SchedulerDate 
+            isToday=(schedule.date === today)
+            datetime=(schedule.date |> RememberMeUtils.getDatetimeStr) 
+            schedules
+          />
+        </div>
+      }
+    | _ => null
+    }
+  }) |> Array.of_list |> array
+};
+
 let component = ReasonReact.reducerComponent("Schedule");
 
-let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[], ~onRefresh, ~profile, _children) => {
+let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[], ~eventList=[], ~onRefresh, ~profile, _children) => {
   ...component,
   initialState: () => {
     loadState: Idle, 
@@ -89,7 +118,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
             {string(
               switch profile {
               | Some(p) => p.firstName
-              | None => ""
+              | None => "-"
               })}
             </span>
           (state.showPopover ? <Popover onClose=(_ => send(TogglePopover(false))) /> : null)
@@ -120,8 +149,9 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
               <div className="col-12 content-schedule- p-0">
                 {
                   /* Filter */
-                  switch (state.scheduleMenu, listBirthDay, holidayList, leaveSchedules) {
-                  | (All, allBirthDay, allHoliday, allLeave) when (allHoliday !== [] && allBirthDay !== [] && allLeave !== []) => {
+                  let today = Js.Date.now() |> Js.Date.fromFloat |> RememberMeApi.getDateOnlyDate |. Js.Date.valueOf;
+                  switch (state.scheduleMenu, listBirthDay, holidayList, leaveSchedules, eventList) {
+                  | (All, allBirthDay, allHoliday, allLeave, allEvent) when (allHoliday !== [] || allBirthDay !== [] || allLeave !== [] || allEvent !== []) => {
                       {
                         let lastEndDate = [|0.|];
                         let birthdaySchedules = 
@@ -129,9 +159,13 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
                           |> List.filter((birthDay) => birthDay.name !== "")
                           |> List.map(birthDay => birthDay |> RememberMeUtils.mapBirthDayToSchedule);
                         let holidaySchedules = allHoliday |> List.map(holiday => holiday |> RememberMeUtils.mapHolidayToSchedule);
-                        let allSchedules = List.append(holidaySchedules, List.append(leaveSchedules, birthdaySchedules));
+                        let eventSchedules = allEvent |> List.map(event => event |> RememberMeUtils.mapEventToSchedule);
+                        let allSchedules = List.append(
+                                              List.append(eventSchedules, holidaySchedules), 
+                                              List.append(leaveSchedules, birthdaySchedules));
                         allSchedules 
                         |> List.sort((schedule1:schedule, schedule2:schedule) => compare(schedule1.date, schedule2.date))
+                        |> List.filter((schedule:schedule) => ((schedule.date) >= today))
                         |> List.mapi((i, schedule:schedule) => {
                             switch schedule.date {
                               | date when date > lastEndDate[0] => {
@@ -147,6 +181,7 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
                                   lastEndDate[0] = (schedules |> List.rev |> List.hd).date;
                                   <div key=("scheduler-all-" ++ schedule.title ++ "-" ++ (i |> string_of_int))>
                                     <SchedulerDate 
+                                      isToday=(schedule.date === today)
                                       datetime
                                       schedules
                                     />
@@ -157,49 +192,25 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
                         }) |> Array.of_list |> array
                       }
                     }
-                  | (Leave, _, _, allLeave) when allLeave !== [] => {
+                  | (Leave, _, _, allLeave, _) when allLeave !== [] => {
+                      <>{findAllSchedules(allLeave, "scheduler-leave-", today)}</>
+                    }
+                  | (Holiday, _, allHoliday, _, _) when allHoliday !== [] => {
                       <>
                       {
-                        let lastEndDate = [|0.|];
-                        leaveSchedules |> List.mapi((i, schedule:schedule) => {
-                          switch schedule.date {
-                          | date when date > lastEndDate[0] => {
-                              let schedules = 
-                                List.append(
-                                  [schedule], 
-                                  leaveSchedules 
-                                  |> List.find_all((s:schedule) => 
-                                    (s.title !== schedule.title && s.date === schedule.date)
-                                  ));
-                              lastEndDate[0] = (schedules |> List.rev |> List.hd).date;
-                              <div key=("scheduler-leave-" ++ (i |> string_of_int))>
-                                <SchedulerDate 
-                                  datetime=(schedule.date |> RememberMeUtils.getDatetimeStr) 
-                                  schedules
-                                />
-                              </div>
-                            }
-                          | _ => null
-                          }
-                        }) |> Array.of_list |> array
+                        let holidaySchedules = allHoliday |> List.map((holiday:holiday) => holiday |> RememberMeUtils.mapHolidayToSchedule);
+                        findAllSchedules(holidaySchedules, "scheduler-holiday-", today);
                       }
                       </>
                     }
-                  | (Holiday, _, allHoliday, _) when allHoliday !== [] => {
+                  | (Event, _, _, _, allEvent) when allEvent !== [] => {
                       <>
                       {
-                        allHoliday 
-                        |> List.filter(holiday => (holiday.date >= Js.Date.now()))
-                        |> List.sort((holiday1:holiday, holiday2:holiday) => compare(holiday1.date, holiday2.date))
-                        |> List.mapi((i, holiday:holiday) => {
-                          <div key=("scheduler-holiday-" ++ holiday.name ++ "-" ++ (i |> string_of_int))>
-                            <SchedulerDate datetime=(holiday.date |> RememberMeUtils.getDatetimeStr) schedules=[(holiday |> RememberMeUtils.mapHolidayToSchedule)] />
-                          </div>
-                        }) |> Array.of_list |> array
+                        let eventSchedules = allEvent |> List.map((event:event) => event |> RememberMeUtils.mapEventToSchedule);
+                        findAllSchedules(eventSchedules, "scheduler-event-", today);
                       }
                       </>
                     }
-                    
                   | _ =>
                     <div className="col-12 text-center pt-5 pb-5">
                       <p>{string("Data not found")}</p>
@@ -224,12 +235,8 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
             |> List.map((requestLeave:leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
             |> List.concat;
           let schedules = List.append(schedulesHoliday, schedulesLeave);
-          <RequestForm 
-            onRefresh 
-            schedules
-          />
+          <RequestForm onRefresh schedules />
         }
-          
         | MyForm => <RequestLeavePanel requestLeaves=userLeaveList onRefresh />
         };
       }

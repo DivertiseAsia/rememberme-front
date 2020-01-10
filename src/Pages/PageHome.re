@@ -13,6 +13,7 @@ type state = {
   holidayList: list(holiday),
   listBirthDay: list(birthDay),
   leaveList: list(leaveDetail),
+  eventList: list(event),
   userLeaveList: list(leaveDetail),
 };
 
@@ -28,6 +29,9 @@ type action =
   | FetchLeaveList
   | FetchLeaveListSuccess(list(leaveDetail))
   | FetchLeaveListFail
+  | FetchEventList
+  | FetchEventListSuccess(list(event))
+  | FetchEventListFail
   | FetchUserLeaveList
   | FetchUserLeaveListSuccess(list(leaveDetail))
   | FetchUserLeaveListFail
@@ -47,6 +51,14 @@ let fetchBirthDay = ({send}) => {
     ~token=Utils.getToken(),
     ~successAction=birthdayList => send(FetchBirthDayListSuccess(birthdayList)),
     ~failAction=_ => send(FetchBirthDayListFail),
+  );
+};
+
+let fetchEvent = ({send}) => {
+  fetchEvent(
+    ~token=Utils.getToken(),
+    ~successAction=eventList => send(FetchEventListSuccess(eventList)),
+    ~failAction=_ => send(FetchEventListFail),
   );
 };
 
@@ -91,6 +103,7 @@ let make = (
     holidayList: [],
     listBirthDay: [],
     leaveList: [],
+    eventList: [],
     userLeaveList: [],
   },
   reducer: (action, state) => {
@@ -106,6 +119,9 @@ let make = (
     | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchAllRequestLeave)
     | FetchLeaveListSuccess(leaveList) => Update({...state, loadState: Succeed, leaveList})
     | FetchLeaveListFail => Update({...state, loadState: Failed, leaveList: []})
+    | FetchEventList => UpdateWithSideEffects({...state, loadState: Loading}, fetchEvent)
+    | FetchEventListSuccess(eventList) => Update({...state, loadState: Succeed, eventList})
+    | FetchEventListFail => Update({...state, loadState: Failed, eventList: []})
     | FetchUserLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchUserRequestLeave)
     | FetchUserLeaveListSuccess(userLeaveList) => Update({...state, loadState: Succeed, userLeaveList})
     | FetchUserLeaveListFail => Update({...state, loadState: Failed, userLeaveList: []})
@@ -119,6 +135,7 @@ let make = (
     send(FetchHolidayList);
     send(FetchBirthDayList);
     send(FetchLeaveList);
+    send(FetchEventList);
     send(FetchUserLeaveList);
   },
   render: ({state, send}) =>
@@ -131,6 +148,7 @@ let make = (
             holidayList=state.holidayList 
             listBirthDay=state.listBirthDay 
             leaveList=state.leaveList 
+            eventList=state.eventList
           />
         </div>
         <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
@@ -140,6 +158,7 @@ let make = (
             listBirthDay=state.listBirthDay 
             leaveList=state.leaveList 
             userLeaveList=state.userLeaveList
+            eventList=state.eventList
             onRefresh=(_ => {send(FetchLeaveList);send(FetchUserLeaveList);})
           />
         </div>

@@ -24,6 +24,7 @@ type state = {
   holidayList: list(holiday),
   listBirthDay: list(birthDay),
   leaveList: list(leaveDetail),
+  eventList: list(event),
 };
 
 type action =
@@ -37,7 +38,10 @@ type action =
   | FetchBirthDayListFail
   | FetchLeaveList
   | FetchLeaveListSuccess(list(leaveDetail))
-  | FetchLeaveListFail;
+  | FetchLeaveListFail
+  | FetchEventList
+  | FetchEventListSuccess(list(event))
+  | FetchEventListFail;
 
 let fetchHolidayList = ({send}) => {
   fetchHoliday(
@@ -62,6 +66,14 @@ let fetchAllRequestLeave = ({send}) => {
   );
 };
 
+let fetchEvent = ({send}) => {
+  fetchEvent(
+    ~token=Utils.getToken(),
+    ~successAction=eventList => send(FetchEventListSuccess(eventList)),
+    ~failAction=_ => send(FetchEventListFail),
+  );
+};
+
 let component = ReasonReact.reducerComponent("PageAllMonth");
 
 let make = (_children) => {
@@ -73,6 +85,7 @@ let make = (_children) => {
     holidayList: [],
     listBirthDay: [],
     leaveList: [],
+    eventList: [],
   },
   reducer: (action, state) => {
     switch (action) {
@@ -87,12 +100,16 @@ let make = (_children) => {
     | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchAllRequestLeave)
     | FetchLeaveListSuccess(leaveList) => Update({...state, loadState: Succeed, leaveList})
     | FetchLeaveListFail => Update({...state, loadState: Failed, leaveList: []})
+    | FetchEventList => UpdateWithSideEffects({...state, loadState: Loading}, fetchEvent)
+    | FetchEventListSuccess(eventList) => Update({...state, loadState: Succeed, eventList})
+    | FetchEventListFail => Update({...state, loadState: Failed, eventList: []})
     };
   },
   didMount: ({send}) => {
     send(FetchHolidayList);
     send(FetchBirthDayList);
     send(FetchLeaveList);
+    send(FetchEventList);
   },
   render: ({state, send}) =>
     <div className="allmonth-page container-fluid">
@@ -138,6 +155,7 @@ let make = (_children) => {
                 holidayList=state.holidayList 
                 listBirthDay=state.listBirthDay 
                 leaveList=state.leaveList 
+                eventList=state.eventList
               />
             </div>
           }) |> Array.of_list |> array

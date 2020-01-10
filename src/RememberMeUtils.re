@@ -171,6 +171,17 @@ let mapHolidayToSchedule = (holiday:RememberMeApi.holiday) => {
     scheduleMenu: Holiday,
     title: holiday.name,
     date: holiday.date,
+    detail: "",
+  };
+  schedule
+};
+
+let mapEventToSchedule = (event:RememberMeApi.event) => {
+  let schedule = {
+    scheduleMenu: Event,
+    title: event.name,
+    date: event.date |> Js.Date.valueOf,
+    detail: event.details,
   };
   schedule
 };
@@ -179,6 +190,7 @@ let mapLeaveToSchedule = (leaveDetail:RememberMeApi.leaveDetail) => {
     scheduleMenu: Leave,
     title: leaveDetail.user ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
     date: leaveDetail.fromDate |> Js.Date.valueOf,
+    detail: "",
   };
   schedule
 };
@@ -195,6 +207,7 @@ let splitRequestLeave= (leaveDetail:RememberMeApi.leaveDetail) => {
           scheduleMenu: Leave,
           title: leaveDetail.user ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
           date,
+          detail: "",
         };
         schedule
       }) |> Array.to_list
@@ -216,6 +229,7 @@ let mapBirthDayToSchedule = (birthday:RememberMeApi.birthDay) => {
         ~date={
           birthday.birthDate  |> Js.Date.getDate;
         }, ()) |> Js.Date.valueOf,
+    detail: "",
   };
   schedule
 };

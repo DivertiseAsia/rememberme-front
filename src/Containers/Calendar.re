@@ -95,7 +95,7 @@ let getDayByStartOnMonday = (dayInWeek:int) => {
   (dayInWeek === 0 ? 6 : dayInWeek - 1)
 };
 
-let dates = (month, year, holidayList, birthDayList, leaveList) => {
+let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
   let col = 7;
   let row = 6;
   let boxs = col * row;
@@ -134,25 +134,31 @@ let dates = (month, year, holidayList, birthDayList, leaveList) => {
         let schedulesLeave = leaveList 
           |> List.map((requestLeave:leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
           |> List.concat;
+        Js.log(eventList);
          <td key={idx |> string_of_int} className={j|day $classThisDay|j} style=(ReactDOMRe.Style.make(~paddingTop="20px", ()))>
            <div className="circle-today" />
            <span className=(String.length(date |> string_of_int) === 1 ? "single-char" : "")>{date |> string_of_int |> str}</span>
-           (List.length(holidayList |> List.find_all(holiday => holiday.date === jsDate)) > 0 ||
+           (List.length(holidayList |> List.find_all((holiday:holiday) => holiday.date === jsDate)) > 0 ||
+            List.length(eventList |> List.find_all((event:event) => (event.date |> Js.Date.valueOf) === jsDate)) > 0 ||
             List.length(schedulesLeave |> List.find_all((schedule:RememberMeType.schedule) => (schedule.date) === jsDate)) > 0 ||
             List.length(birthDayList |> List.find_all(birthDay => RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int))) > 0 ?
               <div className="points">
                 {holidayList 
-                  |> List.find_all(holiday => holiday.date === jsDate) 
-                  |> List.map(holiday => <div key=("holiday-point-" ++ (idx |> string_of_int)) className="point point-holiday" />) |> Array.of_list |> array
+                  |> List.find_all((holiday:holiday) => holiday.date === jsDate) 
+                  |> List.map(_holiday => <div key=("holiday-point-" ++ (idx |> string_of_int)) className="point point-holiday" />) |> Array.of_list |> array
                 }
                 {birthDayList 
                   |> List.filter(birthDay => birthDay.name !== "")
                   |> List.find_all(birthDay => RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)) 
-                  |> List.map(birthDay => <div key=("birthday-point-" ++ (idx |> string_of_int)) className="point point-birthday" />) |> Array.of_list |> array
+                  |> List.map(_birthDay => <div key=("birthday-point-" ++ (idx |> string_of_int)) className="point point-birthday" />) |> Array.of_list |> array
                 }
                 {schedulesLeave
                   |> List.filter((schedule: RememberMeType.schedule) => schedule.date === jsDate) 
-                  |> List.map(schedule => <div className="point point-leave" />) |> Array.of_list |> array
+                  |> List.map(_schedule => <div className="point point-leave" />) |> Array.of_list |> array
+                }
+                {eventList 
+                  |> List.find_all((event:event) => (event.date |> Js.Date.valueOf) === jsDate) 
+                  |> List.map(_event => <div key=("event-point-" ++ (idx |> string_of_int)) className="point point-event" />) |> Array.of_list |> array
                 }
               </div> : null
            )
@@ -179,6 +185,7 @@ let make = (
     ~holidayList=[],
     ~listBirthDay=[],
     ~leaveList=[],
+    ~eventList=[],
     _children
   ) => {
   ...component,
@@ -276,7 +283,8 @@ let make = (
             targetYear, 
             holidayList, 
             listBirthDay,
-            leaveList)
+            leaveList,
+            eventList)
         }
         </tbody>
       </table>

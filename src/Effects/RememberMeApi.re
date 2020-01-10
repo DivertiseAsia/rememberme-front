@@ -13,6 +13,12 @@ type holiday = {
   date: float,
   isVacation: bool,
 };
+
+type event = {
+  name: string,
+  date: Js.Date.t,
+  details: string,
+};
 type leaveType =
   | Sick
   | Personal;
@@ -55,6 +61,7 @@ module URL = {
   let leave = {j|$baseApiUrl/leave/|j};
   let allLeave = {j|$baseApiUrl/leave/all/|j};
   let holiday = {j|$baseApiUrl/holiday/|j};
+  let event = {j|$baseApiUrl/event/|j};
 };
 
 let mapLeaveType = typeInt =>
@@ -100,8 +107,14 @@ module Decode = {
     date: json |> field("date", string) |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf,
     isVacation: json |> field("is_vacation", bool),
   };
-  /*json |> field("date", withDefault(true, nullAs(0. |> ))), */
   let holidayList = json => json |> list(holiday);
+  let event = json => {
+    name: json |> field("name", string),
+    date: json |> field("date", string) |> Js.Date.fromString |> getDateOnlyDate,
+    details: json |> field("details", string),
+  };
+  /*json |> field("date", withDefault(true, nullAs(0. |> ))), */
+  let eventList = json => json |> list(event);
 
   let leaveDetail = json => {
     id: json |> field("rid", string),
@@ -182,6 +195,15 @@ let fetchBirthDay = (~token, ~successAction, ~failAction) =>
     ~headers=buildHeader(token),
     ~url=URL.birthday,
     ~successAction=json => json |> Decode.birthDayList |> successAction,
+    ~failAction,
+  )
+  |> ignore;
+
+let fetchEvent = (~token, ~successAction, ~failAction) =>
+  requestJsonResponseToAction(
+    ~headers=buildHeader(token),
+    ~url=URL.event,
+    ~successAction=json => json |> Decode.eventList |> successAction,
     ~failAction,
   )
   |> ignore;

@@ -167,7 +167,7 @@ let onSubmit = ({state, send}) => {
 
 let component = ReasonReact.reducerComponent("RequestForm");
 
-let make = (~onRefresh, ~schedules=[], _children) => {
+let make = (~schedules, ~onRefresh, _children) => {
   ...component,
   initialState: () => {
     loadState: Idle, 

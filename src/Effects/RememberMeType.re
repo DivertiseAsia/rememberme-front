@@ -52,6 +52,7 @@ type schedule = {
   scheduleMenu,
   title:string,
   date: float,
+  detail:string,
 };
 
 
