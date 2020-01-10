@@ -38,7 +38,19 @@ let make = (
               <div className=("scheduler-status" ++ backgroundColor ++ border) /> 
             </div>
             <div className="col-10">
-              {string(schedule.title)}
+              <p>{string(schedule.title)}</p>
+              {
+                switch schedule.scheduleMenu {
+                | Event => 
+                  {
+                    let details = Js.String.split("\n", schedule.detail);
+                    details |> Array.to_list |> List.map((detail) => {
+                      <div><p>{string(detail)}</p></div>
+                    }) |> Array.of_list |> array
+                  }
+                | _ => null
+                }
+              }
             </div>
           </div>
         }) |> Array.of_list |> array
