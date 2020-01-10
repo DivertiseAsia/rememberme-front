@@ -410,6 +410,7 @@ td{
   }
 }
 
+
 .popover-bg {
   position: fixed;
   top: 0px;
@@ -598,7 +599,10 @@ td{
     top: 35%;
     left: 30%;
     width: 50%;
-    height: 45%;
+    height: 35%;
+  }
+  .popup-container-fail {
+    height: auto !important;
   }
 
   .calendar-container {
@@ -641,7 +645,10 @@ td{
     top: 20%;
     left: 10%;
     width: 80%;
-    height: 60%;
+    height: 40%;
+  }
+  .popup-container-fail {
+    height: auto !important;
   }
   .today .circle-today {
     width: 30px;
