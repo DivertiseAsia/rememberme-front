@@ -1,9 +1,23 @@
 open RequestUtils;
 
+type profile = {
+  username: string,
+  email: string,
+  firstName: string,
+  lastName: string,
+  birthDate: Js.Date.t
+};
+
 type holiday = {
   name: string,
   date: float,
   isVacation: bool,
+};
+
+type event = {
+  name: string,
+  date: Js.Date.t,
+  details: string,
 };
 type leaveType =
   | Sick
@@ -11,11 +25,12 @@ type leaveType =
 
 type leaveDetail = {
   id: string,
+  user:string,
   leaveType,
   fromDate: Js.Date.t,
   toDate: Js.Date.t,
   reason: string,
-  approved: bool,
+  status: RememberMeType.requestStatus,
 };
 
 type birthDay = {
@@ -40,9 +55,13 @@ let baseApiUrl = "https://rememberme-server.herokuapp.com";
 module URL = {
   let login = {j|$baseApiUrl/account/login/|j};
   let signUp = {j|$baseApiUrl/account/register/|j};
+  let password = {j|$baseApiUrl/password/change/|j};
+  let profile = {j|$baseApiUrl/account/profile/|j};
   let birthday = {j|$baseApiUrl/account/birthday/|j};
   let leave = {j|$baseApiUrl/leave/|j};
+  let allLeave = {j|$baseApiUrl/leave/all/|j};
   let holiday = {j|$baseApiUrl/holiday/|j};
+  let event = {j|$baseApiUrl/event/|j};
 };
 
 let mapLeaveType = typeInt =>
@@ -53,15 +72,9 @@ let mapLeaveType = typeInt =>
   };
 let getDateOnlyDate = date => {
   Js.Date.makeWithYMD(
-    ~year={
-      date |> Js.Date.getFullYear;
-    },
-    ~month={
-      date |> Js.Date.getMonth;
-    },
-    ~date={
-      date |> Js.Date.getDate;
-    },
+    ~year={date |> Js.Date.getFullYear;},
+    ~month={date |> Js.Date.getMonth;},
+    ~date={date |> Js.Date.getDate;},
     (),
   );
 };
@@ -71,13 +84,21 @@ let mapLeaveTypeStr = typeInt =>
   | Sick => "Sick"
   | Personal => "Personal"
   };
+let mapRequestStatus = (requestStatus:int) => {
+  open RememberMeType;
+    switch requestStatus {
+    | 2 => Pending
+    | 0 => Fail
+    | _ => Approve
+    }
+  };
 
 module Decode = {
   open Json.Decode;
 
   let birthDay = json => {
     name: json |> field("name", optional(string)) |> Utils.mapOptStr,
-    birthDate: json |> field("birth_date", optional(string)) |> Utils.mapOptStr |> Js.Date.fromString,
+    birthDate: json |> field("birth_date", optional(string)) |> Utils.mapOptStr |> Js.Date.fromString |> getDateOnlyDate,
   };
   let birthDayList = json => json |> list(birthDay);
 
@@ -86,19 +107,43 @@ module Decode = {
     date: json |> field("date", string) |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf,
     isVacation: json |> field("is_vacation", bool),
   };
-
   let holidayList = json => json |> list(holiday);
+  let event = json => {
+    name: json |> field("name", string),
+    date: json |> field("date", string) |> Js.Date.fromString |> getDateOnlyDate,
+    details: json |> field("details", string),
+  };
+  /*json |> field("date", withDefault(true, nullAs(0. |> ))), */
+  let eventList = json => json |> list(event);
 
   let leaveDetail = json => {
     id: json |> field("rid", string),
+    user: json |> field("user", string),
     leaveType: json |> field("type", int) |> mapLeaveType,
-    fromDate: json |> field("from_date", string) |> Js.Date.fromString,
-    toDate: json |> field("to_date", string) |> Js.Date.fromString,
+    fromDate: json |> field("from_date", string) |> Js.Date.fromString |> getDateOnlyDate,
+    toDate: json |> field("to_date", string) |> Js.Date.fromString |> getDateOnlyDate,
     reason: json |> field("reason", string),
-    approved: json |> field("is_approved", bool),
+    status: json |> field("status", int) |> mapRequestStatus,
   };
   let leaveList = json => json |> list(leaveDetail);
+
+  let profile = json => {
+    username: json |> field("username", string),
+    email: json |> field("email", string),
+    firstName: json |> field("first_name", string),
+    lastName: json |> field("last_name", string),
+    birthDate: json |> field("birth_date", string) |> Js.Date.fromString |> getDateOnlyDate,
+  };
 };
+
+let fetchProfile = (~token,~successAction, ~failAction) =>
+  requestJsonResponseToAction(
+    ~headers=buildHeader(token),
+    ~url=URL.profile,
+    ~successAction=json => json |> Decode.profile |> successAction,
+    ~failAction,
+  )
+  |> ignore;
 
 let postLeave = (~token, ~payload, ~successAction, ~failAction) =>
   requestJsonResponseToAction(
@@ -109,10 +154,28 @@ let postLeave = (~token, ~payload, ~successAction, ~failAction) =>
   )
   |> ignore;
 
+let removeRequestLeave = (~token, ~id,  ~successAction, ~failAction) =>
+  requestJsonResponseToAction(
+    ~headers=buildHeader(~verb=Delete, token),
+    ~url=(URL.leave ++ id ++ "/"),
+    ~successAction,
+    ~failAction,
+  )
+  |> ignore;
+
 let fetchUserLeaves = (~token, ~successAction, ~failAction) =>
   requestJsonResponseToAction(
     ~headers=buildHeader(token),
     ~url=URL.leave,
+    ~successAction=json => json |> Decode.leaveList |> successAction,
+    ~failAction,
+  )
+  |> ignore;
+
+let fetchAllLeaves = (~token, ~successAction, ~failAction) =>
+  requestJsonResponseToAction(
+    ~headers=buildHeader(token),
+    ~url=URL.allLeave,
     ~successAction=json => json |> Decode.leaveList |> successAction,
     ~failAction,
   )
@@ -132,6 +195,15 @@ let fetchBirthDay = (~token, ~successAction, ~failAction) =>
     ~headers=buildHeader(token),
     ~url=URL.birthday,
     ~successAction=json => json |> Decode.birthDayList |> successAction,
+    ~failAction,
+  )
+  |> ignore;
+
+let fetchEvent = (~token, ~successAction, ~failAction) =>
+  requestJsonResponseToAction(
+    ~headers=buildHeader(token),
+    ~url=URL.event,
+    ~successAction=json => json |> Decode.eventList |> successAction,
     ~failAction,
   )
   |> ignore;

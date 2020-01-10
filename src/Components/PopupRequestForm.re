@@ -2,7 +2,7 @@ open ReasonReact;
 
 let component = ReasonReact.statelessComponent("SchedulerDate");
 
-let make = (~onConfirm, _children) => {
+let make = (~isSick=true, ~onConfirm, _children) => {
   ...component,
   render: _self => {
     <>
@@ -16,11 +16,18 @@ let make = (~onConfirm, _children) => {
         </div>
         <div className="row row-text"> 
           <div className="col-12 text-center" style=(ReactDOMRe.Style.make(~display="contents", ()))>
-            <div className="m-auto">
-            <h5>{string("Get well soon !")}</h5>
-            <h5>{string("change following the event..")}</h5>
-            <p className="mb-0">{string("waiting for..")}</p>
-            </div>
+            {(isSick ? 
+              <div className="m-auto">
+                <h5>{string("Get well soon !")}</h5>
+                /*<h5>{string("change following the event..")}</h5>*/
+                <p className="mb-0">{string("waiting for..")}</p>
+              </div>
+              : 
+              <div className="m-auto">
+                <h5>{string("Waiting for approve")}</h5>
+              </div>
+            )}
+            
           </div>
         </div>
         <div className="row row-btn"> 

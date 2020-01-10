@@ -1,3 +1,26 @@
+type month =
+  | Jan
+  | Feb
+  | Mar
+  | Apr
+  | May
+  | Jun
+  | Jul
+  | Aug
+  | Sep
+  | Oct
+  | Nov
+  | Dec;
+
+type day =
+  | Sun
+  | Mon
+  | Tue
+  | Wed
+  | Thu
+  | Fri
+  | Sat;
+
 
 type scheduleMenu = 
   | Leave
@@ -10,7 +33,7 @@ type formType =
   | Sick 
   | Vacation;
 
-type formStatus = 
+type requestStatus = 
   | Pending 
   | Fail
   | Approve;
@@ -29,6 +52,7 @@ type schedule = {
   scheduleMenu,
   title:string,
   date: float,
+  detail:string,
 };
 
 
