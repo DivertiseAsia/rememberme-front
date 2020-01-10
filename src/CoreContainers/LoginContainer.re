@@ -62,24 +62,28 @@ let make = (~afterLoginUrl: option(string)=?, _children) => {
     | LoginFailed(error) => Update({...state, loginError: Some(error), sendingLogin: false})
     },
   render: self =>
-    <div className={"login-container " ++ (self.state.sendingLogin ? "loading" : "not-loading")}>
-      <LoginForm
-        loading={self.state.sendingLogin}
-        setEmail={input => self.send(SetEmail(input))}
-        setPassword={password => self.send(SetPassword(password))}
-        onSubmit={e => {
-          ReactEvent.Form.preventDefault(e);
-          Js.log(e);
-          self.send(Login);
-        }}
-      />
-      {self.state.sendingLogin === true ? <Loading /> : ReasonReact.null}
-      {self.state.loginHasSuccess ?
-         <div className="text-info"> {string("Logged in. Redirecting..")} </div> : ReasonReact.null}
-      {switch (self.state.loginError) {
-       | Some("")
-       | None => ReasonReact.null
-       | Some(x) => x |> getErrorMsgFromJson |> array
-       }}
-    </div>,
+    
+      {self.state.sendingLogin === true ? 
+        <Loading /> : 
+        <div className={"login-container " ++ (self.state.sendingLogin ? "loading" : "not-loading")}>
+          <LoginForm
+            loading={self.state.sendingLogin}
+            setEmail={input => self.send(SetEmail(input))}
+            setPassword={password => self.send(SetPassword(password))}
+            onSubmit={e => {
+              ReactEvent.Form.preventDefault(e);
+              Js.log(e);
+              self.send(Login);
+            }}
+          />
+          {self.state.loginHasSuccess ?
+            <div className="text-info"> {string("Logged in. Redirecting..")} </div> : ReasonReact.null}
+         {switch (self.state.loginError) {
+          | Some("")
+          | None => ReasonReact.null
+          | Some(x) => x |> getErrorMsgFromJson |> array
+          }}
+       </div>
+      }
+      ,
 };

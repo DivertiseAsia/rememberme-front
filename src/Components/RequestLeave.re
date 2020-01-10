@@ -15,7 +15,12 @@ let make = (~requestLeave:leaveDetail, ~onCancel, _children) => {
     <div className="request-leave-container">
       <div className="row"> 
         <div className="col-2 pr-0 text-center"> 
-          <img src="/images/sick_blue.svg" />
+          {
+            switch requestLeave.leaveType {
+            | Sick => <img src="/images/sick_blue.svg" />
+            | _ => <img src="/images/vacation_blue.svg" />
+            }
+          }
         </div>
         <div className="col-6"> 
           <p className="mb-1"><b>{string(datetimeStr)}</b></p>

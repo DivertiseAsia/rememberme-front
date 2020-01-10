@@ -12,9 +12,6 @@ let years = [
   (Js.Date.make() |> Js.Date.getFullYear),
   (Js.Date.make() |> Js.Date.getFullYear) +. 1.,
   (Js.Date.make() |> Js.Date.getFullYear) +. 2.,
-  (Js.Date.make() |> Js.Date.getFullYear) +. 3.,
-  (Js.Date.make() |> Js.Date.getFullYear) +. 4.,
-  (Js.Date.make() |> Js.Date.getFullYear) +. 5.,
 ];
 
 type state = {
