@@ -134,7 +134,6 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
         let schedulesLeave = leaveList 
           |> List.map((requestLeave:leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
           |> List.concat;
-        Js.log(eventList);
          <td key={idx |> string_of_int} className={j|day $classThisDay|j} style=(ReactDOMRe.Style.make(~paddingTop="20px", ()))>
            <div className="circle-today" />
            <span className=(String.length(date |> string_of_int) === 1 ? "single-char" : "")>{date |> string_of_int |> str}</span>

@@ -267,7 +267,7 @@ let make = (~schedules, ~onRefresh, _children) => {
             </textarea>
           </div> 
         </div>
-        {
+        /*{
           switch state.formType {
           | Sick => 
             <div className="row mt-4"> 
@@ -277,6 +277,7 @@ let make = (~schedules, ~onRefresh, _children) => {
                   name="file" 
                   id="file" 
                   className="inputfile"
+                  onChange=(e => Js.log(e |> Utils.filesFromEvent))
                   style=(ReactDOMRe.Style.make(~display="none", ()))
                 />
                 <label 
@@ -301,7 +302,7 @@ let make = (~schedules, ~onRefresh, _children) => {
             </div>
           | _ => null
           }
-        }
+        }*/
         <div className="row mt-5"> 
           <button 
             type_="button" 
