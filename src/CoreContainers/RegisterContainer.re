@@ -84,9 +84,9 @@ let make = _children => {
     | SignUpSuccess => SideEffects(_ => ())
     | SignUpFailed(err) => Update({...state, loading: false, err: Some(err)})
     | SetEmail(email) => Update({...state, email})
-    | SetPassword(password) => Update({...state, password: password |> getPasswordWithLimit})
+    | SetPassword(password) => Update({...state, password})
     | SetConfirmPassword(confirmPassword) =>
-      Update({...state, confirmPassword: confirmPassword |> getPasswordWithLimit})
+      Update({...state, confirmPassword})
     | SetBirthDate(birthDate) => Update({...state, birthDate})
     | SetFirstName(firstName) => Update({...state, firstName})
     | SetLastName(lastName) => Update({...state, lastName})
@@ -186,11 +186,11 @@ let make = _children => {
                 id="birthday"
                 className={getClassName(
                   ~extraStyle="form-control-smaller",
-                  ~invalid={state.lastName |> isStringEmpty},
+                  ~invalid={state.birthDate |> isStringEmpty},
                   (),
                 )}
                 placeholder="Birthday"
-                value={state.lastName}
+                value={state.birthDate}
                 onChange={e => send(SetBirthDate(valueFromEvent(e)))}
               />
           </div>
