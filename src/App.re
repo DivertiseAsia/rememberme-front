@@ -1,9 +1,15 @@
 open ReasonReact;
+open RememberMeApi;
+open RememberMeType;
+
 [@bs.val] external encodeURIComponent: string => string = "";
 [@bs.get] external location: Dom.window => Dom.location = "";
 [@bs.get] external href: Dom.location => string = "";
 
-type state = {route: ReasonReact.Router.url};
+type state = {
+  route: ReasonReact.Router.url,
+  loadState,
+};
 
 type action =
   | RouteTo(Router.url);
@@ -28,21 +34,24 @@ let routeMatches = (x, link) => "/" ++ x == link;
 
 let make = _children => {
   ...component,
-  initialState: () => {route: Router.dangerouslyGetInitialUrl()},
-  reducer: (action, _) =>
+  initialState: () => {
+    route: Router.dangerouslyGetInitialUrl(), 
+    loadState: Loading,
+  },
+  reducer: (action, state) =>
     switch (action) {
-    | RouteTo(route) => Update({route: route})
+    | RouteTo(route) => Update({...state, route})
     },
   didMount: ({send, onUnmount}) => {
     let watcherID = Router.watchUrl(url => send(RouteTo(url)));
     onUnmount(() => Router.unwatchUrl(watcherID));
   },
-  render: ({state: {route}}) => {
+  render: ({state: {route, loadState}}) => {
+    
     let token = loadToken();
     let isLoggedIn = token !== "";
-    Js.log2("!! route.path", route.path);
     switch (route.path, isLoggedIn) {
-    | ([], true)
+    | ([], true) => <PageHome isLoggedIn />
     | ([""], true) => <PageHome isLoggedIn />
     | ([x, monthYear], true) when routeMatches(x, Links.dashboard) => {
         let datetime = Js.String.split("-", monthYear);
@@ -61,6 +70,6 @@ let make = _children => {
       let _ = ReasonReact.Router.push("/login?" ++ queryParams);
       <PageLogin queryString=queryParams />;
     | _ => <Page404 isLoggedIn />
-    };
+    }
   },
 };

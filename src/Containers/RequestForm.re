@@ -3,6 +3,12 @@ open RememberMeType;
 
 let requestMenus = [Sick, Vacation];
 
+let months:list(month) = [Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec];
+let years:list(float) = [
+  (Js.Date.now() |> Js.Date.fromFloat |> Js.Date.getFullYear) -. 1.,
+  Js.Date.now() |> Js.Date.fromFloat |> Js.Date.getFullYear, 
+  (Js.Date.now() |> Js.Date.fromFloat |> Js.Date.getFullYear) +. 1.];
+
 type state = {
   loadState,
   formType,
@@ -14,47 +20,160 @@ type state = {
 
 type action =
   | ChangeFormType(formType)
-  | TogglePopup(bool);
+  | TogglePopup(bool)
+  | ChangeStartDate(float)
+  | ChangeEndDate(float)
+  | ChangeNote(string)
+  | OnSubmitRequestLeave
+  | OnSubmitRequestLeaveSuccess
+  | OnSubmitRequestLeaveFailed;
 
-let dateForm = (~title="Start") => {
+let dateForm = (~schedules=[], ~title="Start", ~targetDate, ~targetMonth, ~targetYear, ~onChangeDate) => {
   <>
-    <div className="col-1 p-0" />
-    <div className="col-2 pt-3">
+    <div className="col-12 col-md-2 pt-3">
       {string(title)}
     </div>
-    <div className="col-3 p-1">
-      <input 
-        type_="text" 
-        className="form-control input-request" 
-        placeholder="Day" 
-      />
+    <div className="col-3 col-md-3 p-1">
+      <div className="dropdown show dropdown-request-leave">
+        {cloneElement(
+              <a className="btn dropdown-toggle" role="button" id="dropdown-day">
+                {string(targetDate |> int_of_float |> string_of_int)}
+              </a>,
+            ~props={"data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"},
+            [||]
+          )
+        }
+        <div 
+          className="dropdown-menu" 
+          ariaLabelledby="dropdown-day"
+          style=(ReactDOMRe.Style.make(
+            ~maxHeight="200px",
+            ~overflowY="auto",
+          ()))
+        >
+          {Array.make(31, null)
+            |> Array.mapi((idx, _) => {
+              let today =
+                Js.Date.make()
+                |> (date =>
+                    Js.Date.makeWithYMD(
+                      ~year=date |> Js.Date.getFullYear,
+                      ~month=date |> Js.Date.getMonth,
+                      ~date=date |> Js.Date.getDate,
+                      (),
+                    )
+                  ) |> Js.Date.valueOf;
+              let datetime = Js.Date.makeWithYMD(~year=targetYear, ~month=targetMonth, ~date=((idx + 1) |> float_of_int), ());
+              let isLeaveDay = switch (schedules |> List.find(schedule => schedule.date === (datetime |> Js.Date.valueOf))) {
+                | _leaveDay => true
+                | exception Not_found => false
+                };
+              let isValidate = ((datetime |> Js.Date.getMonth) === targetMonth && 
+                              (datetime |> Js.Date.valueOf) >= today && 
+                              !RememberMeUtils.validateWeekend(datetime) &&
+                              !isLeaveDay
+                              );
+              (isValidate ?
+                <a 
+                  className="dropdown-item" 
+                  onClick=(_ => onChangeDate(datetime |> Js.Date.valueOf))
+                >
+                  {string((idx + 1 |> string_of_int))}
+                </a> : null
+              )
+            }) |> array
+          }
+        </div>
+      </div>
     </div>
-    <div className="col-3 p-1">
-      <input 
-        type_="text" 
-        className="form-control input-request" 
-        placeholder="Month" 
-      />
+    <div className="col-6 col-md-4 p-1">
+      <div className="dropdown show dropdown-request-leave">
+        {cloneElement(
+            <a className="btn dropdown-toggle" role="button" id="dropdown-month">
+              {string(targetMonth |> int_of_float |> RememberMeUtils.mapFullMonthInt)}
+            </a>,
+            ~props={"data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"},
+            [||]
+          )
+        }
+        <div className="dropdown-menu" ariaLabelledby="dropdown-month">
+          {months |> List.mapi((i, month) => {
+              <a 
+                key=("input-month-" ++ (i |> string_of_int)) 
+                className="dropdown-item" 
+                onClick=(_ => {
+                  let datetime = Js.Date.makeWithYMD(~year=targetYear, ~month=(i |> float_of_int), ~date=targetDate, ());
+                  onChangeDate(datetime |> Js.Date.valueOf);
+                })
+              >
+                {string(month |> RememberMeUtils.mapFullMonthStr)}
+              </a>
+            }) |> Array.of_list |> array
+          }
+        </div>
+      </div>
     </div>
-    <div className="col-3 p-1">
-      <input 
-        type_="text" 
-        className="form-control input-request" 
-        placeholder="Year" 
-      />
+    <div className="col-3 col-md-3 p-1">
+      <div className="dropdown show dropdown-request-leave">
+        {cloneElement(
+              <a className="btn dropdown-toggle" role="button" id="dropdown-year">
+                {string(targetYear |> int_of_float |> string_of_int)}
+              </a>
+            ,
+            ~props={"data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"},
+            [||]
+          )
+        }
+        <div className="dropdown-menu" ariaLabelledby="dropdown-year">
+          {years |> List.mapi((i, year) => {
+              <a 
+                key=("input-year-" ++ (i |> string_of_int)) 
+                className="dropdown-item" 
+                onClick=(_ => {
+                  let datetime = Js.Date.makeWithYMD(~year, ~month=targetMonth, ~date=targetDate, ());
+                  onChangeDate(datetime |> Js.Date.valueOf);
+                })
+              >
+                {string(year |> int_of_float |> string_of_int)}
+              </a>
+            }) |> Array.of_list |> array
+          }
+        </div>
+      </div>
     </div>
   </>
 };
 
+let onSubmit = ({state, send}) => {
+  let payload =
+    Json.Encode.(
+      object_([
+        ("type", switch state.formType {
+          | Sick => 1 |> int
+          | _ => 0 |> int
+          }),
+        ("from_date", state.startDate |> RememberMeUtils.getDateStrRequestLeave |> Js.Json.string),
+        ("to_date", state.endDate |> RememberMeUtils.getDateStrRequestLeave |> Js.Json.string),
+        ("reason", state.note |> Js.Json.string),
+      ])
+    );
+  RememberMeApi.postLeave(
+    ~token=Utils.getToken(),
+    ~payload,
+    ~successAction=_ => send(OnSubmitRequestLeaveSuccess),
+    ~failAction=_ => send(OnSubmitRequestLeaveFailed),
+  );
+};
+
 let component = ReasonReact.reducerComponent("RequestForm");
 
-let make = (_children) => {
+let make = (~schedules, ~onRefresh, _children) => {
   ...component,
   initialState: () => {
     loadState: Idle, 
     formType: Sick,
     startDate: Js.Date.now(),
-    endDate: 0.,
+    endDate: Js.Date.now(),
     note: "",
     showPopup: false,
   },
@@ -62,6 +181,13 @@ let make = (_children) => {
     switch (action) {
     | ChangeFormType(formType) => Update({...state, formType})
     | TogglePopup(showPopup) => Update({...state, showPopup})
+    | ChangeStartDate(startDate) => Update({...state, startDate, endDate: (startDate > state.endDate ? startDate : state.endDate)})
+    | ChangeEndDate(endDate) => Update({...state, endDate, startDate: (state.startDate > endDate ? endDate : state.startDate)})
+    | ChangeNote(note) => Update({...state, note})
+    | OnSubmitRequestLeave => UpdateWithSideEffects({...state, loadState: Loading}, onSubmit)
+    | OnSubmitRequestLeaveSuccess => 
+        Update({...state, loadState: Succeed, startDate: Js.Date.now(), endDate: Js.Date.now(), note: "", showPopup: true})
+    | OnSubmitRequestLeaveFailed => Update({...state, loadState: Failed, note: "", showPopup: true})
     };
   },
   render: ({state, send}) =>
@@ -72,7 +198,7 @@ let make = (_children) => {
     <div 
       className="row justify-content-center pt-5 pb-2" 
       style=(ReactDOMRe.Style.make(
-        ~backgroundColor="white", 
+        ~backgroundColor="white",
         ~borderTop="2px solid #FFA227",
       ()))
     >
@@ -106,11 +232,25 @@ let make = (_children) => {
       <div className="col-12"> 
         <div className="row mt-5 pl-2 pr-2"> 
           <div className="timeline-point timeline-start" />
-          {dateForm(~title="Start")}
+          {dateForm(
+            ~schedules,
+            ~title="Start", 
+            ~targetDate=(state.startDate |> Js.Date.fromFloat |> Js.Date.getDate), 
+            ~targetMonth=(state.startDate |> Js.Date.fromFloat |> Js.Date.getMonth), 
+            ~targetYear=(state.startDate |> Js.Date.fromFloat |> Js.Date.getFullYear),
+            ~onChangeDate=(startDate => send(ChangeStartDate(startDate)))
+          )}
         </div>
         <div className="row mt-4 mb-5 pl-2 pr-2"> 
           <div className="timeline-point timeline-end" />
-          {dateForm(~title="End")}
+          {dateForm(
+            ~schedules,
+            ~title="End", 
+            ~targetDate=(state.endDate |> Js.Date.fromFloat |> Js.Date.getDate), 
+            ~targetMonth=(state.endDate |> Js.Date.fromFloat |> Js.Date.getMonth), 
+            ~targetYear=(state.endDate |> Js.Date.fromFloat |> Js.Date.getFullYear),
+            ~onChangeDate=(startDate => send(ChangeEndDate(startDate)))
+          )}
         </div>
         
         <div className="row mt-4">
@@ -121,11 +261,12 @@ let make = (_children) => {
             <textarea 
               rows=2
               style=(ReactDOMRe.Style.make(~width="100%", ()))
+              onChange=(e => send(ChangeNote(Utils.valueFromEvent(e))))
             >
             </textarea>
           </div> 
         </div>
-        {
+        /*{
           switch state.formType {
           | Sick => 
             <div className="row mt-4"> 
@@ -135,6 +276,7 @@ let make = (_children) => {
                   name="file" 
                   id="file" 
                   className="inputfile"
+                  onChange=(e => Js.log(e |> Utils.filesFromEvent))
                   style=(ReactDOMRe.Style.make(~display="none", ()))
                 />
                 <label 
@@ -159,12 +301,12 @@ let make = (_children) => {
             </div>
           | _ => null
           }
-        }
+        }*/
         <div className="row mt-5"> 
           <button 
             type_="button" 
             className="btn btn-rounded btn-form- btn-form-active m-auto"
-            onClick=(_ => send(TogglePopup(true)))
+            onClick=(_ => send(OnSubmitRequestLeave))
             style=(ReactDOMRe.Style.make(~maxWidth="120px", ()))
           >
             {string("Submit")}
@@ -184,7 +326,14 @@ let make = (_children) => {
       </div>
     </div>
     (state.showPopup ? 
-      <PopupRequestForm onConfirm=(_ => send(TogglePopup(false))) /> : null
+      <PopupRequestForm 
+        isSick=(state.formType === Sick)
+        loadState=state.loadState
+        onConfirm=(_ => {
+          send(TogglePopup(false));
+          (state.loadState === Failed ? () : onRefresh());
+        }) 
+      /> : null
     )
   </div>,
 };

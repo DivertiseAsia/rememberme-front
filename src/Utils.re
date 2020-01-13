@@ -20,6 +20,8 @@ let formPreventDefault = e => ReactEvent.Form.preventDefault(e);
 
 let valueFromEvent = event => ReactEvent.Form.target(event)##value;
 
+let filesFromEvent = event => ReactEvent.Form.target(event)##files;
+
 let valueFromEventOnBlur = event => ReactEvent.Focus.target(event)##value;
 
 let boolFromCheckbox = (event): bool => ReactEvent.Form.target(event)##checked;

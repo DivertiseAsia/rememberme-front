@@ -30,17 +30,24 @@ let strToRequestMenu = (formType:string) => {
   }
 };
 
-let formStatusToStr = (formStatus) => {
-  switch formStatus {
+let formStatusToStr = (requestStatus) => {
+  switch requestStatus {
   | Pending => "Pending"
-  | Fail => "Fail"
-  | _ => "Approve"
+  | Fail => "Rejected"
+  | _ => "Approved"
   }
 };
-let strToFormStatus = (formStatus:string) => {
-  switch formStatus {
-  | "Sick" => Pending
-  | "Fail" => Fail
+let strToFormStatus = (requestStatus:string) => {
+  switch requestStatus {
+  | "Approved" => Pending
+  | "Rejected" => Fail
+  | _ => Approve
+  }
+};
+let mapRequestStatus = (requestStatus:int) => {
+  switch requestStatus {
+  | 2 => Pending
+  | 0 => Fail
   | _ => Approve
   }
 };
@@ -57,6 +64,48 @@ let strToFormMenu = (formMenu:string) => {
   | _ => History
   }
 };
+
+let mapDayStr = (day) =>
+  switch (day) {
+  | Sun => "Sun"
+  | Mon => "Mon"
+  | Tue => "Tue"
+  | Wed => "Wed"
+  | Thu => "Thu"
+  | Fri => "Fri"
+  | Sat => "Sat"
+  };
+let mapMonthStr = (month) =>
+  switch (month) {
+  | Jan => "Jan"
+  | Feb => "Feb"
+  | Mar => "Mar"
+  | Apr => "Apr"
+  | May => "May"
+  | Jun => "Jun"
+  | Jul => "Jul"
+  | Aug => "Aug"
+  | Sep => "Sep"
+  | Oct => "Oct"
+  | Nov => "Nov"
+  | Dec => "Dec"
+  };
+
+let mapFullMonthStr = (month) =>
+  switch (month) {
+  | Jan => "January"
+  | Feb => "February"
+  | Mar => "March"
+  | Apr => "April"
+  | May => "May"
+  | Jun => "June"
+  | Jul => "July"
+  | Aug => "August"
+  | Sep => "September"
+  | Oct => "October"
+  | Nov => "November"
+  | Dec => "December"
+  };
 
 let mapDayInt = (day:int) =>
   switch (day) {
@@ -100,18 +149,105 @@ let mapFullMonthInt = (month:int) =>
   | 11 => "December"
   };
 
-let getDatetimeStr = (datetime:float) => {
+let getDatetimeStr = (~formCurrentYear=false, datetime:float) => {
   (datetime |> Js.Date.fromFloat |> Js.Date.getDay |> int_of_float |> mapDayInt) ++ " " ++
   (datetime |> Js.Date.fromFloat |> Js.Date.getDate |> int_of_float |> string_of_int) ++ " " ++
   (datetime |> Js.Date.fromFloat |> Js.Date.getMonth |> int_of_float |> mapFullMonthInt) ++ " " ++
-  (datetime |> Js.Date.fromFloat |> Js.Date.getFullYear |> int_of_float |> string_of_int);
-}
+  ((formCurrentYear ? Js.Date.now() : datetime) |> Js.Date.fromFloat |> Js.Date.getFullYear |> int_of_float |> string_of_int);
+};
+
+
+let getTwoPositionStr = (month:string) => {
+  (String.length(month) === 1 ? ("0" ++ month) : month)
+};
+let getDateStrRequestLeave = (datetime: float) => {
+  (datetime |> Js.Date.fromFloat |> Js.Date.getFullYear |> int_of_float |> string_of_int) ++ "-" ++
+  (((datetime |> Js.Date.fromFloat |> Js.Date.getMonth |> int_of_float) + 1) |> string_of_int |> getTwoPositionStr) ++ "-" ++
+  (datetime |> Js.Date.fromFloat |> Js.Date.getDate |> int_of_float |> string_of_int |> getTwoPositionStr)
+};
 
 let mapHolidayToSchedule = (holiday:RememberMeApi.holiday) => {
   let schedule = {
     scheduleMenu: Holiday,
     title: holiday.name,
     date: holiday.date,
+    detail: "",
   };
   schedule
+};
+
+let mapEventToSchedule = (event:RememberMeApi.event) => {
+  let schedule = {
+    scheduleMenu: Event,
+    title: event.name,
+    date: event.date |> Js.Date.valueOf,
+    detail: event.details,
+  };
+  schedule
+};
+let mapLeaveToSchedule = (leaveDetail:RememberMeApi.leaveDetail) => {
+  let schedule = {
+    scheduleMenu: Leave,
+    title: leaveDetail.user ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
+    date: leaveDetail.fromDate |> Js.Date.valueOf,
+    detail: "",
+  };
+  schedule
+};
+
+let splitRequestLeave= (leaveDetail:RememberMeApi.leaveDetail) => {
+  let dateFloat = (leaveDetail.toDate |> Js.Date.valueOf) -. (leaveDetail.fromDate |> Js.Date.valueOf);
+  switch dateFloat {
+  | x when x === 0. => [leaveDetail |> mapLeaveToSchedule]
+  | _ => 
+    Array.make(((dateFloat /. (1000.*.60.*.60.*.24.) +. 1.) |> int_of_float), ReasonReact.null)
+      |> Array.mapi((idx, _) => {
+        let date = ((leaveDetail.fromDate |> Js.Date.valueOf) +. ((1000.*.60.*.60.*.24.) *. (idx |> float_of_int)));
+        let schedule = {
+          scheduleMenu: Leave,
+          title: leaveDetail.user ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
+          date,
+          detail: "",
+        };
+        schedule
+      }) |> Array.to_list
+  }
+};
+
+let mapBirthDayToSchedule = (birthday:RememberMeApi.birthDay) => {
+  let schedule = {
+    scheduleMenu: Birthday,
+    title: birthday.name ++ "'s birthday",
+    date: 
+      Js.Date.makeWithYMD(
+        ~year={
+          Js.Date.now() |> Js.Date.fromFloat |> Js.Date.getFullYear;
+        },
+        ~month={
+          birthday.birthDate  |> Js.Date.getMonth;
+        },
+        ~date={
+          birthday.birthDate  |> Js.Date.getDate;
+        }, ()) |> Js.Date.valueOf,
+    detail: "",
+  };
+  schedule
+};
+
+let validateBirthday = (birthday:Js.Date.t, month, date) => {
+  (birthday |> Js.Date.getMonth === month && birthday |> Js.Date.getDate === date)
+};
+
+let setStrToJsDate = (datetime:string) => {/* xxxx-xx-xx */
+  let datetimeSplited = Js.String.split("-", datetime);
+  Js.Date.makeWithYMD(
+    ~year=(datetimeSplited[0] |> float_of_string), 
+    ~month=(datetimeSplited[1] |> float_of_string),
+    ~date=(datetimeSplited[2] |> float_of_string), 
+  ());
+};
+
+let validateWeekend = (datetime:Js.Date.t) => {
+  let day = datetime |> Js.Date.getDay;
+  (day === 0. || day === 6.)
 };

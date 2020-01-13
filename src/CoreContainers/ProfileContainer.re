@@ -4,7 +4,6 @@ open Utils;
 
 let str = ReasonReact.string;
 
-type username = string;
 type email = string;
 type password = string;
 type confirmPassword = password;
@@ -15,45 +14,42 @@ type birthDate = string;
 type state = {
   loading: bool,
   email,
+  oldPassword:string,
   password,
   confirmPassword,
   firstName,
   lastName,
-  userName:string,
   birthDate,
   err: option(string),
 };
 
 type action =
-  | SignUp
-  | SignUpFailed(string)
-  | SignUpSuccess
+  | ChangePassword
+  | ChangePasswordFailed(string)
+  | ChangePasswordSuccess
   | SetEmail(string)
+  | SetOldPassword(string)
   | SetPassword(string)
   | SetConfirmPassword(string)
   | SetFirstName(firstName)
   | SetLastName(lastName)
-  | SetUsername(string)
   | SetBirthDate(birthDate);
 
-let signup = ({send, state}) => {
+let changePassword = ({send, state}) => {
   let payload =
     Json.Encode.(
       object_([
-        ("email", state.email |> Js.Json.string),
-        ("password", state.password |> Js.Json.string),
+        ("old_password", state.oldPassword |> Js.Json.string),
+        ("new_password", state.password |> Js.Json.string),
         ("confirm_password", state.confirmPassword |> Js.Json.string),
-        ("first_name", state.firstName |> Js.Json.string),
-        ("last_name", state.lastName |> Js.Json.string),
-        ("birthDate", state.birthDate |> Js.Json.string),
       ])
     );
 
   RequestUtils.requestJsonResponseToAction(
-    ~headers=RequestUtils.buildHeader(~verb=Post, ~body=payload, None),
-    ~url=URL.signUp,
-    ~successAction=json => send(SignUpSuccess),
-    ~failAction=json => send(SignUpFailed(json |> Json.stringify)),
+    ~headers=RequestUtils.buildHeader(~verb=Post, ~body=payload, Utils.getToken()),
+    ~url=URL.password,
+    ~successAction=json => send(ChangePasswordSuccess),
+    ~failAction=json => send(ChangePasswordFailed(json |> Json.stringify)),
   )
   |> ignore;
 };
@@ -65,42 +61,40 @@ let getClassName = (~extraStyle="", ~invalid=false, ()) => {
 
 let component = ReasonReact.reducerComponent("ProfileContainer");
 
-let make = _children => {
+let make = (~profile:profile, _children) => {
   ...component,
   initialState: () => {
     loading: false,
-    email: "",
+    email: profile.email,
+    oldPassword: "",
     password: "",
     confirmPassword: "",
-    firstName: "",
-    lastName: "",
-    userName: "",
-    birthDate: "",
+    firstName: profile.firstName,
+    lastName: profile.lastName,
+    birthDate: profile.birthDate |> Js.Date.valueOf |> RememberMeUtils.getDateStrRequestLeave,
     err: None,
   },
   reducer: (action, state) => {
     switch (action) {
-    | SignUp => UpdateWithSideEffects({...state, loading: true, err: None}, signup)
-    | SignUpSuccess => SideEffects(_ => ())
-    | SignUpFailed(err) => Update({...state, loading: false, err: Some(err)})
+    | ChangePassword => UpdateWithSideEffects({...state, loading: true, err: None}, changePassword)
+    | ChangePasswordSuccess => SideEffects(_ => ())
+    | ChangePasswordFailed(err) => Update({...state, loading: false, err: Some(err)})
     | SetEmail(email) => Update({...state, email})
+    | SetOldPassword(oldPassword) => Update({...state, oldPassword: oldPassword |> getPasswordWithLimit})
     | SetPassword(password) => Update({...state, password: password |> getPasswordWithLimit})
     | SetConfirmPassword(confirmPassword) =>
       Update({...state, confirmPassword: confirmPassword |> getPasswordWithLimit})
     | SetBirthDate(birthDate) => Update({...state, birthDate})
     | SetFirstName(firstName) => Update({...state, firstName})
     | SetLastName(lastName) => Update({...state, lastName})
-    | SetUsername(userName) => Update({...state, userName})
     };
   },
   render: ({state, send}) => {
     let buttonDisabled =
       state.loading
-      || !checkEmail(state.email)
+      || state.oldPassword === ""
       || !checkPassword(state.password)
-      || !checkIsSamePassword(~confirmPassword=state.confirmPassword, ~password=state.password)
-      || [state.firstName, state.lastName, state.birthDate]
-      |> isAnyStringEmpty;
+      || !checkIsSamePassword(~confirmPassword=state.confirmPassword, ~password=state.confirmPassword);
 
     <div className="row">
       <div className="col-sm-9 col-md-9 col-lg-9 mx-auto signup-container">
@@ -152,30 +146,28 @@ let make = _children => {
               id="birthday"
               className={getClassName(
                 ~extraStyle="form-control-smaller",
-                ~invalid={state.lastName |> isStringEmpty},
+                ~invalid={state.birthDate |> isStringEmpty},
                 (),
               )}
               placeholder="Birthday"
-              value={state.lastName}
+              value={state.birthDate}
               onChange={e => send(SetBirthDate(valueFromEvent(e)))}
             />
             <div className="col-12 p-0">
               <h6>{string("Change Password")}</h6>
               <input
                 type_="password"
-                id="inputPassword"
                 className={getClassName(
                   ~extraStyle="form-control-small",
                   ~invalid={!checkPassword(state.password)},
                   (),
                 )}
                 placeholder="Old Password"
-                value={state.password}
-                onChange={e => send(SetPassword(e |> valueFromEvent))}
+                value={state.oldPassword}
+                onChange={e => send(SetOldPassword(e |> valueFromEvent))}
               />
               <input
                 type_="password"
-                id="inputPassword"
                 className={getClassName(
                   ~extraStyle="form-control-small",
                   ~invalid={!checkPassword(state.password)},
@@ -187,7 +179,6 @@ let make = _children => {
               />
               <input
                 type_="password"
-                id="inputConfirmPassword"
                 className={getClassName(
                   ~extraStyle="form-control-small",
                   ~invalid=!{checkIsSamePassword(~password=state.password, ~confirmPassword=state.confirmPassword)},
@@ -210,7 +201,7 @@ let make = _children => {
             {state.password |> Js.String.length > 0 && !checkPassword(state.password) ?
                <p id="error_password"> {"The password must be at least 8 characters long." |> str} </p> : null}
           </div>
-          <button id="signup_btn" className="btn btn-blue btn-signup mb-5" disabled=buttonDisabled onClick={_ => send(SignUp)}>
+          <button id="signup_btn" className="btn btn-blue btn-signup mb-5" disabled=buttonDisabled onClick={_ => send(ChangePassword)}>
             {"Confirm" |> str}
           </button>
         </form>
