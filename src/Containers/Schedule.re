@@ -235,7 +235,13 @@ let make = (~holidayList=[], ~listBirthDay=[], ~leaveList=[], ~userLeaveList=[],
             |> List.map((requestLeave:leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
             |> List.concat;
           let schedules = List.append(schedulesHoliday, schedulesLeave);
-          <RequestForm onRefresh schedules />
+          <RequestForm 
+            onRefresh=(_ => {
+              send(ChangeContentForm(Idle));
+              onRefresh();
+            }) 
+            schedules 
+          />
         }
         | MyForm => <RequestLeavePanel requestLeaves=userLeaveList onRefresh />
         };

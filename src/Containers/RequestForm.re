@@ -186,9 +186,8 @@ let make = (~schedules, ~onRefresh, _children) => {
     | ChangeNote(note) => Update({...state, note})
     | OnSubmitRequestLeave => UpdateWithSideEffects({...state, loadState: Loading}, onSubmit)
     | OnSubmitRequestLeaveSuccess => 
-        UpdateWithSideEffects({...state, loadState: Succeed, startDate: Js.Date.now(), endDate: Js.Date.now(), note: ""}, 
-        _ => onRefresh())
-    | OnSubmitRequestLeaveFailed => Update({...state, loadState: Failed, note: ""})
+        Update({...state, loadState: Succeed, startDate: Js.Date.now(), endDate: Js.Date.now(), note: "", showPopup: true})
+    | OnSubmitRequestLeaveFailed => Update({...state, loadState: Failed, note: "", showPopup: true})
     };
   },
   render: ({state, send}) =>
@@ -307,7 +306,7 @@ let make = (~schedules, ~onRefresh, _children) => {
           <button 
             type_="button" 
             className="btn btn-rounded btn-form- btn-form-active m-auto"
-            onClick=(_ => send(TogglePopup(true)))
+            onClick=(_ => send(OnSubmitRequestLeave))
             style=(ReactDOMRe.Style.make(~maxWidth="120px", ()))
           >
             {string("Submit")}
@@ -329,9 +328,10 @@ let make = (~schedules, ~onRefresh, _children) => {
     (state.showPopup ? 
       <PopupRequestForm 
         isSick=(state.formType === Sick)
+        loadState=state.loadState
         onConfirm=(_ => {
           send(TogglePopup(false));
-          send(OnSubmitRequestLeave);
+          (state.loadState === Failed ? () : onRefresh());
         }) 
       /> : null
     )
