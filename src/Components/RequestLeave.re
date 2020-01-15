@@ -43,7 +43,7 @@ let make = (~requestLeave:leaveDetail, ~onCancel, _children) => {
           {
             switch requestLeave.status {
             | Pending => 
-              <div className="request-status btn-rounded btn-pending" onClick=onCancel>
+              <div className="request-status btn-rounded btn-pending">
                 <img src="/images/pending.svg" style=(ReactDOMRe.Style.make(~width="13px", ~height="13px", ~marginBottom="2px", ())) />
                 {string(" Pending")}
               </div>
