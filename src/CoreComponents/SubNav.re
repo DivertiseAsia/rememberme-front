@@ -22,16 +22,14 @@ let make = (~items: list(navItem), ~current: string, ~className: option(string)=
   ...component,
   render: _self =>
     <nav className={"submenu " ++ Js.Option.getWithDefault("submenu-default", className)}>
-      {
-        array(
-          List.toArray(
-            List.map(items, item =>
-              <li key={item.match} className={isSelected(item, items, current) ? "selected" : ""}>
-                <Link href={item.href}> {string(item.caption)} </Link>
-              </li>
-            ),
-          ),
-        )
-      }
+      {array(
+         List.toArray(
+           List.map(items, item =>
+             <li key={item.match} className={isSelected(item, items, current) ? "selected" : ""}>
+               <Link href={item.href}> {string(item.caption)} </Link>
+             </li>
+           ),
+         ),
+       )}
     </nav>,
 };

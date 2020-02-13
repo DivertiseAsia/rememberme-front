@@ -21,20 +21,19 @@ type day =
   | Fri
   | Sat;
 
-
-type scheduleMenu = 
+type scheduleMenu =
   | Leave
   | Holiday
   | Event
   | Birthday
   | All;
 
-type formType = 
-  | Sick 
+type formType =
+  | Sick
   | Vacation;
 
-type requestStatus = 
-  | Pending 
+type requestStatus =
+  | Pending
   | Fail
   | Approve;
 
@@ -50,9 +49,7 @@ type loadState =
 
 type schedule = {
   scheduleMenu,
-  title:string,
+  title: string,
   date: float,
-  detail:string,
+  detail: string,
 };
-
-
