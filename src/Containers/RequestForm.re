@@ -16,6 +16,7 @@ type state = {
   startDate: float,
   endDate: float,
   note: string,
+  isRemote: bool,
   showPopup: bool,
 };
 
@@ -25,6 +26,7 @@ type action =
   | ChangeStartDate(float)
   | ChangeEndDate(float)
   | ChangeNote(string)
+  | ChangeIsRemote(bool)
   | OnSubmitRequestLeave
   | OnSubmitRequestLeaveSuccess
   | OnSubmitRequestLeaveFailed;
@@ -155,6 +157,7 @@ let onSubmit = ({state, send}) => {
         ("from_date", state.startDate |> RememberMeUtils.getDateStrRequestLeave |> Js.Json.string),
         ("to_date", state.endDate |> RememberMeUtils.getDateStrRequestLeave |> Js.Json.string),
         ("reason", state.note |> Js.Json.string),
+        ("is_remote", state.isRemote |> Js.Json.boolean),
       ])
     );
   RememberMeApi.postLeave(
@@ -175,6 +178,7 @@ let make = (~schedules, ~onRefresh, _children) => {
     startDate: Js.Date.now(),
     endDate: Js.Date.now(),
     note: "",
+    isRemote: false,
     showPopup: false,
   },
   reducer: (action, state) => {
@@ -186,6 +190,7 @@ let make = (~schedules, ~onRefresh, _children) => {
     | ChangeEndDate(endDate) =>
       Update({...state, endDate, startDate: state.startDate > endDate ? endDate : state.startDate})
     | ChangeNote(note) => Update({...state, note})
+    | ChangeIsRemote(isRemote) => Update({...state, isRemote})
     | OnSubmitRequestLeave => UpdateWithSideEffects({...state, loadState: Loading}, onSubmit)
     | OnSubmitRequestLeaveSuccess =>
       Update({
@@ -194,9 +199,10 @@ let make = (~schedules, ~onRefresh, _children) => {
         startDate: Js.Date.now(),
         endDate: Js.Date.now(),
         note: "",
+        isRemote: false,
         showPopup: true,
       })
-    | OnSubmitRequestLeaveFailed => Update({...state, loadState: Failed, note: "", showPopup: true})
+    | OnSubmitRequestLeaveFailed => Update({...state, loadState: Failed, note: "", isRemote: false, showPopup: true})
     };
   },
   render: ({state, send}) =>
@@ -264,6 +270,12 @@ let make = (~schedules, ~onRefresh, _children) => {
                 style={ReactDOMRe.Style.make(~width="100%", ())}
                 onChange={e => send(ChangeNote(Utils.valueFromEvent(e)))}
               />
+            </div>
+          </div>
+          <div className="row mt-3">
+            <div className="col-12 col-md-4 col-note"> {string("Remote:")} </div>
+            <div className="col-12 col-md-8">
+              <input type_="checkbox" onInput={e => send(ChangeIsRemote(Utils.boolFromCheckbox(e)))} />
             </div>
           </div>
           /*{

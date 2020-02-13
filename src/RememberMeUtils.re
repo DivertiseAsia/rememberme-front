@@ -188,7 +188,10 @@ let mapEventToSchedule = (event: RememberMeApi.event) => {
 let mapLeaveToSchedule = (leaveDetail: RememberMeApi.leaveDetail) => {
   let schedule = {
     scheduleMenu: Leave,
-    title: leaveDetail.user ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
+    title:
+      (leaveDetail.isRemote ? "[Remote] " : "")
+      ++ leaveDetail.user
+      ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
     date: leaveDetail.fromDate |> Js.Date.valueOf,
     detail: "",
   };

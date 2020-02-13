@@ -15,6 +15,7 @@ let make = (~requestLeave: leaveDetail, ~onCancel, _children) => {
         (requestLeave.fromDate |> Js.Date.valueOf |> getDatetimeStr)
         ++ " - "
         ++ (requestLeave.toDate |> Js.Date.valueOf |> getDatetimeStr);
+    let detailStr = (requestLeave.isRemote ? "[Remote] " : "") ++ requestLeave.reason;
     <div className="request-leave-container">
       <div className="row">
         <div className="col-2 pr-0 text-center">
@@ -25,7 +26,7 @@ let make = (~requestLeave: leaveDetail, ~onCancel, _children) => {
         </div>
         <div className="col-6">
           <p className="mb-1"> <b> {string(datetimeStr)} </b> </p>
-          <p className="mb-1"> {string(requestLeave.reason)} </p>
+          <p className="mb-1"> {string(detailStr)} </p>
           {switch (requestLeave.status) {
            | Pending =>
              <button type_="button" className="btn btn-rounded btn-outline btn-cancel-request" onClick=onCancel>

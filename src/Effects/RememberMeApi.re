@@ -30,6 +30,7 @@ type leaveDetail = {
   fromDate: Js.Date.t,
   toDate: Js.Date.t,
   reason: string,
+  isRemote: bool,
   status: RememberMeType.requestStatus,
 };
 
@@ -131,6 +132,7 @@ module Decode = {
     fromDate: json |> field("from_date", string) |> Js.Date.fromString |> getDateOnlyDate,
     toDate: json |> field("to_date", string) |> Js.Date.fromString |> getDateOnlyDate,
     reason: json |> field("reason", string),
+    isRemote: json |> field("is_remote", bool),
     status: json |> field("status", int) |> mapRequestStatus,
   };
   let leaveList = json => json |> list(leaveDetail);
