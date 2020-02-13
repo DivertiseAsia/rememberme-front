@@ -43,21 +43,19 @@ let make =
       </div>
       <div className="slider-bullets-container">
         <div className="slider-bullets">
-          {
-            array(
-              List.toArray(
-                List.mapWithIndex(slides, (index, slide) =>
-                  <div
-                    key={"bullet-" ++ string_of_int(index)}
-                    className={
-                      "slider-bullet" ++ (slide.slideNumber === self.state.slide ? " slider-bullet-current" : "")
-                    }
-                    onClick={_e => self.send(GoToSlide(index))}
-                  />
-                ),
-              ),
-            )
-          }
+          {array(
+             List.toArray(
+               List.mapWithIndex(slides, (index, slide) =>
+                 <div
+                   key={"bullet-" ++ string_of_int(index)}
+                   className={
+                     "slider-bullet" ++ (slide.slideNumber === self.state.slide ? " slider-bullet-current" : "")
+                   }
+                   onClick={_e => self.send(GoToSlide(index))}
+                 />
+               ),
+             ),
+           )}
         </div>
       </div>
     </BaseSlider>,

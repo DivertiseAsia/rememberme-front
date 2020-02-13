@@ -20,15 +20,11 @@ let make = (~queryString="", _children) => {
       };
     };
     <div className="auth-page login-page container-fluid">
-      <div className="row row-logo"> 
-        <img className="logo-" src="/images/logo.png" />
-      </div>
-      <div className="row row-login-container justify-content-center"> 
-        <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-3"> 
-          <LoginContainer ?afterLoginUrl />
-        </div>
-        <div className="col-12 text-center link-signup"> 
-          <u><Link href=Links.register> {string("Sign up")} </Link></u>
+      <div className="row row-logo"> <img className="logo-" src="/images/logo.png" /> </div>
+      <div className="row row-login-container justify-content-center">
+        <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-3"> <LoginContainer ?afterLoginUrl /> </div>
+        <div className="col-12 text-center link-signup">
+          <u> <Link href=Links.register> {string("Sign up")} </Link> </u>
         </div>
       </div>
     </div>;

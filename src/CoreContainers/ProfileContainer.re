@@ -14,7 +14,7 @@ type birthDate = string;
 type state = {
   loading: bool,
   email,
-  oldPassword:string,
+  oldPassword: string,
   password,
   confirmPassword,
   firstName,
@@ -61,7 +61,7 @@ let getClassName = (~extraStyle="", ~invalid=false, ()) => {
 
 let component = ReasonReact.reducerComponent("ProfileContainer");
 
-let make = (~profile:profile, _children) => {
+let make = (~profile: profile, _children) => {
   ...component,
   initialState: () => {
     loading: false,
@@ -77,19 +77,28 @@ let make = (~profile:profile, _children) => {
   reducer: (action, state) => {
     switch (action) {
     | ChangePassword => UpdateWithSideEffects({...state, loading: true, statusMessage: None}, changePassword)
-    | ChangePasswordSuccess => Update({...state, loading: false, statusMessage: Some([|<p>{string("Password Updated !")}</p>|]), oldPassword: "", password: "", confirmPassword: ""})
-    | ChangePasswordFailed(statusMessage) => Update({...state, 
-        loading: false, 
-        statusMessage: Some(statusMessage |> getErrorMsgFromJson), 
-        oldPassword: "", 
-        password: "", 
-        confirmPassword: ""
+    | ChangePasswordSuccess =>
+      Update({
+        ...state,
+        loading: false,
+        statusMessage: Some([|<p> {string("Password Updated !")} </p>|]),
+        oldPassword: "",
+        password: "",
+        confirmPassword: "",
+      })
+    | ChangePasswordFailed(statusMessage) =>
+      Update({
+        ...state,
+        loading: false,
+        statusMessage: Some(statusMessage |> getErrorMsgFromJson),
+        oldPassword: "",
+        password: "",
+        confirmPassword: "",
       })
     | SetEmail(email) => Update({...state, email})
     | SetOldPassword(oldPassword) => Update({...state, oldPassword})
     | SetPassword(password) => Update({...state, password})
-    | SetConfirmPassword(confirmPassword) =>
-      Update({...state, confirmPassword})
+    | SetConfirmPassword(confirmPassword) => Update({...state, confirmPassword})
     | SetBirthDate(birthDate) => Update({...state, birthDate})
     | SetFirstName(firstName) => Update({...state, firstName})
     | SetLastName(lastName) => Update({...state, lastName})
@@ -146,7 +155,7 @@ let make = (~profile:profile, _children) => {
               value={state.email}
               onChange={e => send(SetEmail(e |> valueFromEvent))}
             />
-            <small>{string("Birthday")}</small>
+            <small> {string("Birthday")} </small>
             <input
               type_="date"
               id="birthday"
@@ -160,7 +169,7 @@ let make = (~profile:profile, _children) => {
               onChange={e => send(SetBirthDate(valueFromEvent(e)))}
             />
             <div className="col-12 p-0">
-              <h6>{string("Change Password")}</h6>
+              <h6> {string("Change Password")} </h6>
               <input
                 type_="password"
                 className={getClassName(
@@ -207,11 +216,14 @@ let make = (~profile:profile, _children) => {
             {state.password |> Js.String.length > 0 && !checkPassword(state.password) ?
                <p id="error_password"> {"The password must be at least 8 characters long." |> str} </p> : null}
           </div>
-          <button id="signup_btn" className="btn btn-blue btn-signup mb-5" disabled=buttonDisabled onClick={_ => send(ChangePassword)}>
+          <button
+            id="signup_btn"
+            className="btn btn-blue btn-signup mb-5"
+            disabled=buttonDisabled
+            onClick={_ => send(ChangePassword)}>
             {"Confirm" |> str}
           </button>
         </form>
-
       </div>
     </div>;
   },

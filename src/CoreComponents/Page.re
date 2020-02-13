@@ -22,22 +22,18 @@ let mapPageEnd = (pageEndArray: list(pageEnd), extraClass: string) =>
   | 0 => ReasonReact.null
   | _ =>
     <div className={"page-end-container page-end-" ++ extraClass} key=extraClass>
-      {
-        array(
-          List.toArray(
-            List.mapWithIndex(pageEndArray, (i, info: pageEnd) =>
-              <div className={"page-end page-end-" ++ string_of_int(i)} key={string_of_int(i)}>
-                {
-                  switch ((info: pageEnd)) {
-                  | Text(s) => <div className="page-end-text"> {ReasonReact.string(s)} </div>
-                  | Children(children) => <div className="page-end-children"> ...children </div>
-                  }
-                }
-              </div>
-            ),
-          ),
-        )
-      }
+      {array(
+         List.toArray(
+           List.mapWithIndex(pageEndArray, (i, info: pageEnd) =>
+             <div className={"page-end page-end-" ++ string_of_int(i)} key={string_of_int(i)}>
+               {switch ((info: pageEnd)) {
+                | Text(s) => <div className="page-end-text"> {ReasonReact.string(s)} </div>
+                | Children(children) => <div className="page-end-children"> ...children </div>
+                }}
+             </div>
+           ),
+         ),
+       )}
     </div>
   };
 
