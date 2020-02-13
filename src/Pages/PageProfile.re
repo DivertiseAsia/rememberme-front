@@ -45,7 +45,7 @@ let make = (_children) => {
         <div className="col-6 text-left">
           <div 
             className="cursor-pointer" 
-            onClick=(_ => Router.push(""))
+            onClick=(_ => Router.push("/"))
           >
             <img 
               className="form-icon mr-2" 
@@ -73,8 +73,8 @@ let make = (_children) => {
           {
             switch (state.loadState, state.profile) {
             | (Succeed, Some(profile)) => <ProfileContainer profile />
-            | (Failed, _) => null 
-            | _ => {string("Loading")}
+            | (Failed, _) => {string("Can't get profile. Please try again")} 
+            | _ => <Loading />
             }
           }
         </div>

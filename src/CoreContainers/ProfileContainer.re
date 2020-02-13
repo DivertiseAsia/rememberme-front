@@ -20,7 +20,7 @@ type state = {
   firstName,
   lastName,
   birthDate,
-  err: option(string),
+  statusMessage: option(array(ReasonReact.reactElement)),
 };
 
 type action =
@@ -72,18 +72,24 @@ let make = (~profile:profile, _children) => {
     firstName: profile.firstName,
     lastName: profile.lastName,
     birthDate: profile.birthDate |> Js.Date.valueOf |> RememberMeUtils.getDateStrRequestLeave,
-    err: None,
+    statusMessage: None,
   },
   reducer: (action, state) => {
     switch (action) {
-    | ChangePassword => UpdateWithSideEffects({...state, loading: true, err: None}, changePassword)
-    | ChangePasswordSuccess => SideEffects(_ => ())
-    | ChangePasswordFailed(err) => Update({...state, loading: false, err: Some(err)})
+    | ChangePassword => UpdateWithSideEffects({...state, loading: true, statusMessage: None}, changePassword)
+    | ChangePasswordSuccess => Update({...state, loading: false, statusMessage: Some([|<p>{string("Password Updated !")}</p>|]), oldPassword: "", password: "", confirmPassword: ""})
+    | ChangePasswordFailed(statusMessage) => Update({...state, 
+        loading: false, 
+        statusMessage: Some(statusMessage |> getErrorMsgFromJson), 
+        oldPassword: "", 
+        password: "", 
+        confirmPassword: ""
+      })
     | SetEmail(email) => Update({...state, email})
-    | SetOldPassword(oldPassword) => Update({...state, oldPassword: oldPassword |> getPasswordWithLimit})
-    | SetPassword(password) => Update({...state, password: password |> getPasswordWithLimit})
+    | SetOldPassword(oldPassword) => Update({...state, oldPassword})
+    | SetPassword(password) => Update({...state, password})
     | SetConfirmPassword(confirmPassword) =>
-      Update({...state, confirmPassword: confirmPassword |> getPasswordWithLimit})
+      Update({...state, confirmPassword})
     | SetBirthDate(birthDate) => Update({...state, birthDate})
     | SetFirstName(firstName) => Update({...state, firstName})
     | SetLastName(lastName) => Update({...state, lastName})
@@ -191,9 +197,9 @@ let make = (~profile:profile, _children) => {
             </div>
           </div>
           <div className="error-message">
-            {switch (state.err) {
+            {switch (state.statusMessage) {
              | None => null
-             | Some(jsonStr) => jsonStr |> getErrorMsgFromJson |> array
+             | Some(messages) => messages |> array
              }}
             {state.confirmPassword |> Js.String.length > 0 && !(state.confirmPassword === state.password) ?
                <p id="error_confirm_password"> {"The password and confirmation password are mismatch." |> str} </p> :
