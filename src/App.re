@@ -34,10 +34,7 @@ let routeMatches = (x, link) => "/" ++ x == link;
 
 let make = _children => {
   ...component,
-  initialState: () => {
-    route: Router.dangerouslyGetInitialUrl(), 
-    loadState: Loading,
-  },
+  initialState: () => {route: Router.dangerouslyGetInitialUrl(), loadState: Loading},
   reducer: (action, state) =>
     switch (action) {
     | RouteTo(route) => Update({...state, route})
@@ -47,16 +44,14 @@ let make = _children => {
     onUnmount(() => Router.unwatchUrl(watcherID));
   },
   render: ({state: {route, loadState}}) => {
-    
     let token = loadToken();
     let isLoggedIn = token !== "";
     switch (route.path, isLoggedIn) {
     | ([], true) => <PageHome isLoggedIn />
     | ([""], true) => <PageHome isLoggedIn />
-    | ([x, monthYear], true) when routeMatches(x, Links.dashboard) => {
-        let datetime = Js.String.split("-", monthYear);
-        <PageHome isLoggedIn year=(datetime[1] |> float_of_string) month=((datetime[0] |> int_of_string) - 1) />
-      }
+    | ([x, monthYear], true) when routeMatches(x, Links.dashboard) =>
+      let datetime = Js.String.split("-", monthYear);
+      <PageHome isLoggedIn year={datetime[1] |> float_of_string} month={(datetime[0] |> int_of_string) - 1} />;
     | ([x], true) when routeMatches(x, Links.profile) => <PageProfile />
     | ([x], true) when routeMatches(x, Links.allMonth) => <PageAllMonth />
     | ([x], _) when routeMatches(x, Links.login) => <PageLogin queryString={route.search} />
@@ -70,6 +65,6 @@ let make = _children => {
       let _ = ReasonReact.Router.push("/login?" ++ queryParams);
       <PageLogin queryString=queryParams />;
     | _ => <Page404 isLoggedIn />
-    }
+    };
   },
 };

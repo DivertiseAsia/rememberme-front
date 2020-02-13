@@ -9,20 +9,16 @@ let make = (~onClose, _children) => {
       <div className="popover-bg" onClick=onClose />
       <div className="container popover">
         <div className="popover-arrow" />
-        <div className="row"> 
-          <div 
-            className="col-12 text-center mt-2 mb-2 cursor-pointer"
-            onClick=(_ => Router.push("profile"))
-          > 
+        <div className="row">
+          <div className="col-12 text-center mt-2 mb-2 cursor-pointer" onClick={_ => Router.push("profile")}>
             {string("My Profile")}
           </div>
-          <div 
+          <div
             className="col-12 text-center mt-2 mb-2 cursor-pointer"
-            onClick=(_ => {
+            onClick={_ => {
               Dom.Storage.(localStorage |> removeItem("token"));
               Router.push("");
-            })
-          > 
+            }}>
             {string("Sign Out")}
           </div>
         </div>

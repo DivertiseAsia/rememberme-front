@@ -30,15 +30,13 @@ let renderItemEnd = (itemEnd: option(itemEnd), extraClass: string) =>
   | None => ReasonReact.null
   | Some(value) =>
     <span className={"item-end item-end-" ++ extraClass}>
-      {
-        switch (value) {
-        | Text(s) => <span> {ReasonReact.string(s)} </span>
-        | Image(s) =>
-          <span className=imageStyle style={ReactDOMRe.Style.make(~backgroundImage="url('" ++ s ++ "')", ())} />
-        | Button(s, onClick) => <button onClick> {ReasonReact.string(s)} </button>
-        | _ => <span />
-        }
-      }
+      {switch (value) {
+       | Text(s) => <span> {ReasonReact.string(s)} </span>
+       | Image(s) =>
+         <span className=imageStyle style={ReactDOMRe.Style.make(~backgroundImage="url('" ++ s ++ "')", ())} />
+       | Button(s, onClick) => <button onClick> {ReasonReact.string(s)} </button>
+       | _ => <span />
+       }}
     </span>
   };
 
@@ -54,12 +52,10 @@ let renderItemBody = (itemBody: itemBody) =>
     {renderToDiv(itemBody.topTitle, "item-top")}
     <div className="list-item-title"> {ReasonReact.string(itemBody.title)} </div>
     {renderToDiv(itemBody.subtitle, "item-sub")}
-    {
-      switch (itemBody.children) {
-      | None => ReasonReact.null
-      | Some(children) => <div className="list-item-subchildren"> ...children </div>
-      }
-    }
+    {switch (itemBody.children) {
+     | None => ReasonReact.null
+     | Some(children) => <div className="list-item-subchildren"> ...children </div>
+     }}
   </span>;
 
 let make = (~item: item, ~className: option(string)=?, _children) => {

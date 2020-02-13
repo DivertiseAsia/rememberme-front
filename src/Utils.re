@@ -14,7 +14,7 @@ let getErrorMsgFromJson = json =>
        )
      );
 
-let getValueOfForm = e => ReactEvent.Form.target(e)##value
+let getValueOfForm = e => ReactEvent.Form.target(e)##value;
 
 let formPreventDefault = e => ReactEvent.Form.preventDefault(e);
 
@@ -52,10 +52,12 @@ let getNumberWithoutSpace = (~limit=?, text) => {
   switch (Js.String.match(Js.Re.fromStringWithFlags("\\d", ~flags="g"), text)) {
   | None => ""
   | Some(arr) =>
-    switch(limit){
-     | None => arr |> Array.length
-     | Some(l) => l
-    }
+    (
+      switch (limit) {
+      | None => arr |> Array.length
+      | Some(l) => l
+      }
+    )
     |> (realLimit => Js.String.slice(~from=0, ~to_=realLimit, Js.Array.joinWith("", arr)))
   };
 };
@@ -64,10 +66,12 @@ let getCaseId = (~limit=?, text) => {
   switch (Js.String.match(Js.Re.fromStringWithFlags("[a-zA-z0-9-_\/]", ~flags="g"), text)) {
   | None => ""
   | Some(arr) =>
-    switch(limit){
-     | None => arr |> Array.length
-     | Some(l) => l
-    }
+    (
+      switch (limit) {
+      | None => arr |> Array.length
+      | Some(l) => l
+      }
+    )
     |> (realLimit => Js.String.slice(~from=0, ~to_=realLimit, Js.Array.joinWith("", arr)))
   };
 };
@@ -85,17 +89,17 @@ let checkEmail = text =>
   | None => false
   | Some(_) => true
   };
+
 let getLocalStorage = key => Dom.Storage.getItem(key, Dom.Storage.localStorage);
 
-let getLocalStorageWithDefault = (~default="", key) =>
-    Js.Option.getWithDefault(default, getLocalStorage(key));
+let getLocalStorageWithDefault = (~default="", key) => Js.Option.getWithDefault(default, getLocalStorage(key));
 
+let getToken = () => getLocalStorage("token");
 
-let getToken = () => getLocalStorage("token")
-  let mapOpt = (opt, ~defaultValue) =>
-    switch (opt) {
-    | None => defaultValue
-    | Some(value) => value
-    };
+let mapOpt = (opt, ~defaultValue) =>
+  switch (opt) {
+  | None => defaultValue
+  | Some(value) => value
+  };
 
-  let mapOptStr = optStr => optStr |> mapOpt(~defaultValue="");
+let mapOptStr = optStr => optStr |> mapOpt(~defaultValue="");

@@ -5,7 +5,7 @@ type profile = {
   email: string,
   firstName: string,
   lastName: string,
-  birthDate: Js.Date.t
+  birthDate: Js.Date.t,
 };
 
 type holiday = {
@@ -25,7 +25,7 @@ type leaveType =
 
 type leaveDetail = {
   id: string,
-  user:string,
+  user: string,
   leaveType,
   fromDate: Js.Date.t,
   toDate: Js.Date.t,
@@ -72,9 +72,15 @@ let mapLeaveType = typeInt =>
   };
 let getDateOnlyDate = date => {
   Js.Date.makeWithYMD(
-    ~year={date |> Js.Date.getFullYear;},
-    ~month={date |> Js.Date.getMonth;},
-    ~date={date |> Js.Date.getDate;},
+    ~year={
+      date |> Js.Date.getFullYear;
+    },
+    ~month={
+      date |> Js.Date.getMonth;
+    },
+    ~date={
+      date |> Js.Date.getDate;
+    },
     (),
   );
 };
@@ -84,21 +90,23 @@ let mapLeaveTypeStr = typeInt =>
   | Sick => "Sick"
   | Personal => "Personal"
   };
-let mapRequestStatus = (requestStatus:int) => {
-  open RememberMeType;
-    switch requestStatus {
+let mapRequestStatus = (requestStatus: int) => {
+  RememberMeType.(
+    switch (requestStatus) {
     | 2 => Pending
     | 0 => Fail
     | _ => Approve
     }
-  };
+  );
+};
 
 module Decode = {
   open Json.Decode;
 
   let birthDay = json => {
     name: json |> field("name", optional(string)) |> Utils.mapOptStr,
-    birthDate: json |> field("birth_date", optional(string)) |> Utils.mapOptStr |> Js.Date.fromString |> getDateOnlyDate,
+    birthDate:
+      json |> field("birth_date", optional(string)) |> Utils.mapOptStr |> Js.Date.fromString |> getDateOnlyDate,
   };
   let birthDayList = json => json |> list(birthDay);
 
@@ -136,7 +144,7 @@ module Decode = {
   };
 };
 
-let fetchProfile = (~token,~successAction, ~failAction) =>
+let fetchProfile = (~token, ~successAction, ~failAction) =>
   requestJsonResponseToAction(
     ~headers=buildHeader(token),
     ~url=URL.profile,
@@ -154,10 +162,10 @@ let postLeave = (~token, ~payload, ~successAction, ~failAction) =>
   )
   |> ignore;
 
-let removeRequestLeave = (~token, ~id,  ~successAction, ~failAction) =>
+let removeRequestLeave = (~token, ~id, ~successAction, ~failAction) =>
   requestJsonResponseToAction(
     ~headers=buildHeader(~verb=Delete, token),
-    ~url=(URL.leave ++ id ++ "/"),
+    ~url=URL.leave ++ id ++ "/",
     ~successAction,
     ~failAction,
   )

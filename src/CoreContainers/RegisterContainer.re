@@ -19,7 +19,7 @@ type state = {
   confirmPassword,
   firstName,
   lastName,
-  userName:string,
+  userName: string,
   birthDate,
   err: option(string),
 };
@@ -85,8 +85,7 @@ let make = _children => {
     | SignUpFailed(err) => Update({...state, loading: false, err: Some(err)})
     | SetEmail(email) => Update({...state, email})
     | SetPassword(password) => Update({...state, password})
-    | SetConfirmPassword(confirmPassword) =>
-      Update({...state, confirmPassword})
+    | SetConfirmPassword(confirmPassword) => Update({...state, confirmPassword})
     | SetBirthDate(birthDate) => Update({...state, birthDate})
     | SetFirstName(firstName) => Update({...state, firstName})
     | SetLastName(lastName) => Update({...state, lastName})
@@ -180,19 +179,19 @@ let make = _children => {
               onChange={e => send(SetConfirmPassword(e |> valueFromEvent))}
             />
             <div className="line-signup" />
-              <small>{string("Birthday")}</small>
-              <input
-                type_="date"
-                id="birthday"
-                className={getClassName(
-                  ~extraStyle="form-control-smaller",
-                  ~invalid={state.birthDate |> isStringEmpty},
-                  (),
-                )}
-                placeholder="Birthday"
-                value={state.birthDate}
-                onChange={e => send(SetBirthDate(valueFromEvent(e)))}
-              />
+            <small> {string("Birthday")} </small>
+            <input
+              type_="date"
+              id="birthday"
+              className={getClassName(
+                ~extraStyle="form-control-smaller",
+                ~invalid={state.birthDate |> isStringEmpty},
+                (),
+              )}
+              placeholder="Birthday"
+              value={state.birthDate}
+              onChange={e => send(SetBirthDate(valueFromEvent(e)))}
+            />
           </div>
           <div className="error-message">
             {switch (state.err) {
@@ -205,11 +204,11 @@ let make = _children => {
             {state.password |> Js.String.length > 0 && !checkPassword(state.password) ?
                <p id="error_password"> {"The password must be at least 8 characters long." |> str} </p> : null}
           </div>
-          <button id="signup_btn" className="btn btn-blue btn-signup" disabled=buttonDisabled onClick={_ => send(SignUp)}>
+          <button
+            id="signup_btn" className="btn btn-blue btn-signup" disabled=buttonDisabled onClick={_ => send(SignUp)}>
             {"Sign Up" |> str}
           </button>
         </form>
-
       </div>
     </div>;
   },

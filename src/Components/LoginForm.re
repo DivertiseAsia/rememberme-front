@@ -15,7 +15,7 @@ let make =
   render: _self =>
     <form className={"form-group form-login " ++ Js.Option.getWithDefault("", className)} onSubmit>
       <div className="section-login content -text-center">
-        <small>{string("Username")}</small>
+        <small> {string("Username")} </small>
         <input
           disabled=loading
           className="form-control"
@@ -31,7 +31,12 @@ let make =
           type_="password"
           required=true
         />
-        <input disabled=loading className="btn-filled-blue btn-line btn-login btn-main-color" type_="submit" value="Login" />
+        <input
+          disabled=loading
+          className="btn-filled-blue btn-line btn-login btn-main-color"
+          type_="submit"
+          value="Login"
+        />
       </div>
     </form>,
 };
