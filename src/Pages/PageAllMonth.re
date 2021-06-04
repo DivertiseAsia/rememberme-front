@@ -50,7 +50,8 @@ let fetchHolidayList = ({send}) => {
 let fetchBirthDay = ({send}) => {
   fetchBirthDay(
     ~token=Utils.getToken(),
-    ~successAction=birthdayList => send(FetchBirthDayListSuccess(birthdayList)),
+    ~successAction=
+      birthdayList => send(FetchBirthDayListSuccess(birthdayList)),
     ~failAction=_ => send(FetchBirthDayListFail),
   );
 };
@@ -88,18 +89,33 @@ let make = _children => {
     switch (action) {
     | ToggleDropdown(openDropdown) => Update({...state, openDropdown})
     | ChangeYear(targetYear) => Update({...state, targetYear})
-    | FetchHolidayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchHolidayList)
-    | FetchHolidayListSuccess(holidayList) => Update({...state, loadState: Succeed, holidayList})
-    | FetchHolidayListFail => Update({...state, loadState: Failed, holidayList: []})
-    | FetchBirthDayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchBirthDay)
-    | FetchBirthDayListSuccess(listBirthDay) => Update({...state, loadState: Succeed, listBirthDay})
-    | FetchBirthDayListFail => Update({...state, loadState: Failed, listBirthDay: []})
-    | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchAllRequestLeave)
-    | FetchLeaveListSuccess(leaveList) => Update({...state, loadState: Succeed, leaveList})
-    | FetchLeaveListFail => Update({...state, loadState: Failed, leaveList: []})
-    | FetchEventList => UpdateWithSideEffects({...state, loadState: Loading}, fetchEvent)
-    | FetchEventListSuccess(eventList) => Update({...state, loadState: Succeed, eventList})
-    | FetchEventListFail => Update({...state, loadState: Failed, eventList: []})
+    | FetchHolidayList =>
+      UpdateWithSideEffects({...state, loadState: Loading}, fetchHolidayList)
+    | FetchHolidayListSuccess(holidayList) =>
+      Update({...state, loadState: Succeed, holidayList})
+    | FetchHolidayListFail =>
+      Update({...state, loadState: Failed(""), holidayList: []})
+    | FetchBirthDayList =>
+      UpdateWithSideEffects({...state, loadState: Loading}, fetchBirthDay)
+    | FetchBirthDayListSuccess(listBirthDay) =>
+      Update({...state, loadState: Succeed, listBirthDay})
+    | FetchBirthDayListFail =>
+      Update({...state, loadState: Failed(""), listBirthDay: []})
+    | FetchLeaveList =>
+      UpdateWithSideEffects(
+        {...state, loadState: Loading},
+        fetchAllRequestLeave,
+      )
+    | FetchLeaveListSuccess(leaveList) =>
+      Update({...state, loadState: Succeed, leaveList})
+    | FetchLeaveListFail =>
+      Update({...state, loadState: Failed(""), leaveList: []})
+    | FetchEventList =>
+      UpdateWithSideEffects({...state, loadState: Loading}, fetchEvent)
+    | FetchEventListSuccess(eventList) =>
+      Update({...state, loadState: Succeed, eventList})
+    | FetchEventListFail =>
+      Update({...state, loadState: Failed(""), eventList: []})
     };
   },
   didMount: ({send}) => {
@@ -116,12 +132,18 @@ let make = _children => {
             type_="button"
             className="btn btn-rounded btn-main-color active-menu pl-4 pr-4 dropwdown-year"
             onClick={_ => send(ToggleDropdown(!state.openDropdown))}>
-            <img src="/images/calendar.svg" style={ReactDOMRe.Style.make(~width="35px", ~height="35px", ())} />
+            <img
+              src="/images/calendar.svg"
+              style={ReactDOMRe.Style.make(~width="35px", ~height="35px", ())}
+            />
             {string(" " ++ (state.targetYear |> Js.Float.toString))}
           </button>
           {state.openDropdown ?
              <>
-               <div className="dropdown-items-bg" onClick={_ => send(ToggleDropdown(false))} />
+               <div
+                 className="dropdown-items-bg"
+                 onClick={_ => send(ToggleDropdown(false))}
+               />
                <div className="dropdown-items">
                  {years
                   |> List.mapi((i, year) =>
@@ -144,7 +166,9 @@ let make = _children => {
       <div className="row mt-2">
         {months
          |> List.mapi((i, month) =>
-              <div key={"month-" ++ (i |> string_of_int)} className="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 mb-3">
+              <div
+                key={"month-" ++ (i |> string_of_int)}
+                className="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 mb-3">
                 <Calendar
                   isMini=true
                   month

@@ -45,7 +45,7 @@ type loadState =
   | Idle
   | Loading
   | Succeed
-  | Failed;
+  | Failed(string);
 
 type schedule = {
   scheduleMenu,

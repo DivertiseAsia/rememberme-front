@@ -49,7 +49,8 @@ let fetchHolidayList = ({send}) => {
 let fetchBirthDay = ({send}) => {
   fetchBirthDay(
     ~token=Utils.getToken(),
-    ~successAction=birthdayList => send(FetchBirthDayListSuccess(birthdayList)),
+    ~successAction=
+      birthdayList => send(FetchBirthDayListSuccess(birthdayList)),
     ~failAction=_ => send(FetchBirthDayListFail),
   );
 };
@@ -109,26 +110,52 @@ let make =
   },
   reducer: (action, state) => {
     switch (action) {
-    | ToggleRequestLeave => Update({...state, showRequestLeave: !state.showRequestLeave})
-    | ToggleRequestUserLeave => Update({...state, showRequestUserLeave: !state.showRequestUserLeave})
-    | FetchHolidayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchHolidayList)
-    | FetchHolidayListSuccess(holidayList) => Update({...state, loadState: Succeed, holidayList})
-    | FetchHolidayListFail => Update({...state, loadState: Failed, holidayList: []})
-    | FetchBirthDayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchBirthDay)
-    | FetchBirthDayListSuccess(listBirthDay) => Update({...state, loadState: Succeed, listBirthDay})
-    | FetchBirthDayListFail => Update({...state, loadState: Failed, listBirthDay: []})
-    | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchAllRequestLeave)
-    | FetchLeaveListSuccess(leaveList) => Update({...state, loadState: Succeed, leaveList})
-    | FetchLeaveListFail => Update({...state, loadState: Failed, leaveList: []})
-    | FetchEventList => UpdateWithSideEffects({...state, loadState: Loading}, fetchEvent)
-    | FetchEventListSuccess(eventList) => Update({...state, loadState: Succeed, eventList})
-    | FetchEventListFail => Update({...state, loadState: Failed, eventList: []})
-    | FetchUserLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchUserRequestLeave)
-    | FetchUserLeaveListSuccess(userLeaveList) => Update({...state, loadState: Succeed, userLeaveList})
-    | FetchUserLeaveListFail => Update({...state, loadState: Failed, userLeaveList: []})
-    | FetchProfile => UpdateWithSideEffects({...state, loadState: Loading}, fetchProfile)
-    | FetchProfileSuccess(profile) => Update({...state, loadState: Succeed, profile})
-    | FetchProfileFail => Update({...state, loadState: Failed, profile: None})
+    | ToggleRequestLeave =>
+      Update({...state, showRequestLeave: !state.showRequestLeave})
+    | ToggleRequestUserLeave =>
+      Update({...state, showRequestUserLeave: !state.showRequestUserLeave})
+    | FetchHolidayList =>
+      UpdateWithSideEffects({...state, loadState: Loading}, fetchHolidayList)
+    | FetchHolidayListSuccess(holidayList) =>
+      Update({...state, loadState: Succeed, holidayList})
+    | FetchHolidayListFail =>
+      Update({...state, loadState: Failed(""), holidayList: []})
+    | FetchBirthDayList =>
+      UpdateWithSideEffects({...state, loadState: Loading}, fetchBirthDay)
+    | FetchBirthDayListSuccess(listBirthDay) =>
+      Update({...state, loadState: Succeed, listBirthDay})
+    | FetchBirthDayListFail =>
+      Update({...state, loadState: Failed(""), listBirthDay: []})
+    | FetchLeaveList =>
+      UpdateWithSideEffects(
+        {...state, loadState: Loading},
+        fetchAllRequestLeave,
+      )
+    | FetchLeaveListSuccess(leaveList) =>
+      Update({...state, loadState: Succeed, leaveList})
+    | FetchLeaveListFail =>
+      Update({...state, loadState: Failed(""), leaveList: []})
+    | FetchEventList =>
+      UpdateWithSideEffects({...state, loadState: Loading}, fetchEvent)
+    | FetchEventListSuccess(eventList) =>
+      Update({...state, loadState: Succeed, eventList})
+    | FetchEventListFail =>
+      Update({...state, loadState: Failed(""), eventList: []})
+    | FetchUserLeaveList =>
+      UpdateWithSideEffects(
+        {...state, loadState: Loading},
+        fetchUserRequestLeave,
+      )
+    | FetchUserLeaveListSuccess(userLeaveList) =>
+      Update({...state, loadState: Succeed, userLeaveList})
+    | FetchUserLeaveListFail =>
+      Update({...state, loadState: Failed(""), userLeaveList: []})
+    | FetchProfile =>
+      UpdateWithSideEffects({...state, loadState: Loading}, fetchProfile)
+    | FetchProfileSuccess(profile) =>
+      Update({...state, loadState: Succeed, profile})
+    | FetchProfileFail =>
+      Update({...state, loadState: Failed(""), profile: None})
     };
   },
   didMount: ({send}) => {
@@ -141,8 +168,11 @@ let make =
   },
   render: ({state, send}) =>
     <div className="home-page container-fluid">
-      <div className="row row-main" style={ReactDOMRe.Style.make(~height="100%", ())}>
-        <div className="col-12 col-sm-12 col-md-7 col-lg-8 col-xl-8 col-calendar">
+      <div
+        className="row row-main"
+        style={ReactDOMRe.Style.make(~height="100%", ())}>
+        <div
+          className="col-12 col-sm-12 col-md-7 col-lg-8 col-xl-8 col-calendar">
           <Calendar
             month
             year
@@ -152,7 +182,8 @@ let make =
             eventList={state.eventList}
           />
         </div>
-        <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
+        <div
+          className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
           <Schedule
             profile={state.profile}
             holidayList={state.holidayList}

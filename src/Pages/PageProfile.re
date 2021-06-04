@@ -28,9 +28,12 @@ let make = _children => {
   initialState: () => {loadState: Loading, profile: None},
   reducer: (action, state) => {
     switch (action) {
-    | FetchProfile => UpdateWithSideEffects({...state, loadState: Loading}, fetchProfile)
-    | FetchProfileSuccess(profile) => Update({...state, loadState: Succeed, profile})
-    | FetchProfileFail => Update({...state, loadState: Failed, profile: None})
+    | FetchProfile =>
+      UpdateWithSideEffects({...state, loadState: Loading}, fetchProfile)
+    | FetchProfileSuccess(profile) =>
+      Update({...state, loadState: Succeed, profile})
+    | FetchProfileFail =>
+      Update({...state, loadState: Failed(""), profile: None})
     };
   },
   didMount: ({state, send}) => {
@@ -55,13 +58,15 @@ let make = _children => {
              )}
           </span>
         </div>
-        <div className="col-12 text-center"> <h2 className="m-auto"> {string("My Profile")} </h2> </div>
+        <div className="col-12 text-center">
+          <h2 className="m-auto"> {string("My Profile")} </h2>
+        </div>
       </div>
       <div className="row row-profile-container justify-content-center">
         <div className="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-4">
           {switch (state.loadState, state.profile) {
            | (Succeed, Some(profile)) => <ProfileContainer profile />
-           | (Failed, _) => string("Can't get profile. Please try again")
+           | (Failed(_), _) => string("Can't get profile. Please try again")
            | _ => <Loading />
            }}
         </div>

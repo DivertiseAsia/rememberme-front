@@ -32,11 +32,14 @@ let make = (~requestLeaves, ~onRefresh, _children) => {
     switch (action) {
     | ChangeFormMenu(formMenu) => Update({...state, formMenu})
     | RemoveRequestLeave(id) =>
-      UpdateWithSideEffects({...state, loadState: Loading}, self => removeRequestLeave(id, self))
+      UpdateWithSideEffects(
+        {...state, loadState: Loading},
+        self => removeRequestLeave(id, self),
+      )
     | RemoveRequestLeaveSuccess =>
       onRefresh();
       Update({...state, loadState: Succeed});
-    | RemoveRequestLeaveFailed => Update({...state, loadState: Failed})
+    | RemoveRequestLeaveFailed => Update({...state, loadState: Failed("")})
     };
   },
   render: ({state, send}) => {
@@ -46,7 +49,11 @@ let make = (~requestLeaves, ~onRefresh, _children) => {
           <p
             className="cursor-pointer"
             onClick={_ => send(ChangeFormMenu(MyForm))}
-            style={ReactDOMRe.Style.make(~marginTop="8px", ~marginBottom="0px", ())}>
+            style={ReactDOMRe.Style.make(
+              ~marginTop="8px",
+              ~marginBottom="0px",
+              (),
+            )}>
             {string("My Form")}
           </p>
         </div>
@@ -54,17 +61,27 @@ let make = (~requestLeaves, ~onRefresh, _children) => {
           <button
             type_="button"
             className={
-              "btn btn-rounded " ++ (state.formMenu === History ? "btn-main-color active-menu" : "btn-outline")
+              "btn btn-rounded "
+              ++ (
+                state.formMenu === History ?
+                  "btn-main-color active-menu" : "btn-outline"
+              )
             }
             onClick={_ => send(ChangeFormMenu(History))}>
-            {state.formMenu === History ? <img src="/images/history.svg" /> : <img src="/images/history_blue.svg" />}
+            {state.formMenu === History ?
+               <img src="/images/history.svg" /> :
+               <img src="/images/history_blue.svg" />}
             {string(" History")}
           </button>
         </div>
       </div>
       <div
         className="row justify-content-center pt-5 pb-5"
-        style={ReactDOMRe.Style.make(~backgroundColor="white", ~borderTop="2px solid #52C4BB", ())}>
+        style={ReactDOMRe.Style.make(
+          ~backgroundColor="white",
+          ~borderTop="2px solid #52C4BB",
+          (),
+        )}>
         {requestLeaves
          |> List.filter((requestLeaves: leaveDetail) =>
               switch (state.formMenu) {
@@ -86,7 +103,10 @@ let make = (~requestLeaves, ~onRefresh, _children) => {
                 className="container "
                 style={ReactDOMRe.Style.make(~width="100%", ())}>
                 {i === 0 ? <hr /> : null}
-                <RequestLeave requestLeave onCancel={_ => send(RemoveRequestLeave(requestLeave.id))} />
+                <RequestLeave
+                  requestLeave
+                  onCancel={_ => send(RemoveRequestLeave(requestLeave.id))}
+                />
                 <hr />
               </div>
             )
