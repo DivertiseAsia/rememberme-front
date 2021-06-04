@@ -237,7 +237,7 @@ let onSubmit = ({state, send}) => {
     ~token=Utils.getToken(),
     ~payload,
     ~successAction=_ => send(OnSubmitRequestLeaveSuccess),
-    ~failAction=_ => send(OnSubmitRequestLeaveFailed("")),
+    ~failAction=json => json->Json.stringify->OnSubmitRequestLeaveFailed->send,
   );
 };
 

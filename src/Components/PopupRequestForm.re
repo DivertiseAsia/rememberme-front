@@ -9,13 +9,22 @@ let make = (~isSick=true, ~loadState, ~onConfirm, _children) => {
     <>
       <div className="popup-bg" onClick=onConfirm />
       {switch (loadState) {
-       | Failed(_) =>
+       | Failed(errMsg) =>
          <div className="container p-4 popup-container popup-container-fail">
            <div className="row">
              <div className="col-12 text-center">
                <h5> {string("Something went wrong !")} </h5>
              </div>
            </div>
+           {if (errMsg != "") {
+              <div className="row">
+                <div className="col-12 text-center">
+                  {errMsg->Utils.getErrorMsgFromJson->React.array}
+                </div>
+              </div>;
+            } else {
+              React.null;
+            }}
            <div className="row">
              <div className="col-12 text-center">
                <p> {string("Please try again.")} </p>
