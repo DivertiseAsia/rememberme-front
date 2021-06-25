@@ -25,15 +25,16 @@
     "bs-css": "^7.2.0",
     "bs-fetch": "^0.3.0",
     "bs-promise-monad": "^0.2.9",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
-    "reason-react": ">=0.4.0"
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "reason-react": "^0.9.1"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",
     "@babel/preset-env": "^7.1.6",
     "babel-loader": "^8.0.4",
-    "bs-platform": "^4.0.18",
+    "bs-platform": "^8.4.2",
+    "bs-webapi": "^0.19.1",
     "clean-webpack-plugin": "^0.1.19",
     "concurrently": "^4.0.1",
     "copy-webpack-plugin": "^5.1.1",

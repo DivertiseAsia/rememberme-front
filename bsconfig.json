@@ -18,6 +18,6 @@
     "@glennsl/bs-json",
     "bs-promise-monad"
   ],
-  "reason": { "react-jsx": 2 },
+  "reason": { "react-jsx": 3 },
   "refmt": 3
 }
