@@ -97,7 +97,11 @@ let make =
       ~month=Js.Date.make() |> Js.Date.getMonth |> int_of_float,
       ~year=Js.Date.make() |> Js.Date.getFullYear,
     ) => {
-  let (eventsApiState, loadEvents) = EventsContext.useEventsResults();
+  let {
+    events: {data: eventsApiState, fetchData: loadEvents},
+    holidayList: {data: holidayListApiState, fetchData: loadHolidayList},
+  } =
+    DaysContext.useDaysResults();
 
   let (state, dispatch) =
     React.useReducer(
@@ -132,8 +136,10 @@ let make =
 
   React.useEffect0(() => {
     loadEvents();
+    loadHolidayList();
     fetchProfile(dispatch);
-    fetchHoliday(dispatch);
+    //    fetchHoliday(dispatch);
+    fetchBirthDay(dispatch);
     fetchBirthDay(dispatch);
     fetchAllRequestLeave(dispatch);
     fetchUserRequestLeaveList(dispatch);
@@ -149,7 +155,7 @@ let make =
         <Calendar
           month
           year
-          holidayList={state.holidayApiState->RememberMeUtils.getListFromState}
+          holidayList={holidayListApiState->RememberMeUtils.getListFromState}
           listBirthDay={
             state.birthDayApiState->RememberMeUtils.getListFromState
           }
@@ -163,7 +169,7 @@ let make =
           profile={
             state.profileApiState->RememberMeUtils.getOptionDataFromState
           }
-          holidayList={state.holidayApiState->RememberMeUtils.getListFromState}
+          holidayList={holidayListApiState->RememberMeUtils.getListFromState}
           listBirthDay={
             state.birthDayApiState->RememberMeUtils.getListFromState
           }
@@ -182,7 +188,7 @@ let make =
     <div className="error-status">
       eventsApiState->RememberMeUtils.getErrorElFromState
       state.profileApiState->RememberMeUtils.getErrorElFromState
-      state.holidayApiState->RememberMeUtils.getErrorElFromState
+      holidayListApiState->RememberMeUtils.getErrorElFromState
       state.birthDayApiState->RememberMeUtils.getErrorElFromState
       state.leaveListApiState->RememberMeUtils.getErrorElFromState
       state.userLeaveListApiState->RememberMeUtils.getErrorElFromState

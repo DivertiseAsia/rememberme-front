@@ -7,16 +7,19 @@ open RememberMeApi;
 [@bs.get] external href: Dom.location => string = "href";
 
 type eventsApiState = apiState(list(event));
+type holidayApiState = apiState(list(holiday));
 
 type state = {
   route: ReasonReact.Router.url,
   loadState,
   eventsApiState,
+  holidayApiState,
 };
 
 type action =
   | RouteTo(Router.url)
-  | SetEventsApiState(eventsApiState);
+  | SetEventsApiState(eventsApiState)
+  | SetHolidayApiState(holidayApiState);
 
 let loadToken = () =>
   switch (Dom.Storage.(localStorage |> getItem("token"))) {
@@ -44,6 +47,16 @@ let fetchEvents = dispatch => {
   );
 };
 
+let fetchHoliday = dispatch => {
+  Loading->SetHolidayApiState->dispatch;
+  fetchHoliday(
+    ~successAction=
+      holidayList => holidayList->Loaded->SetHolidayApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetHolidayApiState->dispatch,
+  );
+};
+
 [@react.component]
 let make = () => {
   let (state, dispatch) =
@@ -52,11 +65,13 @@ let make = () => {
         switch (action) {
         | RouteTo(route) => {...state, route}
         | SetEventsApiState(eventsApiState) => {...state, eventsApiState}
+        | SetHolidayApiState(holidayApiState) => {...state, holidayApiState}
         },
       {
         route: Router.dangerouslyGetInitialUrl(),
         loadState: Loading,
         eventsApiState: NotLoaded,
+        holidayApiState: NotLoaded,
       },
     );
 
@@ -64,11 +79,13 @@ let make = () => {
   let isLoggedIn = token !== "";
 
   let fetchEventsIfNone = () => {
-    switch (state.eventsApiState) {
-    | Loading
-    | Loaded(_) => Js.log("events already loaded")
-    | _ => fetchEvents(dispatch)
-    };
+    state.eventsApiState
+    ->RememberMeUtils.doActionIfNotLoaded(_ => fetchEvents(dispatch));
+  };
+
+  let fetchHolidayIfNone = () => {
+    state.eventsApiState
+    ->RememberMeUtils.doActionIfNotLoaded(_ => fetchHoliday(dispatch));
   };
 
   React.useEffect0(_ => {
@@ -81,13 +98,26 @@ let make = () => {
     _ => {
       if (isLoggedIn) {
         fetchEventsIfNone();
+        fetchHolidayIfNone();
       };
       None;
     },
     [|isLoggedIn|],
   );
 
-  <EventsContext.Provider value=(state.eventsApiState, fetchEventsIfNone)>
+  <DaysContext.Provider
+    value=(
+            {
+              events: {
+                data: state.eventsApiState,
+                fetchData: fetchEventsIfNone,
+              },
+              holidayList: {
+                data: state.holidayApiState,
+                fetchData: fetchHolidayIfNone,
+              },
+            }: DaysContext.days
+          )>
     {switch (state.route.path, isLoggedIn) {
      | ([], true)
      | ([""], true) => <PageHome />
@@ -112,5 +142,5 @@ let make = () => {
        <PageLogin queryString=queryParams />;
      | _ => <Page404 isLoggedIn />
      }}
-  </EventsContext.Provider>;
+  </DaysContext.Provider>;
 };

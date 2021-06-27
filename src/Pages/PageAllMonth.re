@@ -72,7 +72,11 @@ let fetchAllRequestLeave = dispatch => {
 
 [@react.component]
 let make = () => {
-  let (eventsApiState, loadEvents) = EventsContext.useEventsResults();
+  let {
+    events: {data: eventsApiState, fetchData: loadEvents},
+    holidayList: {data: holidayListApiState, fetchData: loadHolidayList},
+  } =
+    DaysContext.useDaysResults();
 
   let (state, dispatch) =
     React.useReducer(
@@ -133,6 +137,7 @@ let make = () => {
     dispatch(FetchLeaveList);
     //    dispatch(FetchEventList);
     loadEvents();
+    loadHolidayList();
     None;
   });
 
