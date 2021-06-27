@@ -1,5 +1,6 @@
 open ReasonReact;
-open Css;
+//open Css;
+open Css_Js_Core;
 
 type itemEnd =
   | Text(string)
@@ -21,9 +22,10 @@ type item = {
   onClick: option(ReactEvent.Mouse.t => unit),
 };
 
-let imageStyle = style([display(inlineBlock), height(`px(20)), width(`px(20))]);
+let imageStyle = "";
+//  style([display(inlineBlock), height(`px(20)), width(`px(20))]); //TODO:
 
-let component = ReasonReact.statelessComponent("ListItemRe");
+//let component = ReasonReact.statelessComponent("ListItemRe");
 
 let renderItemEnd = (itemEnd: option(itemEnd), extraClass: string) =>
   switch (itemEnd) {
@@ -33,8 +35,15 @@ let renderItemEnd = (itemEnd: option(itemEnd), extraClass: string) =>
       {switch (value) {
        | Text(s) => <span> {ReasonReact.string(s)} </span>
        | Image(s) =>
-         <span className=imageStyle style={ReactDOMRe.Style.make(~backgroundImage="url('" ++ s ++ "')", ())} />
-       | Button(s, onClick) => <button onClick> {ReasonReact.string(s)} </button>
+         <span
+           className=imageStyle
+           style={ReactDOM.Style.make(
+             ~backgroundImage="url('" ++ s ++ "')",
+             (),
+           )}
+         />
+       | Button(s, onClick) =>
+         <button onClick> {ReasonReact.string(s)} </button>
        | _ => <span />
        }}
     </span>
@@ -50,20 +59,26 @@ let renderToDiv = (text: option(string), extraClass: string) =>
 let renderItemBody = (itemBody: itemBody) =>
   <span className="item-body">
     {renderToDiv(itemBody.topTitle, "item-top")}
-    <div className="list-item-title"> {ReasonReact.string(itemBody.title)} </div>
+    <div className="list-item-title">
+      {ReasonReact.string(itemBody.title)}
+    </div>
     {renderToDiv(itemBody.subtitle, "item-sub")}
     {switch (itemBody.children) {
      | None => ReasonReact.null
-     | Some(children) => <div className="list-item-subchildren"> ...children </div>
+     | Some(children) =>
+       <div className="list-item-subchildren"> children->React.array </div>
      }}
   </span>;
 
-let make = (~item: item, ~className: option(string)=?, _children) => {
-  ...component,
-  render: _self =>
-    <div className={"list-item " ++ Js.Option.getWithDefault("list-item-default", className)} onClick=?{item.onClick}>
-      {renderItemEnd(item.left, "left")}
-      {renderItemBody(item.body)}
-      {renderItemEnd(item.right, "right")}
-    </div>,
+[@react.component]
+let make = (~item: item, ~className: option(string)=?) => {
+  <div
+    className={
+      "list-item " ++ Js.Option.getWithDefault("list-item-default", className)
+    }
+    onClick=?{item.onClick}>
+    {renderItemEnd(item.left, "left")}
+    {renderItemBody(item.body)}
+    {renderItemEnd(item.right, "right")}
+  </div>;
 };
