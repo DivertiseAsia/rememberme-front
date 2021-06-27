@@ -38,9 +38,18 @@ let mapIcon = icon =>
       className: "location",
       content:
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <defs> <style> {string(".a{fill:none;}.b{fill:#838383;fill-rule:evenodd;}")} </style> </defs>
+          <defs>
+            <style>
+              {string(".a{fill:none;}.b{fill:#838383;fill-rule:evenodd;}")}
+            </style>
+          </defs>
           <g transform="translate(-207 -596)">
-            <rect className="a" width="16" height="16" transform="translate(207 596)" />
+            <rect
+              className="a"
+              width="16"
+              height="16"
+              transform="translate(207 596)"
+            />
             <path
               className="b"
               d="M6.58,9.47A2.786,2.786,0,0,0,9.371,6.679,2.872,2.872,0,0,0,6.58,3.788,2.786,2.786,0,0,0,3.788,6.579,2.942,2.942,0,0,0,6.58,9.47ZM1.894,1.894a6.626,6.626,0,0,1,9.371,9.371L6.58,15.95,1.894,11.265A6.807,6.807,0,0,1,1.894,1.894Z"
@@ -51,14 +60,16 @@ let mapIcon = icon =>
     }
   };
 
-let component = ReasonReact.statelessComponent("IconRe");
-
-let make = (~iconType, ~className=?, _children) => {
-  ...component,
-  render: _self => {
-    let icon = mapIcon(iconType);
-    <span className={"icon icon-" ++ icon.className ++ " " ++ Js.Option.getWithDefault("", className)}>
-      {icon.content}
-    </span>;
-  },
+[@react.component]
+let make = (~iconType, ~className=?) => {
+  let icon = mapIcon(iconType);
+  <span
+    className={
+      "icon icon-"
+      ++ icon.className
+      ++ " "
+      ++ Belt.Option.getWithDefault(className, "")
+    }>
+    {icon.content}
+  </span>;
 };

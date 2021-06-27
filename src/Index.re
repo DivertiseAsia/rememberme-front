@@ -6,4 +6,4 @@
 let appName = Config.Info.name;
 //let _ = [%bs.raw "console.log(`${appName}: ${BUILD.VERSION}`)"];
 
-ReactDOMRe.renderToElementWithId(<App />, "container");
+ReactDOM.renderToElementWithId(<App />, "container");
