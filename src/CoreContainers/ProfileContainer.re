@@ -11,8 +11,9 @@ type firstName = string;
 type lastName = string;
 type birthDate = string;
 
+type changePassState = RememberMeType.apiState(string);
+
 type state = {
-  loading: bool,
   email,
   oldPassword: string,
   password,
@@ -20,41 +21,18 @@ type state = {
   firstName,
   lastName,
   birthDate,
-  statusMessage: option(array(ReasonReact.reactElement)),
+  changePassState,
 };
 
 type action =
-  | ChangePassword
-  | ChangePasswordFailed(string)
-  | ChangePasswordSuccess
   | SetEmail(string)
   | SetOldPassword(string)
   | SetPassword(string)
   | SetConfirmPassword(string)
   | SetFirstName(firstName)
   | SetLastName(lastName)
-  | SetBirthDate(birthDate);
-
-let changePassword = (state, dispatch) => {
-  let payload =
-    Json.Encode.(
-      object_([
-        ("old_password", state.oldPassword |> Js.Json.string),
-        ("new_password", state.password |> Js.Json.string),
-        ("confirm_password", state.confirmPassword |> Js.Json.string),
-      ])
-    );
-
-  RequestUtils.requestJsonResponseToAction(
-    ~headers=
-      RequestUtils.buildHeader(~verb=Post, ~body=payload, Utils.getToken()),
-    ~url=URL.password,
-    ~successAction=_json => dispatch(ChangePasswordSuccess),
-    ~failAction=
-      json => dispatch(ChangePasswordFailed(json |> Json.stringify)),
-  )
-  |> ignore;
-};
+  | SetBirthDate(birthDate)
+  | SetChangePassState(changePassState);
 
 let getClassName = (~extraStyle="", ~invalid=false, ()) => {
   let invalidStyle = invalid ? "invalid" : "";
@@ -67,24 +45,6 @@ let make = (~profile: profile) => {
     React.useReducer(
       (state, action) => {
         switch (action) {
-        | ChangePassword => {...state, loading: true, statusMessage: None}
-        //        changePassword, // TODO: REWRITE
-        | ChangePasswordSuccess => {
-            ...state,
-            loading: false,
-            statusMessage: Some([|<p> {string("Password Updated !")} </p>|]),
-            oldPassword: "",
-            password: "",
-            confirmPassword: "",
-          }
-        | ChangePasswordFailed(statusMessage) => {
-            ...state,
-            loading: false,
-            statusMessage: Some(statusMessage |> getErrorMsgFromJson),
-            oldPassword: "",
-            password: "",
-            confirmPassword: "",
-          }
         | SetEmail(email) => {...state, email}
         | SetOldPassword(oldPassword) => {...state, oldPassword}
         | SetPassword(password) => {...state, password}
@@ -92,10 +52,10 @@ let make = (~profile: profile) => {
         | SetBirthDate(birthDate) => {...state, birthDate}
         | SetFirstName(firstName) => {...state, firstName}
         | SetLastName(lastName) => {...state, lastName}
+        | SetChangePassState(changePassState) => {...state, changePassState}
         }
       },
       {
-        loading: false,
         email: profile.email,
         oldPassword: "",
         password: "",
@@ -106,12 +66,36 @@ let make = (~profile: profile) => {
           profile.birthDate
           ->Js.Date.valueOf
           ->RememberMeUtils.getDateStrRequestLeave,
-        statusMessage: None,
+        changePassState: NotLoaded,
       },
     );
 
+  let changePassword = () => {
+    Loading->SetChangePassState->dispatch;
+
+    RequestUtils.requestJsonResponseToAction(
+      ~headers=
+        RequestUtils.buildHeader(
+          ~verb=Post,
+          ~body=
+            RememberMeType.Encode.changePassword(
+              ~oldPassword=state.oldPassword,
+              ~password=state.password,
+              ~confirmPassword=state.confirmPassword,
+            ),
+          Utils.getToken(),
+        ),
+      ~url=URL.password,
+      ~successAction=
+        _json => {Loaded("Password Updated !")->SetChangePassState->dispatch},
+      ~failAction=
+        json => {json->Json.stringify->Failed->SetChangePassState->dispatch},
+    )
+    |> ignore;
+  };
+
   let buttonDisabled =
-    state.loading
+    state.changePassState === Loading
     || state.oldPassword === ""
     || !checkPassword(state.password)
     || !
@@ -122,7 +106,7 @@ let make = (~profile: profile) => {
 
   <div className="row">
     <div className="col-sm-9 col-md-9 col-lg-9 mx-auto signup-container">
-      {state.loading ? <Loading /> : null}
+      {state.changePassState === Loading ? <Loading /> : null}
       <form id="signup-form">
         <div className="row justify-content-between">
           <div className="col-6 pl-0">
@@ -223,19 +207,18 @@ let make = (~profile: profile) => {
           </div>
         </div>
         <div className="error-message">
-          {switch (state.statusMessage) {
-           | None => null
-           | Some(messages) => messages |> array
+          {switch (state.changePassState) {
+           | Loaded(msg) => <p> msg->str </p>
+           | Failed(messages) => messages->getErrorMsgFromJson->array
+           | _ => null
            }}
-          {state.confirmPassword
-           |> Js.String.length > 0
+          {state.confirmPassword->Js.String.length > 0
            && !(state.confirmPassword === state.password)
              ? <p id="error_confirm_password">
                  {"The password and confirmation password are mismatch." |> str}
                </p>
              : null}
-          {state.password
-           |> Js.String.length > 0
+          {state.password->Js.String.length > 0
            && !checkPassword(state.password)
              ? <p id="error_password">
                  {"The password must be at least 8 characters long." |> str}
@@ -246,7 +229,7 @@ let make = (~profile: profile) => {
           id="signup_btn"
           className="btn btn-blue btn-signup mb-5"
           disabled=buttonDisabled
-          onClick={_ => dispatch(ChangePassword)}>
+          onClick={_ => changePassword()}>
           {"Confirm" |> str}
         </button>
       </form>

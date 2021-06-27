@@ -59,3 +59,15 @@ type schedule = {
   date: float,
   detail: string,
 };
+
+module Encode = {
+  let changePassword = (~oldPassword, ~password, ~confirmPassword) => {
+    Json.Encode.(
+      object_([
+        ("old_password", oldPassword |> Js.Json.string),
+        ("new_password", password |> Js.Json.string),
+        ("confirm_password", confirmPassword |> Js.Json.string),
+      ])
+    );
+  };
+};
