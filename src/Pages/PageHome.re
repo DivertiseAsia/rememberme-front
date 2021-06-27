@@ -1,110 +1,114 @@
-open ReasonReact;
 open RememberMeType;
 open RememberMeApi;
 
 let str = ReasonReact.string;
 type birthDay = RememberMeApi.birthDay;
+type holidayApiState = apiState(list(holiday));
+type birthDayApiState = apiState(list(birthDay));
+type leaveListApiState = apiState(list(leaveDetail));
+type userLeaveListApiState = apiState(list(leaveDetail));
+type eventListApiState = apiState(list(event));
+type profileApiState = apiState(profile);
 
 type state = {
-  loadState,
-  profile: option(profile),
+  profileApiState,
   showRequestLeave: bool,
   showRequestUserLeave: bool,
-  holidayList: list(holiday),
-  listBirthDay: list(birthDay),
-  leaveList: list(leaveDetail),
-  eventList: list(event),
-  userLeaveList: list(leaveDetail),
+  holidayApiState,
+  birthDayApiState,
+  leaveListApiState,
+  eventListApiState,
+  userLeaveListApiState,
 };
 
 type action =
   | ToggleRequestLeave
   | ToggleRequestUserLeave
-  | FetchHolidayList
-  | FetchHolidayListSuccess(list(holiday))
-  | FetchHolidayListFail
-  | FetchBirthDayList
-  | FetchBirthDayListSuccess(list(birthDay))
-  | FetchBirthDayListFail
-  | FetchLeaveList
-  | FetchLeaveListSuccess(list(leaveDetail))
-  | FetchLeaveListFail
-  | FetchEventList
-  | FetchEventListSuccess(list(event))
-  | FetchEventListFail
-  | FetchUserLeaveList
-  | FetchUserLeaveListSuccess(list(leaveDetail))
-  | FetchUserLeaveListFail
-  | FetchProfile
-  | FetchProfileSuccess(option(profile))
-  | FetchProfileFail;
+  | SetProfileApiState(profileApiState)
+  | SetHolidayApiState(holidayApiState)
+  | SetBirthDayApiState(birthDayApiState)
+  | SetLeaveListApiState(leaveListApiState)
+  | SetEventListApiState(eventListApiState)
+  | SetUserLeaveListApiState(userLeaveListApiState);
 
 let initialState = {
-  loadState: Idle,
-  profile: None,
+  profileApiState: NotLoaded,
   showRequestLeave: false,
   showRequestUserLeave: false,
-  holidayList: [],
-  listBirthDay: [],
-  leaveList: [],
-  eventList: [],
-  userLeaveList: [],
+  holidayApiState: NotLoaded,
+  birthDayApiState: NotLoaded,
+  leaveListApiState: NotLoaded,
+  eventListApiState: NotLoaded,
+  userLeaveListApiState: NotLoaded,
 };
 
-let fetchHolidayList = dispatch => {
+let fetchHoliday = dispatch => {
+  Loading->SetHolidayApiState->dispatch;
   fetchHoliday(
     ~successAction=
-      holidayList => dispatch(FetchHolidayListSuccess(holidayList)),
-    ~failAction=_ => dispatch(FetchHolidayListFail),
+      holidayList => holidayList->Loaded->SetHolidayApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetHolidayApiState->dispatch,
   );
 };
 
 let fetchBirthDay = dispatch => {
+  Loading->SetBirthDayApiState->dispatch;
   fetchBirthDay(
     ~token=Utils.getToken(),
     ~successAction=
-      birthdayList => dispatch(FetchBirthDayListSuccess(birthdayList)),
-    ~failAction=_ => dispatch(FetchBirthDayListFail),
+      birthdayList => birthdayList->Loaded->SetBirthDayApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetBirthDayApiState->dispatch,
   );
 };
 
 let fetchEvent = dispatch => {
+  Loading->SetEventListApiState->dispatch;
   fetchEvent(
     ~token=Utils.getToken(),
-    ~successAction=eventList => dispatch(FetchEventListSuccess(eventList)),
-    ~failAction=_ => dispatch(FetchEventListFail),
+    ~successAction=
+      eventList => eventList->Loaded->SetEventListApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetEventListApiState->dispatch,
   );
 };
 
 let fetchAllRequestLeave = dispatch => {
+  Loading->SetLeaveListApiState->dispatch;
   fetchAllLeaves(
     ~token=Utils.getToken(),
-    ~successAction=leaveList => dispatch(FetchLeaveListSuccess(leaveList)),
-    ~failAction=_ => dispatch(FetchLeaveListFail),
+    ~successAction=
+      leaveList => leaveList->Loaded->SetLeaveListApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetLeaveListApiState->dispatch,
   );
 };
 
-let fetchUserRequestLeave = dispatch => {
+let fetchUserRequestLeaveList = dispatch => {
+  Loading->SetUserLeaveListApiState->dispatch;
   fetchUserLeaves(
     ~token=Utils.getToken(),
     ~successAction=
-      leaveList => dispatch(FetchUserLeaveListSuccess(leaveList)),
-    ~failAction=_ => dispatch(FetchUserLeaveListFail),
+      leaveList => leaveList->Loaded->SetUserLeaveListApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetUserLeaveListApiState->dispatch,
   );
 };
 
-let fetchProfile = (state, dispatch) => {
+let fetchProfile = dispatch => {
+  Loading->SetProfileApiState->dispatch;
   fetchProfile(
     ~token=Utils.getToken(),
-    ~successAction=profile => dispatch(FetchProfileSuccess(Some(profile))),
-    ~failAction=_ => dispatch(FetchProfileFail),
+    ~successAction=profile => profile->Loaded->SetProfileApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetProfileApiState->dispatch,
   );
 };
 
 [@react.component]
 let make =
     (
-      ~isLoggedIn: bool,
       ~month=Js.Date.make() |> Js.Date.getMonth |> int_of_float,
       ~year=Js.Date.make() |> Js.Date.getFullYear,
     ) => {
@@ -120,81 +124,23 @@ let make =
             ...state,
             showRequestUserLeave: !state.showRequestUserLeave,
           }
-        | FetchHolidayList => {...state, loadState: Loading}
-        //      , fetchHolidayList) TODO
-        | FetchHolidayListSuccess(holidayList) => {
+        | SetProfileApiState(profileApiState) => {...state, profileApiState}
+        | SetHolidayApiState(holidayApiState) => {...state, holidayApiState}
+        | SetBirthDayApiState(birthDayApiState) => {
             ...state,
-            loadState: Succeed,
-            holidayList,
+            birthDayApiState,
           }
-        | FetchHolidayListFail => {
+        | SetLeaveListApiState(leaveListApiState) => {
             ...state,
-            loadState: Failed(""),
-            holidayList: [],
+            leaveListApiState,
           }
-        | FetchBirthDayList => {...state, loadState: Loading}
-        //      , fetchBirthDay) TODO
-        | FetchBirthDayListSuccess(listBirthDay) => {
+        | SetEventListApiState(eventListApiState) => {
             ...state,
-            loadState: Succeed,
-            listBirthDay,
+            eventListApiState,
           }
-        | FetchBirthDayListFail => {
+        | SetUserLeaveListApiState(userLeaveListApiState) => {
             ...state,
-            loadState: Failed(""),
-            listBirthDay: [],
-          }
-        | FetchLeaveList => {...state, loadState: Loading}
-        //        fetchAllRequestLeave, TODO
-        | FetchLeaveListSuccess(leaveList) => {
-            ...state,
-            loadState: Succeed,
-            leaveList,
-          }
-        | FetchLeaveListFail => {
-            ...state,
-            loadState: Failed(""),
-            leaveList: [],
-          }
-        | FetchEventList => {...state, loadState: Loading}
-        //      , fetchEvent) TODO
-        | FetchEventListSuccess(eventList) => {
-            ...state,
-            loadState: Succeed,
-            eventList,
-          }
-        | FetchEventListFail => {
-            ...state,
-            loadState: Failed(""),
-            eventList: [],
-          }
-        | FetchUserLeaveList =>
-          //TODO
-          {...state, loadState: Loading}
-        //        fetchUserRequestLeave,
-        | FetchUserLeaveListSuccess(userLeaveList) => {
-            ...state,
-            loadState: Succeed,
-            userLeaveList,
-          }
-        | FetchUserLeaveListFail => {
-            ...state,
-            loadState: Failed(""),
-            userLeaveList: [],
-          }
-        | FetchProfile =>
-          // TODO:
-          {...state, loadState: Loading}
-        //      , fetchProfile)
-        | FetchProfileSuccess(profile) => {
-            ...state,
-            loadState: Succeed,
-            profile,
-          }
-        | FetchProfileFail => {
-            ...state,
-            loadState: Failed(""),
-            profile: None,
+            userLeaveListApiState,
           }
         }
       },
@@ -202,15 +148,15 @@ let make =
     );
 
   React.useEffect0(() => {
-    dispatch(FetchProfile);
-    dispatch(FetchHolidayList);
-    dispatch(FetchBirthDayList);
-    dispatch(FetchLeaveList);
-    dispatch(FetchEventList);
-    dispatch(FetchUserLeaveList);
-
+    fetchProfile(dispatch);
+    fetchHoliday(dispatch);
+    fetchBirthDay(dispatch);
+    fetchAllRequestLeave(dispatch);
+    fetchEvent(dispatch);
+    fetchUserRequestLeaveList(dispatch);
     None;
   });
+
   <div className="home-page container-fluid">
     <div
       className="row row-main"
@@ -220,27 +166,43 @@ let make =
         <Calendar
           month
           year
-          holidayList={state.holidayList}
-          listBirthDay={state.listBirthDay}
-          leaveList={state.leaveList}
-          eventList={state.eventList}
+          holidayList={state.holidayApiState->RememberMeUtils.getListFromState}
+          listBirthDay={
+            state.birthDayApiState->RememberMeUtils.getListFromState
+          }
+          leaveList={state.leaveListApiState->RememberMeUtils.getListFromState}
+          eventList={state.eventListApiState->RememberMeUtils.getListFromState}
         />
       </div>
       <div
         className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
         <Schedule
-          profile={state.profile}
-          holidayList={state.holidayList}
-          listBirthDay={state.listBirthDay}
-          leaveList={state.leaveList}
-          userLeaveList={state.userLeaveList}
-          eventList={state.eventList}
+          profile={
+            state.profileApiState->RememberMeUtils.getOptionDataFromState
+          }
+          holidayList={state.holidayApiState->RememberMeUtils.getListFromState}
+          listBirthDay={
+            state.birthDayApiState->RememberMeUtils.getListFromState
+          }
+          leaveList={state.leaveListApiState->RememberMeUtils.getListFromState}
+          userLeaveList={
+            state.userLeaveListApiState->RememberMeUtils.getListFromState
+          }
+          eventList={state.eventListApiState->RememberMeUtils.getListFromState}
           onRefresh={_ => {
-            dispatch(FetchLeaveList);
-            dispatch(FetchUserLeaveList);
+            fetchAllRequestLeave(dispatch);
+            fetchUserRequestLeaveList(dispatch);
           }}
         />
       </div>
+    </div>
+    <div className="error-status">
+      state.profileApiState->RememberMeUtils.getErrorElFromState
+      state.holidayApiState->RememberMeUtils.getErrorElFromState
+      state.birthDayApiState->RememberMeUtils.getErrorElFromState
+      state.eventListApiState->RememberMeUtils.getErrorElFromState
+      state.leaveListApiState->RememberMeUtils.getErrorElFromState
+      state.userLeaveListApiState->RememberMeUtils.getErrorElFromState
     </div>
   </div>;
 };

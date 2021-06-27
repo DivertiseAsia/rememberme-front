@@ -46,12 +46,11 @@ let make = () => {
   let token = loadToken();
   let isLoggedIn = token !== "";
   switch (route.path, isLoggedIn) {
-  | ([], true) => <PageHome isLoggedIn />
-  | ([""], true) => <PageHome isLoggedIn />
+  | ([], true)
+  | ([""], true) => <PageHome />
   | ([x, monthYear], true) when routeMatches(x, Links.dashboard) =>
     let datetime = Js.String.split("-", monthYear);
     <PageHome
-      isLoggedIn
       year={datetime[1] |> float_of_string}
       month={(datetime[0] |> int_of_string) - 1}
     />;

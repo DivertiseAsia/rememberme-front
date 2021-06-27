@@ -320,3 +320,21 @@ let validateWeekend = (datetime: Js.Date.t) => {
   let day = datetime |> Js.Date.getDay;
   day === 0. || day === 6.;
 };
+
+let getListFromState = apiState =>
+  switch (apiState) {
+  | Loaded(listData) => listData
+  | _ => []
+  };
+
+let getOptionDataFromState = apiState =>
+  switch (apiState) {
+  | Loaded(data) => Some(data)
+  | _ => None
+  };
+
+let getErrorElFromState = apiState =>
+  switch (apiState) {
+  | Failed(jsonStr) => jsonStr->Utils.getErrorMsgFromJson->React.array
+  | _ => React.null
+  };
