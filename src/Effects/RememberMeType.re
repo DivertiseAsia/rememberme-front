@@ -70,4 +70,46 @@ module Encode = {
       ])
     );
   };
+
+  let getDateStrRequestLeave = (datetime: float) => {
+    let getTwoPositionStr = (month: string) => {
+      String.length(month) === 1 ? "0" ++ month : month;
+    };
+
+    (
+      datetime
+      |> Js.Date.fromFloat
+      |> Js.Date.getFullYear
+      |> int_of_float
+      |> string_of_int
+    )
+    ++ "-"
+    ++ (
+      (datetime |> Js.Date.fromFloat |> Js.Date.getMonth |> int_of_float)
+      + 1
+      |> string_of_int
+      |> getTwoPositionStr
+    )
+    ++ "-"
+    ++ (
+      datetime
+      |> Js.Date.fromFloat
+      |> Js.Date.getDate
+      |> int_of_float
+      |> string_of_int
+      |> getTwoPositionStr
+    );
+  };
+
+  let leaveRequest = (~formType, ~fromDate, ~toDate, ~reason, ~isRemote) => {
+    Json.Encode.(
+      object_([
+        ("type", (formType === Sick ? 1 : 0)->int),
+        ("from_date", fromDate |> getDateStrRequestLeave |> Js.Json.string),
+        ("to_date", toDate |> getDateStrRequestLeave |> Js.Json.string),
+        ("reason", reason |> Js.Json.string),
+        ("is_remote", isRemote |> Js.Json.boolean),
+      ])
+    );
+  };
 };

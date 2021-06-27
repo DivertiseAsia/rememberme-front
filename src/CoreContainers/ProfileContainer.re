@@ -65,7 +65,7 @@ let make = (~profile: profile) => {
         birthDate:
           profile.birthDate
           ->Js.Date.valueOf
-          ->RememberMeUtils.getDateStrRequestLeave,
+          ->RememberMeType.Encode.getDateStrRequestLeave,
         changePassState: NotLoaded,
       },
     );

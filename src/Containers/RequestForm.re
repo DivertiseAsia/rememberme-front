@@ -40,7 +40,7 @@ type action =
   | ChangeEndDate(float)
   | ChangeNote(string)
   | ChangeIsRemote(bool)
-  | OnSubmitRequestLeave
+  | SetLoadState(loadState)
   | OnSubmitRequestLeaveSuccess
   | OnSubmitRequestLeaveFailed(string);
 
@@ -206,42 +206,6 @@ let dateForm =
   </>;
 };
 
-let onSubmit = (state, dispatch) => {
-  let payload =
-    Json.Encode.(
-      object_([
-        (
-          "type",
-          switch (state.formType) {
-          | Sick => 1 |> int
-          | _ => 0 |> int
-          },
-        ),
-        (
-          "from_date",
-          state.startDate
-          |> RememberMeUtils.getDateStrRequestLeave
-          |> Js.Json.string,
-        ),
-        (
-          "to_date",
-          state.endDate
-          |> RememberMeUtils.getDateStrRequestLeave
-          |> Js.Json.string,
-        ),
-        ("reason", state.note |> Js.Json.string),
-        ("is_remote", state.isRemote |> Js.Json.boolean),
-      ])
-    );
-  RememberMeApi.postLeave(
-    ~token=Utils.getToken(),
-    ~payload,
-    ~successAction=_ => dispatch(OnSubmitRequestLeaveSuccess),
-    ~failAction=
-      json => json->Json.stringify->OnSubmitRequestLeaveFailed->dispatch,
-  );
-};
-
 [@react.component]
 let make = (~schedules, ~onRefresh) => {
   let (state, dispatch) =
@@ -262,13 +226,7 @@ let make = (~schedules, ~onRefresh) => {
           }
         | ChangeNote(note) => {...state, note}
         | ChangeIsRemote(isRemote) => {...state, isRemote}
-        | OnSubmitRequestLeave =>
-          //          onSubmit(
-
-          //            dispatch, // TODO: REWRITE
-          {...state, loadState: Loading}
-        //            state,
-        //          )
+        | SetLoadState(loadState) => {...state, loadState}
         | OnSubmitRequestLeaveSuccess => {
             ...state,
             loadState: Succeed,
@@ -298,6 +256,26 @@ let make = (~schedules, ~onRefresh) => {
       },
     );
 
+  let onSubmit = () => {
+    let payload =
+      Encode.leaveRequest(
+        ~formType=state.formType,
+        ~fromDate=state.startDate,
+        ~toDate=state.endDate,
+        ~reason=state.note,
+        ~isRemote=state.isRemote,
+      );
+
+    Loading->SetLoadState->dispatch;
+
+    RememberMeApi.postLeave(
+      ~token=Utils.getToken(),
+      ~payload,
+      ~successAction=_ => dispatch(OnSubmitRequestLeaveSuccess),
+      ~failAction=
+        json => json->Json.stringify->OnSubmitRequestLeaveFailed->dispatch,
+    );
+  };
   <div className="container mt-4 request-form-container">
     <div className="row"> <p> {string("Create Form")} </p> </div>
     <div
@@ -429,7 +407,7 @@ let make = (~schedules, ~onRefresh) => {
           <button
             type_="button"
             className="btn btn-rounded btn-form- btn-form-active m-auto"
-            onClick={_ => dispatch(OnSubmitRequestLeave)}
+            onClick={_ => onSubmit()}
             style={ReactDOM.Style.make(~maxWidth="120px", ())}>
             {string("Submit")}
           </button>
