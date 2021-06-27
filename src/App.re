@@ -9,6 +9,7 @@ open RememberMeApi;
 type eventsApiState = apiState(list(event));
 type holidayApiState = apiState(list(holiday));
 type birthDayApiState = apiState(list(birthDay));
+type allLeaveListApiState = apiState(list(leaveDetail));
 
 type state = {
   route: ReasonReact.Router.url,
@@ -16,10 +17,12 @@ type state = {
   eventsApiState,
   holidayApiState,
   birthDayApiState,
+  allLeaveListApiState,
 };
 
 type action =
   | RouteTo(Router.url)
+  | SetAllLeaveListApiState(allLeaveListApiState)
   | SetEventsApiState(eventsApiState)
   | SetBirthDayApiState(birthDayApiState)
   | SetHolidayApiState(holidayApiState);
@@ -70,6 +73,16 @@ let fetchBirthDay = dispatch => {
       json => json->Json.stringify->Failed->SetBirthDayApiState->dispatch,
   );
 };
+let fetchAllLeaveList = dispatch => {
+  Loading->SetAllLeaveListApiState->dispatch;
+  fetchAllLeaves(
+    ~token=Utils.getToken(),
+    ~successAction=
+      leaveList => leaveList->Loaded->SetAllLeaveListApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetAllLeaveListApiState->dispatch,
+  );
+};
 
 [@react.component]
 let make = () => {
@@ -84,6 +97,10 @@ let make = () => {
             birthDayApiState,
           }
         | SetHolidayApiState(holidayApiState) => {...state, holidayApiState}
+        | SetAllLeaveListApiState(allLeaveListApiState) => {
+            ...state,
+            allLeaveListApiState,
+          }
         },
       {
         route: Router.dangerouslyGetInitialUrl(),
@@ -91,6 +108,7 @@ let make = () => {
         eventsApiState: NotLoaded,
         holidayApiState: NotLoaded,
         birthDayApiState: NotLoaded,
+        allLeaveListApiState: NotLoaded,
       },
     );
 
@@ -112,18 +130,31 @@ let make = () => {
     ->RememberMeUtils.doActionIfNotLoaded(_ => fetchBirthDay(dispatch));
   };
 
+  let fetchAllLeaveListIfNone = () => {
+    state.allLeaveListApiState
+    ->RememberMeUtils.doActionIfNotLoaded(_ => fetchAllLeaveList(dispatch));
+  };
+
   let daysContextValue: DaysContext.days = {
     events: {
       data: state.eventsApiState,
       fetchData: fetchEventsIfNone,
+      forceFetchData: _ => fetchEvents(dispatch),
     },
     holidayList: {
       data: state.holidayApiState,
       fetchData: fetchHolidayIfNone,
+      forceFetchData: _ => fetchHoliday(dispatch),
     },
     birthDayList: {
       data: state.birthDayApiState,
       fetchData: fetchBirthDayIfNone,
+      forceFetchData: _ => fetchBirthDay(dispatch),
+    },
+    allLeaveList: {
+      data: state.allLeaveListApiState,
+      fetchData: fetchAllLeaveListIfNone,
+      forceFetchData: _ => fetchAllLeaveList(dispatch),
     },
   };
 

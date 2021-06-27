@@ -13,7 +13,6 @@ type state = {
   profileApiState,
   showRequestLeave: bool,
   showRequestUserLeave: bool,
-  leaveListApiState,
   userLeaveListApiState,
 };
 
@@ -21,26 +20,13 @@ type action =
   | ToggleRequestLeave
   | ToggleRequestUserLeave
   | SetProfileApiState(profileApiState)
-  | SetLeaveListApiState(leaveListApiState)
   | SetUserLeaveListApiState(userLeaveListApiState);
 
 let initialState = {
   profileApiState: NotLoaded,
   showRequestLeave: false,
   showRequestUserLeave: false,
-  leaveListApiState: NotLoaded,
   userLeaveListApiState: NotLoaded,
-};
-
-let fetchAllRequestLeave = dispatch => {
-  Loading->SetLeaveListApiState->dispatch;
-  fetchAllLeaves(
-    ~token=Utils.getToken(),
-    ~successAction=
-      leaveList => leaveList->Loaded->SetLeaveListApiState->dispatch,
-    ~failAction=
-      json => json->Json.stringify->Failed->SetLeaveListApiState->dispatch,
-  );
 };
 
 let fetchUserRequestLeaveList = dispatch => {
@@ -74,6 +60,11 @@ let make =
     events: {data: eventsApiState, fetchData: loadEvents},
     holidayList: {data: holidayListApiState, fetchData: loadHolidayList},
     birthDayList: {data: birthDayListApiState, fetchData: loadBirthdayList},
+    allLeaveList: {
+      data: leaveListApiState,
+      fetchData: loadLeaveList,
+      forceFetchData: forceLoadLeaveList,
+    },
   } =
     DaysContext.useDaysResults();
 
@@ -90,10 +81,6 @@ let make =
             showRequestUserLeave: !state.showRequestUserLeave,
           }
         | SetProfileApiState(profileApiState) => {...state, profileApiState}
-        | SetLeaveListApiState(leaveListApiState) => {
-            ...state,
-            leaveListApiState,
-          }
         | SetUserLeaveListApiState(userLeaveListApiState) => {
             ...state,
             userLeaveListApiState,
@@ -107,8 +94,9 @@ let make =
     loadEvents();
     loadHolidayList();
     loadBirthdayList();
+    loadLeaveList();
     fetchProfile(dispatch);
-    fetchAllRequestLeave(dispatch);
+    //    fetchAllRequestLeave(dispatch);
     fetchUserRequestLeaveList(dispatch);
     None;
   });
@@ -124,7 +112,7 @@ let make =
           year
           holidayList={holidayListApiState->RememberMeUtils.getListFromState}
           listBirthDay={birthDayListApiState->RememberMeUtils.getListFromState}
-          leaveList={state.leaveListApiState->RememberMeUtils.getListFromState}
+          leaveList={leaveListApiState->RememberMeUtils.getListFromState}
           eventList={eventsApiState->RememberMeUtils.getListFromState}
         />
       </div>
@@ -136,13 +124,13 @@ let make =
           }
           holidayList={holidayListApiState->RememberMeUtils.getListFromState}
           listBirthDay={birthDayListApiState->RememberMeUtils.getListFromState}
-          leaveList={state.leaveListApiState->RememberMeUtils.getListFromState}
+          leaveList={leaveListApiState->RememberMeUtils.getListFromState}
           userLeaveList={
             state.userLeaveListApiState->RememberMeUtils.getListFromState
           }
           eventList={eventsApiState->RememberMeUtils.getListFromState}
           onRefresh={_ => {
-            fetchAllRequestLeave(dispatch);
+            forceLoadLeaveList();
             fetchUserRequestLeaveList(dispatch);
           }}
         />
@@ -153,7 +141,7 @@ let make =
       state.profileApiState->RememberMeUtils.getErrorElFromState
       holidayListApiState->RememberMeUtils.getErrorElFromState
       birthDayListApiState->RememberMeUtils.getErrorElFromState
-      state.leaveListApiState->RememberMeUtils.getErrorElFromState
+      leaveListApiState->RememberMeUtils.getErrorElFromState
       state.userLeaveListApiState->RememberMeUtils.getErrorElFromState
     </div>
   </div>;

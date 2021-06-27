@@ -3,20 +3,27 @@ open RememberMeType;
 type dayContext('a) = {
   data: 'a,
   fetchData: unit => unit,
+  forceFetchData: unit => unit,
 };
 
 type days = {
   events: dayContext(apiState(list(RememberMeApi.event))),
   holidayList: dayContext(apiState(list(RememberMeApi.holiday))),
   birthDayList: dayContext(apiState(list(RememberMeApi.birthDay))),
+  allLeaveList: dayContext(apiState(list(RememberMeApi.leaveDetail))),
 };
 
-let initDayContext = {data: NotLoaded, fetchData: _ => ignore()};
+let initDayContext = {
+  data: NotLoaded,
+  fetchData: _ => ignore(),
+  forceFetchData: _ => ignore(),
+};
 
 let initValue: days = {
   events: initDayContext,
   holidayList: initDayContext,
   birthDayList: initDayContext,
+  allLeaveList: initDayContext,
 };
 
 let context = React.createContext(initValue);

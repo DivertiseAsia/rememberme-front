@@ -338,3 +338,10 @@ let getErrorElFromState = apiState =>
   | Failed(jsonStr) => jsonStr->Utils.getErrorMsgFromJson->React.array
   | _ => React.null
   };
+
+let doActionIfNotLoaded = (apiState, action) =>
+  switch (apiState) {
+  | Loading
+  | Loaded(_) => ()
+  | _ => action()
+  };
