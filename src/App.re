@@ -10,6 +10,7 @@ type eventsApiState = apiState(list(event));
 type holidayApiState = apiState(list(holiday));
 type birthDayApiState = apiState(list(birthDay));
 type allLeaveListApiState = apiState(list(leaveDetail));
+type userLeaveListApiState = apiState(list(leaveDetail));
 
 type state = {
   route: ReasonReact.Router.url,
@@ -18,11 +19,13 @@ type state = {
   holidayApiState,
   birthDayApiState,
   allLeaveListApiState,
+  userLeaveListApiState,
 };
 
 type action =
   | RouteTo(Router.url)
   | SetAllLeaveListApiState(allLeaveListApiState)
+  | SetUserLeaveListApiState(userLeaveListApiState)
   | SetEventsApiState(eventsApiState)
   | SetBirthDayApiState(birthDayApiState)
   | SetHolidayApiState(holidayApiState);
@@ -84,6 +87,16 @@ let fetchAllLeaveList = dispatch => {
   );
 };
 
+let fetchUserRequestLeaveList = dispatch => {
+  Loading->SetUserLeaveListApiState->dispatch;
+  fetchUserLeaves(
+    ~token=Utils.getToken(),
+    ~successAction=
+      leaveList => leaveList->Loaded->SetUserLeaveListApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetUserLeaveListApiState->dispatch,
+  );
+};
 [@react.component]
 let make = () => {
   let (state, dispatch) =
@@ -101,6 +114,10 @@ let make = () => {
             ...state,
             allLeaveListApiState,
           }
+        | SetUserLeaveListApiState(userLeaveListApiState) => {
+            ...state,
+            userLeaveListApiState,
+          }
         },
       {
         route: Router.dangerouslyGetInitialUrl(),
@@ -109,6 +126,7 @@ let make = () => {
         holidayApiState: NotLoaded,
         birthDayApiState: NotLoaded,
         allLeaveListApiState: NotLoaded,
+        userLeaveListApiState: NotLoaded,
       },
     );
 
@@ -135,6 +153,13 @@ let make = () => {
     ->RememberMeUtils.doActionIfNotLoaded(_ => fetchAllLeaveList(dispatch));
   };
 
+  let fetchUserRequestLeaveListIfNone = () => {
+    state.userLeaveListApiState
+    ->RememberMeUtils.doActionIfNotLoaded(_ =>
+        fetchUserRequestLeaveList(dispatch)
+      );
+  };
+
   let daysContextValue: DaysContext.days = {
     events: {
       data: state.eventsApiState,
@@ -156,6 +181,11 @@ let make = () => {
       fetchData: fetchAllLeaveListIfNone,
       forceFetchData: _ => fetchAllLeaveList(dispatch),
     },
+    userLeaveList: {
+      data: state.userLeaveListApiState,
+      fetchData: fetchUserRequestLeaveListIfNone,
+      forceFetchData: _ => fetchUserRequestLeaveList(dispatch),
+    },
   };
 
   React.useEffect0(_ => {
@@ -169,6 +199,8 @@ let make = () => {
       if (isLoggedIn) {
         fetchEventsIfNone();
         fetchHolidayIfNone();
+        fetchBirthDayIfNone();
+        fetchAllLeaveListIfNone();
       };
       None;
     },

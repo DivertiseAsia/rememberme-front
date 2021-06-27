@@ -11,6 +11,7 @@ type days = {
   holidayList: dayContext(apiState(list(RememberMeApi.holiday))),
   birthDayList: dayContext(apiState(list(RememberMeApi.birthDay))),
   allLeaveList: dayContext(apiState(list(RememberMeApi.leaveDetail))),
+  userLeaveList: dayContext(apiState(list(RememberMeApi.leaveDetail))),
 };
 
 let initDayContext = {
@@ -24,6 +25,7 @@ let initValue: days = {
   holidayList: initDayContext,
   birthDayList: initDayContext,
   allLeaveList: initDayContext,
+  userLeaveList: initDayContext,
 };
 
 let context = React.createContext(initValue);
