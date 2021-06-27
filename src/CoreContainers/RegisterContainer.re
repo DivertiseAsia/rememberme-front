@@ -12,8 +12,9 @@ type firstName = string;
 type lastName = string;
 type birthDate = string;
 
+type apiState = RememberMeType.apiState(bool);
+
 type state = {
-  loading: bool,
   email,
   password,
   confirmPassword,
@@ -21,22 +22,20 @@ type state = {
   lastName,
   userName: string,
   birthDate,
-  err: option(string),
+  apiState,
 };
 
 type action =
-  | SignUp
-  | SignUpFailed(string)
-  | SignUpSuccess
   | SetEmail(string)
   | SetPassword(string)
   | SetConfirmPassword(string)
   | SetFirstName(firstName)
   | SetLastName(lastName)
   | SetUsername(string)
-  | SetBirthDate(birthDate);
+  | SetBirthDate(birthDate)
+  | SetApiState(apiState);
+
 let initialState = {
-  loading: false,
   email: "",
   password: "",
   confirmPassword: "",
@@ -44,28 +43,7 @@ let initialState = {
   lastName: "",
   userName: "",
   birthDate: "",
-  err: None,
-};
-let signup = (dispatch, state) => {
-  let payload =
-    Json.Encode.(
-      object_([
-        ("email", state.email |> Js.Json.string),
-        ("password", state.password |> Js.Json.string),
-        ("confirm_password", state.confirmPassword |> Js.Json.string),
-        ("first_name", state.firstName |> Js.Json.string),
-        ("last_name", state.lastName |> Js.Json.string),
-        ("birthDate", state.birthDate |> Js.Json.string),
-      ])
-    );
-
-  RequestUtils.requestJsonResponseToAction(
-    ~headers=RequestUtils.buildHeader(~verb=Post, ~body=payload, None),
-    ~url=URL.signUp,
-    ~successAction=json => dispatch(SignUpSuccess),
-    ~failAction=json => dispatch(SignUpFailed(json |> Json.stringify)),
-  )
-  |> ignore;
+  apiState: NotLoaded,
 };
 
 let getClassName = (~extraStyle="", ~invalid=false, ()) => {
@@ -79,12 +57,6 @@ let make = () => {
     React.useReducer(
       (state, action) => {
         switch (action) {
-        | SignUp =>
-          //TODO: REWRITE
-          {...state, loading: true, err: None}
-        //          signup()
-        | SignUpSuccess => {...state, loading: false}
-        | SignUpFailed(err) => {...state, loading: false, err: Some(err)}
         | SetEmail(email) => {...state, email}
         | SetPassword(password) => {...state, password}
         | SetConfirmPassword(confirmPassword) => {...state, confirmPassword}
@@ -92,12 +64,38 @@ let make = () => {
         | SetFirstName(firstName) => {...state, firstName}
         | SetLastName(lastName) => {...state, lastName}
         | SetUsername(userName) => {...state, userName}
+        | SetApiState(apiState) => {...state, apiState}
         }
       },
       initialState,
     );
+
+  let signup = () => {
+    let payload =
+      Json.Encode.(
+        object_([
+          ("email", state.email |> Js.Json.string),
+          ("password", state.password |> Js.Json.string),
+          ("confirm_password", state.confirmPassword |> Js.Json.string),
+          ("first_name", state.firstName |> Js.Json.string),
+          ("last_name", state.lastName |> Js.Json.string),
+          ("birthDate", state.birthDate |> Js.Json.string),
+        ])
+      );
+
+    Loading->SetApiState->dispatch;
+
+    RequestUtils.requestJsonResponseToAction(
+      ~headers=RequestUtils.buildHeader(~verb=Post, ~body=payload, None),
+      ~url=URL.signUp,
+      ~successAction=_json => Loaded(true)->SetApiState->dispatch,
+      ~failAction=json => json->Json.stringify->Failed->SetApiState->dispatch,
+    )
+    |> ignore;
+  };
+
   let buttonDisabled =
-    state.loading
+    state.apiState === Loading
     || !checkEmail(state.email)
     || !checkPassword(state.password)
     || !
@@ -110,7 +108,7 @@ let make = () => {
 
   <div className="row">
     <div className="col-sm-9 col-md-9 col-lg-9 mx-auto signup-container">
-      {state.loading ? <Loading /> : null}
+      {state.apiState === Loading ? <Loading /> : null}
       <form id="signup-form">
         <div className="row justify-content-between">
           <div className="col-6 pl-0">
@@ -207,9 +205,9 @@ let make = () => {
           />
         </div>
         <div className="error-message">
-          {switch (state.err) {
-           | None => null
-           | Some(jsonStr) => jsonStr |> getErrorMsgFromJson |> array
+          {switch (state.apiState) {
+           | Failed(jsonStr) => jsonStr |> getErrorMsgFromJson |> array
+           | _ => null
            }}
           {state.confirmPassword
            |> Js.String.length > 0
@@ -230,7 +228,7 @@ let make = () => {
           id="signup_btn"
           className="btn btn-blue btn-signup"
           disabled=buttonDisabled
-          onClick={_ => dispatch(SignUp)}>
+          onClick={_ => signup()}>
           {"Sign Up" |> str}
         </button>
       </form>
