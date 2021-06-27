@@ -2,46 +2,13 @@ open ReasonReact;
 open RememberMeApi;
 open RememberMeType;
 
-type state = {
-  loadState,
-  profile: option(profile),
-};
-
-type action =
-  | FetchProfile
-  | FetchProfileSuccess(option(profile))
-  | FetchProfileFail;
-
-let initialState = {loadState: Loading, profile: None};
-
-let fetchProfile = dispatch => {
-  fetchProfile(
-    ~token=Utils.getToken(),
-    ~successAction=profile => dispatch(FetchProfileSuccess(Some(profile))),
-    ~failAction=_ => dispatch(FetchProfileFail),
-  );
-};
-
-let regex = Js.Re.fromStringWithFlags("next=([^&#]*)", ~flags="g");
-
 [@react.component]
 let make = () => {
-  let (state, dispatch) =
-    React.useReducer(
-      (state, action) => {
-        switch (action) {
-        | FetchProfile => {...state, loadState: Loading}
-        //      , fetchProfile) TODO
-        | FetchProfileSuccess(profile) => {loadState: Succeed, profile}
-        | FetchProfileFail => {loadState: Failed(""), profile: None}
-        }
-      },
-      initialState,
-    );
+  let {data: profileApiState, fetchData: loadProfile} =
+    ProfileContext.useProfileResults();
 
   React.useEffect0(_ => {
-    dispatch(FetchProfile);
-
+    loadProfile();
     None;
   });
 
@@ -56,9 +23,9 @@ let make = () => {
       <div className="col-6 text-right">
         <span className="cursor-pointer">
           {string(
-             switch (state.profile) {
-             | Some(p) => p.firstName
-             | None => ""
+             switch (profileApiState) {
+             | Loaded(p) => p.firstName
+             | _ => ""
              },
            )}
         </span>
@@ -69,9 +36,9 @@ let make = () => {
     </div>
     <div className="row row-profile-container justify-content-center">
       <div className="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-4">
-        {switch (state.loadState, state.profile) {
-         | (Succeed, Some(profile)) => <ProfileContainer profile />
-         | (Failed(_), _) => string("Can't get profile. Please try again")
+        {switch (profileApiState) {
+         | Loaded(profile) => <ProfileContainer profile />
+         | Failed(_) => string("Can't get profile. Please try again")
          | _ => <Loading />
          }}
       </div>
