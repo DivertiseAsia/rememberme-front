@@ -21,7 +21,6 @@ type state = {
   holidayList: list(holiday),
   listBirthDay: list(birthDay),
   leaveList: list(leaveDetail),
-  eventList: list(event),
 };
 
 type action =
@@ -35,10 +34,8 @@ type action =
   | FetchBirthDayListFail
   | FetchLeaveList
   | FetchLeaveListSuccess(list(leaveDetail))
-  | FetchLeaveListFail
-  | FetchEventList
-  | FetchEventListSuccess(list(event))
-  | FetchEventListFail;
+  | FetchLeaveListFail;
+
 let initialState = {
   loadState: Idle,
   openDropdown: false,
@@ -46,7 +43,6 @@ let initialState = {
   holidayList: [],
   listBirthDay: [],
   leaveList: [],
-  eventList: [],
 };
 
 let fetchHolidayList = dispatch => {
@@ -74,16 +70,10 @@ let fetchAllRequestLeave = dispatch => {
   );
 };
 
-let fetchEvent = dispatch => {
-  fetchEvent(
-    ~token=Utils.getToken(),
-    ~successAction=eventList => dispatch(FetchEventListSuccess(eventList)),
-    ~failAction=_ => dispatch(FetchEventListFail),
-  );
-};
-
 [@react.component]
 let make = () => {
+  let (eventsApiState, loadEvents) = EventsContext.useEventsResults();
+
   let (state, dispatch) =
     React.useReducer(
       (state, action) => {
@@ -132,20 +122,6 @@ let make = () => {
             loadState: Failed(""),
             leaveList: [],
           }
-        | FetchEventList =>
-          // TODO: REWRITE
-          {...state, loadState: Loading}
-        //      , fetchEvent)
-        | FetchEventListSuccess(eventList) => {
-            ...state,
-            loadState: Succeed,
-            eventList,
-          }
-        | FetchEventListFail => {
-            ...state,
-            loadState: Failed(""),
-            eventList: [],
-          }
         }
       },
       initialState,
@@ -155,7 +131,8 @@ let make = () => {
     dispatch(FetchHolidayList);
     dispatch(FetchBirthDayList);
     dispatch(FetchLeaveList);
-    dispatch(FetchEventList);
+    //    dispatch(FetchEventList);
+    loadEvents();
     None;
   });
 
@@ -211,7 +188,7 @@ let make = () => {
                 holidayList={state.holidayList}
                 listBirthDay={state.listBirthDay}
                 leaveList={state.leaveList}
-                eventList={state.eventList}
+                eventList={eventsApiState->RememberMeUtils.getListFromState}
               />
             </div>
           )

@@ -7,7 +7,6 @@ type holidayApiState = apiState(list(holiday));
 type birthDayApiState = apiState(list(birthDay));
 type leaveListApiState = apiState(list(leaveDetail));
 type userLeaveListApiState = apiState(list(leaveDetail));
-type eventListApiState = apiState(list(event));
 type profileApiState = apiState(profile);
 
 type state = {
@@ -17,7 +16,6 @@ type state = {
   holidayApiState,
   birthDayApiState,
   leaveListApiState,
-  eventListApiState,
   userLeaveListApiState,
 };
 
@@ -28,7 +26,6 @@ type action =
   | SetHolidayApiState(holidayApiState)
   | SetBirthDayApiState(birthDayApiState)
   | SetLeaveListApiState(leaveListApiState)
-  | SetEventListApiState(eventListApiState)
   | SetUserLeaveListApiState(userLeaveListApiState);
 
 let initialState = {
@@ -38,7 +35,6 @@ let initialState = {
   holidayApiState: NotLoaded,
   birthDayApiState: NotLoaded,
   leaveListApiState: NotLoaded,
-  eventListApiState: NotLoaded,
   userLeaveListApiState: NotLoaded,
 };
 
@@ -60,17 +56,6 @@ let fetchBirthDay = dispatch => {
       birthdayList => birthdayList->Loaded->SetBirthDayApiState->dispatch,
     ~failAction=
       json => json->Json.stringify->Failed->SetBirthDayApiState->dispatch,
-  );
-};
-
-let fetchEvent = dispatch => {
-  Loading->SetEventListApiState->dispatch;
-  fetchEvent(
-    ~token=Utils.getToken(),
-    ~successAction=
-      eventList => eventList->Loaded->SetEventListApiState->dispatch,
-    ~failAction=
-      json => json->Json.stringify->Failed->SetEventListApiState->dispatch,
   );
 };
 
@@ -112,6 +97,8 @@ let make =
       ~month=Js.Date.make() |> Js.Date.getMonth |> int_of_float,
       ~year=Js.Date.make() |> Js.Date.getFullYear,
     ) => {
+  let (eventsApiState, loadEvents) = EventsContext.useEventsResults();
+
   let (state, dispatch) =
     React.useReducer(
       (state, action) => {
@@ -134,10 +121,6 @@ let make =
             ...state,
             leaveListApiState,
           }
-        | SetEventListApiState(eventListApiState) => {
-            ...state,
-            eventListApiState,
-          }
         | SetUserLeaveListApiState(userLeaveListApiState) => {
             ...state,
             userLeaveListApiState,
@@ -148,11 +131,11 @@ let make =
     );
 
   React.useEffect0(() => {
+    loadEvents();
     fetchProfile(dispatch);
     fetchHoliday(dispatch);
     fetchBirthDay(dispatch);
     fetchAllRequestLeave(dispatch);
-    fetchEvent(dispatch);
     fetchUserRequestLeaveList(dispatch);
     None;
   });
@@ -171,7 +154,7 @@ let make =
             state.birthDayApiState->RememberMeUtils.getListFromState
           }
           leaveList={state.leaveListApiState->RememberMeUtils.getListFromState}
-          eventList={state.eventListApiState->RememberMeUtils.getListFromState}
+          eventList={eventsApiState->RememberMeUtils.getListFromState}
         />
       </div>
       <div
@@ -188,7 +171,7 @@ let make =
           userLeaveList={
             state.userLeaveListApiState->RememberMeUtils.getListFromState
           }
-          eventList={state.eventListApiState->RememberMeUtils.getListFromState}
+          eventList={eventsApiState->RememberMeUtils.getListFromState}
           onRefresh={_ => {
             fetchAllRequestLeave(dispatch);
             fetchUserRequestLeaveList(dispatch);
@@ -197,10 +180,10 @@ let make =
       </div>
     </div>
     <div className="error-status">
+      eventsApiState->RememberMeUtils.getErrorElFromState
       state.profileApiState->RememberMeUtils.getErrorElFromState
       state.holidayApiState->RememberMeUtils.getErrorElFromState
       state.birthDayApiState->RememberMeUtils.getErrorElFromState
-      state.eventListApiState->RememberMeUtils.getErrorElFromState
       state.leaveListApiState->RememberMeUtils.getErrorElFromState
       state.userLeaveListApiState->RememberMeUtils.getErrorElFromState
     </div>
