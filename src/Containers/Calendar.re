@@ -132,12 +132,13 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
       },
     )
     |> int_of_float;
+
   let startDayInWeek =
     Js.Date.makeWithYM(~year, ~month, ())
     |> Js.Date.getDay
     |> int_of_float
     |> getDayByStartOnMonday;
-  let emptyEl = key => <td key />;
+
   let today =
     Js.Date.make()
     |> (

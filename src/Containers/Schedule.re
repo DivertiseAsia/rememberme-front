@@ -43,7 +43,7 @@ let findAllSchedules = (schedules, key, today) => {
          <div key={key ++ (i |> string_of_int)}>
            <SchedulerDate
              isToday={schedule.date === today}
-             datetime={schedule.date |> RememberMeUtils.getDatetimeStr}
+             datetime={RememberMeUtils.getDatetimeStr(schedule.date)}
              schedules
            />
          </div>;
@@ -239,7 +239,7 @@ let make =
                                   ~formCurrentYear=true,
                                 )
                            | _ =>
-                             schedule.date |> RememberMeUtils.getDatetimeStr
+                             RememberMeUtils.getDatetimeStr(schedule.date)
                            };
                          let schedules =
                            List.append(

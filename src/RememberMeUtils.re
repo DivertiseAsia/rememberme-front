@@ -116,6 +116,7 @@ let mapDayInt = (day: int) =>
   | 4 => "Thu"
   | 5 => "Fri"
   | 6 => "Sat"
+  | _ => "N/A"
   };
 let mapMonthInt = (month: int) =>
   switch (month) {

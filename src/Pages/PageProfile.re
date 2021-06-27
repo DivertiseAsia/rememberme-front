@@ -14,7 +14,7 @@ type action =
 
 let initialState = {loadState: Loading, profile: None};
 
-let fetchProfile = (state, dispatch) => {
+let fetchProfile = dispatch => {
   fetchProfile(
     ~token=Utils.getToken(),
     ~successAction=profile => dispatch(FetchProfileSuccess(Some(profile))),

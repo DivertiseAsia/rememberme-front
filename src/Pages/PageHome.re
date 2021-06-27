@@ -44,7 +44,7 @@ let make =
   } =
     DaysContext.useDaysResults();
 
-  let (state, dispatch) =
+  let (_state, _dispatch) =
     React.useReducer(
       (state, action) => {
         switch (action) {

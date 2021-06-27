@@ -286,7 +286,7 @@ let make = (~schedules, ~onRefresh) => {
         (),
       )}>
       {requestMenus
-       |> List.mapi((i, menu: formType) =>
+       |> List.map((menu: formType) =>
             <div
               key={"form-type-" ++ (menu |> RememberMeUtils.requestMenuToStr)}
               className="col-6 col-sm-6 col-md-6 col-lg-5 col-xl-4">

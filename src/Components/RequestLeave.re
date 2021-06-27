@@ -10,10 +10,10 @@ let make = (~requestLeave: leaveDetail, ~onCancel) => {
     |> Js.Date.valueOf === (requestLeave.toDate |> Js.Date.valueOf);
   let datetimeStr =
     isOneDay
-      ? requestLeave.fromDate |> Js.Date.valueOf |> getDatetimeStr
-      : (requestLeave.fromDate |> Js.Date.valueOf |> getDatetimeStr)
+      ? getDatetimeStr(requestLeave.fromDate |> Js.Date.valueOf)
+      : getDatetimeStr(requestLeave.fromDate |> Js.Date.valueOf)
         ++ " - "
-        ++ (requestLeave.toDate |> Js.Date.valueOf |> getDatetimeStr);
+        ++ getDatetimeStr(requestLeave.toDate |> Js.Date.valueOf);
   let detailStr =
     (requestLeave.isRemote ? "[Remote] " : "") ++ requestLeave.reason;
 
