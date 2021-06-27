@@ -8,17 +8,20 @@ open RememberMeApi;
 
 type eventsApiState = apiState(list(event));
 type holidayApiState = apiState(list(holiday));
+type birthDayApiState = apiState(list(birthDay));
 
 type state = {
   route: ReasonReact.Router.url,
   loadState,
   eventsApiState,
   holidayApiState,
+  birthDayApiState,
 };
 
 type action =
   | RouteTo(Router.url)
   | SetEventsApiState(eventsApiState)
+  | SetBirthDayApiState(birthDayApiState)
   | SetHolidayApiState(holidayApiState);
 
 let loadToken = () =>
@@ -57,6 +60,17 @@ let fetchHoliday = dispatch => {
   );
 };
 
+let fetchBirthDay = dispatch => {
+  Loading->SetBirthDayApiState->dispatch;
+  fetchBirthDay(
+    ~token=Utils.getToken(),
+    ~successAction=
+      birthdayList => birthdayList->Loaded->SetBirthDayApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetBirthDayApiState->dispatch,
+  );
+};
+
 [@react.component]
 let make = () => {
   let (state, dispatch) =
@@ -65,6 +79,10 @@ let make = () => {
         switch (action) {
         | RouteTo(route) => {...state, route}
         | SetEventsApiState(eventsApiState) => {...state, eventsApiState}
+        | SetBirthDayApiState(birthDayApiState) => {
+            ...state,
+            birthDayApiState,
+          }
         | SetHolidayApiState(holidayApiState) => {...state, holidayApiState}
         },
       {
@@ -72,6 +90,7 @@ let make = () => {
         loadState: Loading,
         eventsApiState: NotLoaded,
         holidayApiState: NotLoaded,
+        birthDayApiState: NotLoaded,
       },
     );
 
@@ -86,6 +105,26 @@ let make = () => {
   let fetchHolidayIfNone = () => {
     state.eventsApiState
     ->RememberMeUtils.doActionIfNotLoaded(_ => fetchHoliday(dispatch));
+  };
+
+  let fetchBirthDayIfNone = () => {
+    state.birthDayApiState
+    ->RememberMeUtils.doActionIfNotLoaded(_ => fetchBirthDay(dispatch));
+  };
+
+  let daysContextValue: DaysContext.days = {
+    events: {
+      data: state.eventsApiState,
+      fetchData: fetchEventsIfNone,
+    },
+    holidayList: {
+      data: state.holidayApiState,
+      fetchData: fetchHolidayIfNone,
+    },
+    birthDayList: {
+      data: state.birthDayApiState,
+      fetchData: fetchBirthDayIfNone,
+    },
   };
 
   React.useEffect0(_ => {
@@ -105,19 +144,7 @@ let make = () => {
     [|isLoggedIn|],
   );
 
-  <DaysContext.Provider
-    value=(
-            {
-              events: {
-                data: state.eventsApiState,
-                fetchData: fetchEventsIfNone,
-              },
-              holidayList: {
-                data: state.holidayApiState,
-                fetchData: fetchHolidayIfNone,
-              },
-            }: DaysContext.days
-          )>
+  <DaysContext.Provider value=daysContextValue>
     {switch (state.route.path, isLoggedIn) {
      | ([], true)
      | ([""], true) => <PageHome />

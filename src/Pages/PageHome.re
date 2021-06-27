@@ -13,8 +13,6 @@ type state = {
   profileApiState,
   showRequestLeave: bool,
   showRequestUserLeave: bool,
-  holidayApiState,
-  birthDayApiState,
   leaveListApiState,
   userLeaveListApiState,
 };
@@ -23,8 +21,6 @@ type action =
   | ToggleRequestLeave
   | ToggleRequestUserLeave
   | SetProfileApiState(profileApiState)
-  | SetHolidayApiState(holidayApiState)
-  | SetBirthDayApiState(birthDayApiState)
   | SetLeaveListApiState(leaveListApiState)
   | SetUserLeaveListApiState(userLeaveListApiState);
 
@@ -32,31 +28,8 @@ let initialState = {
   profileApiState: NotLoaded,
   showRequestLeave: false,
   showRequestUserLeave: false,
-  holidayApiState: NotLoaded,
-  birthDayApiState: NotLoaded,
   leaveListApiState: NotLoaded,
   userLeaveListApiState: NotLoaded,
-};
-
-let fetchHoliday = dispatch => {
-  Loading->SetHolidayApiState->dispatch;
-  fetchHoliday(
-    ~successAction=
-      holidayList => holidayList->Loaded->SetHolidayApiState->dispatch,
-    ~failAction=
-      json => json->Json.stringify->Failed->SetHolidayApiState->dispatch,
-  );
-};
-
-let fetchBirthDay = dispatch => {
-  Loading->SetBirthDayApiState->dispatch;
-  fetchBirthDay(
-    ~token=Utils.getToken(),
-    ~successAction=
-      birthdayList => birthdayList->Loaded->SetBirthDayApiState->dispatch,
-    ~failAction=
-      json => json->Json.stringify->Failed->SetBirthDayApiState->dispatch,
-  );
 };
 
 let fetchAllRequestLeave = dispatch => {
@@ -100,6 +73,7 @@ let make =
   let {
     events: {data: eventsApiState, fetchData: loadEvents},
     holidayList: {data: holidayListApiState, fetchData: loadHolidayList},
+    birthDayList: {data: birthDayListApiState, fetchData: loadBirthdayList},
   } =
     DaysContext.useDaysResults();
 
@@ -116,11 +90,6 @@ let make =
             showRequestUserLeave: !state.showRequestUserLeave,
           }
         | SetProfileApiState(profileApiState) => {...state, profileApiState}
-        | SetHolidayApiState(holidayApiState) => {...state, holidayApiState}
-        | SetBirthDayApiState(birthDayApiState) => {
-            ...state,
-            birthDayApiState,
-          }
         | SetLeaveListApiState(leaveListApiState) => {
             ...state,
             leaveListApiState,
@@ -137,10 +106,8 @@ let make =
   React.useEffect0(() => {
     loadEvents();
     loadHolidayList();
+    loadBirthdayList();
     fetchProfile(dispatch);
-    //    fetchHoliday(dispatch);
-    fetchBirthDay(dispatch);
-    fetchBirthDay(dispatch);
     fetchAllRequestLeave(dispatch);
     fetchUserRequestLeaveList(dispatch);
     None;
@@ -156,9 +123,7 @@ let make =
           month
           year
           holidayList={holidayListApiState->RememberMeUtils.getListFromState}
-          listBirthDay={
-            state.birthDayApiState->RememberMeUtils.getListFromState
-          }
+          listBirthDay={birthDayListApiState->RememberMeUtils.getListFromState}
           leaveList={state.leaveListApiState->RememberMeUtils.getListFromState}
           eventList={eventsApiState->RememberMeUtils.getListFromState}
         />
@@ -170,9 +135,7 @@ let make =
             state.profileApiState->RememberMeUtils.getOptionDataFromState
           }
           holidayList={holidayListApiState->RememberMeUtils.getListFromState}
-          listBirthDay={
-            state.birthDayApiState->RememberMeUtils.getListFromState
-          }
+          listBirthDay={birthDayListApiState->RememberMeUtils.getListFromState}
           leaveList={state.leaveListApiState->RememberMeUtils.getListFromState}
           userLeaveList={
             state.userLeaveListApiState->RememberMeUtils.getListFromState
@@ -189,7 +152,7 @@ let make =
       eventsApiState->RememberMeUtils.getErrorElFromState
       state.profileApiState->RememberMeUtils.getErrorElFromState
       holidayListApiState->RememberMeUtils.getErrorElFromState
-      state.birthDayApiState->RememberMeUtils.getErrorElFromState
+      birthDayListApiState->RememberMeUtils.getErrorElFromState
       state.leaveListApiState->RememberMeUtils.getErrorElFromState
       state.userLeaveListApiState->RememberMeUtils.getErrorElFromState
     </div>

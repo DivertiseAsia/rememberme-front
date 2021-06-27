@@ -8,11 +8,16 @@ type dayContext('a) = {
 type days = {
   events: dayContext(apiState(list(RememberMeApi.event))),
   holidayList: dayContext(apiState(list(RememberMeApi.holiday))),
+  birthDayList: dayContext(apiState(list(RememberMeApi.birthDay))),
 };
 
 let initDayContext = {data: NotLoaded, fetchData: _ => ignore()};
 
-let initValue: days = {events: initDayContext, holidayList: initDayContext};
+let initValue: days = {
+  events: initDayContext,
+  holidayList: initDayContext,
+  birthDayList: initDayContext,
+};
 
 let context = React.createContext(initValue);
 
