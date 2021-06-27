@@ -1,6 +1,5 @@
 open ReasonReact;
 open RememberMeType;
-open RememberMeApi;
 
 let str = ReasonReact.string;
 
@@ -18,56 +17,16 @@ type state = {
   loadState,
   openDropdown: bool,
   targetYear: float,
-  holidayList: list(holiday),
-  listBirthDay: list(birthDay),
-  leaveList: list(leaveDetail),
 };
 
 type action =
   | ToggleDropdown(bool)
-  | ChangeYear(float)
-  | FetchHolidayList
-  | FetchHolidayListSuccess(list(holiday))
-  | FetchHolidayListFail
-  | FetchBirthDayList
-  | FetchBirthDayListSuccess(list(birthDay))
-  | FetchBirthDayListFail
-  | FetchLeaveList
-  | FetchLeaveListSuccess(list(leaveDetail))
-  | FetchLeaveListFail;
+  | ChangeYear(float);
 
 let initialState = {
   loadState: Idle,
   openDropdown: false,
   targetYear: Js.Date.make() |> Js.Date.getFullYear,
-  holidayList: [],
-  listBirthDay: [],
-  leaveList: [],
-};
-
-let fetchHolidayList = dispatch => {
-  fetchHoliday(
-    ~successAction=
-      holidayList => dispatch(FetchHolidayListSuccess(holidayList)),
-    ~failAction=_ => dispatch(FetchHolidayListFail),
-  );
-};
-
-let fetchBirthDay = dispatch => {
-  fetchBirthDay(
-    ~token=Utils.getToken(),
-    ~successAction=
-      birthdayList => dispatch(FetchBirthDayListSuccess(birthdayList)),
-    ~failAction=_ => dispatch(FetchBirthDayListFail),
-  );
-};
-
-let fetchAllRequestLeave = dispatch => {
-  fetchAllLeaves(
-    ~token=Utils.getToken(),
-    ~successAction=leaveList => dispatch(FetchLeaveListSuccess(leaveList)),
-    ~failAction=_ => dispatch(FetchLeaveListFail),
-  );
 };
 
 [@react.component]
@@ -75,6 +34,8 @@ let make = () => {
   let {
     events: {data: eventsApiState, fetchData: loadEvents},
     holidayList: {data: holidayListApiState, fetchData: loadHolidayList},
+    birthDayList: {data: birthDayListApiState, fetchData: loadBirthdayList},
+    allLeaveList: {data: leaveListApiState, fetchData: loadLeaveList},
   } =
     DaysContext.useDaysResults();
 
@@ -84,60 +45,16 @@ let make = () => {
         switch (action) {
         | ToggleDropdown(openDropdown) => {...state, openDropdown}
         | ChangeYear(targetYear) => {...state, targetYear}
-        | FetchHolidayList =>
-          // TODO REWRITE
-          {...state, loadState: Loading}
-        //      , fetchHolidayList)
-        | FetchHolidayListSuccess(holidayList) => {
-            ...state,
-            loadState: Succeed,
-            holidayList,
-          }
-        | FetchHolidayListFail => {
-            ...state,
-            loadState: Failed(""),
-            holidayList: [],
-          }
-        | FetchBirthDayList =>
-          // TODO REWRITE
-          {...state, loadState: Loading}
-        //      , fetchBirthDay)
-        | FetchBirthDayListSuccess(listBirthDay) => {
-            ...state,
-            loadState: Succeed,
-            listBirthDay,
-          }
-        | FetchBirthDayListFail => {
-            ...state,
-            loadState: Failed(""),
-            listBirthDay: [],
-          }
-        | FetchLeaveList =>
-          // TODO REWRITE
-          {...state, loadState: Loading}
-        //        fetchAllRequestLeave,
-        | FetchLeaveListSuccess(leaveList) => {
-            ...state,
-            loadState: Succeed,
-            leaveList,
-          }
-        | FetchLeaveListFail => {
-            ...state,
-            loadState: Failed(""),
-            leaveList: [],
-          }
         }
       },
       initialState,
     );
 
   React.useEffect0(_ => {
-    dispatch(FetchHolidayList);
-    dispatch(FetchBirthDayList);
-    dispatch(FetchLeaveList);
-    //    dispatch(FetchEventList);
+    loadBirthdayList();
     loadEvents();
     loadHolidayList();
+    loadLeaveList();
     None;
   });
 
@@ -190,10 +107,14 @@ let make = () => {
                 isMini=true
                 month
                 year={state.targetYear}
-                holidayList={state.holidayList}
-                listBirthDay={state.listBirthDay}
-                leaveList={state.leaveList}
+                listBirthDay={
+                  birthDayListApiState->RememberMeUtils.getListFromState
+                }
+                leaveList={leaveListApiState->RememberMeUtils.getListFromState}
                 eventList={eventsApiState->RememberMeUtils.getListFromState}
+                holidayList={
+                  holidayListApiState->RememberMeUtils.getListFromState
+                }
               />
             </div>
           )
