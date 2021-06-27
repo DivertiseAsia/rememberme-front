@@ -1,10 +1,18 @@
-[@bs.module] external loading: string = "../../../../public/images/loading.gif";
-let component = ReasonReact.statelessComponent("Loading");
+[@bs.module]
+external loading: string = "../../../../public/images/loading.gif";
 
-let make = (~className: option(string)=?, ~onClick=?, _children) => {
-  ...component,
-  render: _self =>
-    <div className={"loading-wrapper " ++ Js.Option.getWithDefault("", className)}>
-      <img className={"loading " ++ Js.Option.getWithDefault("loading-default", className)} ?onClick src=loading />
-    </div>,
+[@react.component]
+let make = (~className: option(string)=?, ~onClick=?) => {
+  <div
+    className={
+      "loading-wrapper " ++ Belt.Option.getWithDefault(className, "")
+    }>
+    <img
+      className={
+        "loading " ++ Belt.Option.getWithDefault(className, "loading-default")
+      }
+      ?onClick
+      src=loading
+    />
+  </div>;
 };

@@ -116,6 +116,7 @@ let mapDayInt = (day: int) =>
   | 4 => "Thu"
   | 5 => "Fri"
   | 6 => "Sat"
+  | _ => "N/A"
   };
 let mapMonthInt = (month: int) =>
   switch (month) {
@@ -131,6 +132,7 @@ let mapMonthInt = (month: int) =>
   | 9 => "Oct"
   | 10 => "Nov"
   | 11 => "Dec"
+  | _ => "N/A"
   };
 
 let mapFullMonthInt = (month: int) =>
@@ -147,14 +149,29 @@ let mapFullMonthInt = (month: int) =>
   | 9 => "October"
   | 10 => "November"
   | 11 => "December"
+  | _ => "N/A"
   };
 
-let getDatetimeStr = (~formCurrentYear=false, datetime: float) => {
-  (datetime |> Js.Date.fromFloat |> Js.Date.getDay |> int_of_float |> mapDayInt)
+let getDatetimeStr = (~formCurrentYear: bool=false, datetime: float) => {
+  (
+    datetime |> Js.Date.fromFloat |> Js.Date.getDay |> int_of_float |> mapDayInt
+  )
   ++ " "
-  ++ (datetime |> Js.Date.fromFloat |> Js.Date.getDate |> int_of_float |> string_of_int)
+  ++ (
+    datetime
+    |> Js.Date.fromFloat
+    |> Js.Date.getDate
+    |> int_of_float
+    |> string_of_int
+  )
   ++ " "
-  ++ (datetime |> Js.Date.fromFloat |> Js.Date.getMonth |> int_of_float |> mapFullMonthInt)
+  ++ (
+    datetime
+    |> Js.Date.fromFloat
+    |> Js.Date.getMonth
+    |> int_of_float
+    |> mapFullMonthInt
+  )
   ++ " "
   ++ (
     (formCurrentYear ? Js.Date.now() : datetime)
@@ -169,20 +186,48 @@ let getTwoPositionStr = (month: string) => {
   String.length(month) === 1 ? "0" ++ month : month;
 };
 let getDateStrRequestLeave = (datetime: float) => {
-  (datetime |> Js.Date.fromFloat |> Js.Date.getFullYear |> int_of_float |> string_of_int)
+  (
+    datetime
+    |> Js.Date.fromFloat
+    |> Js.Date.getFullYear
+    |> int_of_float
+    |> string_of_int
+  )
   ++ "-"
-  ++ ((datetime |> Js.Date.fromFloat |> Js.Date.getMonth |> int_of_float) + 1 |> string_of_int |> getTwoPositionStr)
+  ++ (
+    (datetime |> Js.Date.fromFloat |> Js.Date.getMonth |> int_of_float)
+    + 1
+    |> string_of_int
+    |> getTwoPositionStr
+  )
   ++ "-"
-  ++ (datetime |> Js.Date.fromFloat |> Js.Date.getDate |> int_of_float |> string_of_int |> getTwoPositionStr);
+  ++ (
+    datetime
+    |> Js.Date.fromFloat
+    |> Js.Date.getDate
+    |> int_of_float
+    |> string_of_int
+    |> getTwoPositionStr
+  );
 };
 
 let mapHolidayToSchedule = (holiday: RememberMeApi.holiday) => {
-  let schedule = {scheduleMenu: Holiday, title: holiday.name, date: holiday.date, detail: ""};
+  let schedule = {
+    scheduleMenu: Holiday,
+    title: holiday.name,
+    date: holiday.date,
+    detail: "",
+  };
   schedule;
 };
 
 let mapEventToSchedule = (event: RememberMeApi.event) => {
-  let schedule = {scheduleMenu: Event, title: event.name, date: event.date |> Js.Date.valueOf, detail: event.details};
+  let schedule = {
+    scheduleMenu: Event,
+    title: event.name,
+    date: event.date |> Js.Date.valueOf,
+    detail: event.details,
+  };
   schedule;
 };
 let mapLeaveToSchedule = (leaveDetail: RememberMeApi.leaveDetail) => {
@@ -199,16 +244,29 @@ let mapLeaveToSchedule = (leaveDetail: RememberMeApi.leaveDetail) => {
 };
 
 let splitRequestLeave = (leaveDetail: RememberMeApi.leaveDetail) => {
-  let dateFloat = (leaveDetail.toDate |> Js.Date.valueOf) -. (leaveDetail.fromDate |> Js.Date.valueOf);
+  let dateFloat =
+    (leaveDetail.toDate |> Js.Date.valueOf)
+    -. (leaveDetail.fromDate |> Js.Date.valueOf);
   switch (dateFloat) {
   | x when x === 0. => [leaveDetail |> mapLeaveToSchedule]
   | _ =>
-    Array.make(dateFloat /. (1000. *. 60. *. 60. *. 24.) +. 1. |> int_of_float, ReasonReact.null)
+    Array.make(
+      dateFloat /. (1000. *. 60. *. 60. *. 24.) +. 1. |> int_of_float,
+      ReasonReact.null,
+    )
     |> Array.mapi((idx, _) => {
-         let date = (leaveDetail.fromDate |> Js.Date.valueOf) +. 1000. *. 60. *. 60. *. 24. *. (idx |> float_of_int);
+         let date =
+           (leaveDetail.fromDate |> Js.Date.valueOf)
+           +. 1000.
+           *. 60.
+           *. 60.
+           *. 24.
+           *. (idx |> float_of_int);
          let schedule = {
            scheduleMenu: Leave,
-           title: leaveDetail.user ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
+           title:
+             leaveDetail.user
+             ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
            date,
            detail: "",
          };
@@ -242,7 +300,10 @@ let mapBirthDayToSchedule = (birthday: RememberMeApi.birthDay) => {
 };
 
 let validateBirthday = (birthday: Js.Date.t, month, date) => {
-  birthday |> Js.Date.getMonth === month && birthday |> Js.Date.getDate === date;
+  birthday
+  |> Js.Date.getMonth === month
+  && birthday
+  |> Js.Date.getDate === date;
 };
 
 let setStrToJsDate = (datetime: string) => {
@@ -260,3 +321,28 @@ let validateWeekend = (datetime: Js.Date.t) => {
   let day = datetime |> Js.Date.getDay;
   day === 0. || day === 6.;
 };
+
+let getListFromState = apiState =>
+  switch (apiState) {
+  | Loaded(listData) => listData
+  | _ => []
+  };
+
+let getOptionDataFromState = apiState =>
+  switch (apiState) {
+  | Loaded(data) => Some(data)
+  | _ => None
+  };
+
+let getErrorElFromState = apiState =>
+  switch (apiState) {
+  | Failed(jsonStr) => jsonStr->Utils.getErrorMsgFromJson->React.array
+  | _ => React.null
+  };
+
+let doActionIfNotLoaded = (apiState, action) =>
+  switch (apiState) {
+  | Loading
+  | Loaded(_) => ()
+  | _ => action()
+  };

@@ -1,5 +1,5 @@
-let component = ReasonReact.statelessComponent("ChangeFormRe");
 
+[@react.component]
 let make =
     (
       ~loading: bool,
@@ -8,11 +8,11 @@ let make =
       ~setNewPassword,
       ~setConfPassword,
       ~className: option(string)=?,
-      _children,
     ) => {
-  ...component,
-  render: _self =>
-    <form className={"form form-reset " ++ Js.Option.getWithDefault("", className)} onSubmit>
+  <form
+    className={"form form-reset " ++ Js.Option.getWithDefault("", className)}
+    onSubmit>
+
       <div className="section-reset content -text-center">
         <input
           disabled=loading
@@ -35,7 +35,12 @@ let make =
           onChange={e => setConfPassword(ReactEvent.Form.target(e)##value)}
           type_="password"
         />
-        <input disabled=loading className="btn-filled-blue btn-line" type_="submit" value="Change Password" />
+        <input
+          disabled=loading
+          className="btn-filled-blue btn-line"
+          type_="submit"
+          value="Change Password"
+        />
       </div>
-    </form>,
+    </form>;
 };
