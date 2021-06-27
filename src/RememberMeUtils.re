@@ -151,7 +151,7 @@ let mapFullMonthInt = (month: int) =>
   | _ => "N/A"
   };
 
-let getDatetimeStr = (~formCurrentYear=false, datetime: float) => {
+let getDatetimeStr = (~formCurrentYear: bool=false, datetime: float) => {
   (
     datetime |> Js.Date.fromFloat |> Js.Date.getDay |> int_of_float |> mapDayInt
   )

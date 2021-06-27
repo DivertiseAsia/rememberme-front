@@ -47,6 +47,12 @@ type loadState =
   | Succeed
   | Failed(string);
 
+type apiState('a) =
+  | NotLoaded
+  | Loading
+  | Loaded('a)
+  | Failed(string);
+
 type schedule = {
   scheduleMenu,
   title: string,

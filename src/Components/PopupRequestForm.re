@@ -2,7 +2,7 @@ open ReasonReact;
 open RememberMeType;
 
 [@react.component]
-let make = (~isSick=true, ~loadState, ~onConfirm) => {
+let make = (~isSick=true, ~loadState: loadState, ~onConfirm) => {
   <>
     <div className="popup-bg" onClick=onConfirm />
     {switch (loadState) {
