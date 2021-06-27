@@ -1,7 +1,6 @@
 open ReasonReact;
 open RememberMeApi;
 open RememberMeType;
-open Utils;
 
 type state = {
   loadState,
@@ -10,18 +9,7 @@ type state = {
 
 type action =
   | ChangeFormMenu(formMenu)
-  | RemoveRequestLeave(string)
-  | RemoveRequestLeaveSuccess
-  | RemoveRequestLeaveFailed;
-
-let removeRequestLeave = (id, dispatch) => {
-  removeRequestLeave(
-    ~token=Utils.getToken(),
-    ~id,
-    ~successAction=_ => dispatch(RemoveRequestLeaveSuccess),
-    ~failAction=_ => dispatch(RemoveRequestLeaveFailed),
-  );
-};
+  | SetLoadState(loadState);
 
 [@react.component]
 let make = (~requestLeaves, ~onRefresh) => {
@@ -30,19 +18,25 @@ let make = (~requestLeaves, ~onRefresh) => {
       (state, action) => {
         switch (action) {
         | ChangeFormMenu(formMenu) => {...state, formMenu}
-        | RemoveRequestLeave(id) =>
-          //        removeRequestLeave(id, dispatch);
-          // TODO:
-
-          {...state, loadState: Loading}
-        | RemoveRequestLeaveSuccess =>
-          onRefresh();
-          {...state, loadState: Succeed};
-        | RemoveRequestLeaveFailed => {...state, loadState: Failed("")}
+        | SetLoadState(loadState) => {...state, loadState}
         }
       },
       {loadState: Idle, formMenu: MyForm},
     );
+
+  let removeRequestLeave = (id, dispatch) => {
+    Loading->SetLoadState->dispatch;
+    removeRequestLeave(
+      ~token=Utils.getToken(),
+      ~id,
+      ~successAction=
+        _ => {
+          onRefresh();
+          Succeed->SetLoadState->dispatch;
+        },
+      ~failAction=json => json->Json.stringify->Failed->SetLoadState->dispatch,
+    );
+  };
 
   <div className="container request-form-container">
     <div className="row mt-4 mb-2">
@@ -106,7 +100,7 @@ let make = (~requestLeaves, ~onRefresh) => {
               {i === 0 ? <hr /> : null}
               <RequestLeave
                 requestLeave
-                onCancel={_ => dispatch(RemoveRequestLeave(requestLeave.id))}
+                onCancel={_ => removeRequestLeave(requestLeave.id, dispatch)}
               />
               <hr />
             </div>
