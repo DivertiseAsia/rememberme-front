@@ -71,7 +71,7 @@ let make =
     (
       ~pageEnds: pageEnds,
       ~className: option(string)=?,
-      ~children: array(ReasonReact.reactElement),
+      ~children: ReasonReact.reactElement,
     ) => {
   let extraClasses = extraClasses(pageEnds);
   <div
@@ -87,7 +87,7 @@ let make =
     <div
       className={"page-content-container " ++ pageContentsStyle}
       key="children">
-      <div className="page-content"> children->React.array </div>
+      <div className="page-content"> children </div>
     </div>
     {mapPageEnd(pageEnds.bottom, "bottom")}
   </div>;

@@ -101,8 +101,7 @@ let fetchProfile = (state, dispatch) => {
   );
 };
 
-let component = ReasonReact.reducerComponent("PageHome");
-
+[@react.component]
 let make =
     (
       ~isLoggedIn: bool,

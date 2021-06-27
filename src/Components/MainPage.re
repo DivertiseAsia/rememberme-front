@@ -7,7 +7,7 @@ let make =
     (
       ~isLoggedIn: bool,
       ~className: option(string)=?,
-      ~children: array(ReasonReact.reactElement),
+      ~children: ReasonReact.reactElement,
     ) => {
   <Page
     pageEnds={

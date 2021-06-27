@@ -1,13 +1,23 @@
-let buildHeader = (~verb: Fetch.requestMethod=Get, ~body: option(Js.Json.t)=?, token: option(string)) => {
+let buildHeader =
+    (~verb=Fetch.Get, ~body: option(Js.Json.t)=?, token: option(string)) => {
   let headers =
     switch (token) {
     | None => Fetch.HeadersInit.make({"Content-Type": "application/json"})
-    | Some(token) => Fetch.HeadersInit.make({"Content-Type": "application/json", "Authorization": "Token " ++ token})
+    | Some(token) =>
+      Fetch.HeadersInit.make({
+        "Content-Type": "application/json",
+        "Authorization": "Token " ++ token,
+      })
     };
   switch (body) {
   | None => Fetch.RequestInit.make(~method_=verb, ~headers, ())
   | Some(body) =>
-    Fetch.RequestInit.make(~method_=verb, ~body=Fetch.BodyInit.make(Js.Json.stringify(body)), ~headers, ())
+    Fetch.RequestInit.make(
+      ~method_=verb,
+      ~body=Fetch.BodyInit.make(Js.Json.stringify(body)),
+      ~headers,
+      (),
+    )
   };
 };
 
@@ -15,10 +25,16 @@ let buildFileHeader = (~body, token: option(string)) => {
   let headers =
     switch (token) {
     | None => Fetch.HeadersInit.makeWithArray([||])
-    | Some(token) => Fetch.HeadersInit.make({"Authorization": "Token " ++ token})
+    | Some(token) =>
+      Fetch.HeadersInit.make({"Authorization": "Token " ++ token})
     };
 
-  Fetch.RequestInit.make(~method_=Post, ~body=Fetch.BodyInit.make(Js.Json.stringify(body)), ~headers, ());
+  Fetch.RequestInit.make(
+    ~method_=Post,
+    ~body=Fetch.BodyInit.make(Js.Json.stringify(body)),
+    ~headers,
+    (),
+  );
 };
 
 let internalUrl = endPoint => {
@@ -32,7 +48,8 @@ let request = (~headers, ~url, ~decoder=?, ()) =>
     |> then_(Fetch.Response.json)
     |> then_(json =>
          switch (decoder) {
-         | Some(decoder) => json |> decoder |> (response => resolve(Some(response)))
+         | Some(decoder) =>
+           json |> decoder |> (response => resolve(Some(response)))
          | None => resolve(None)
          }
        )
@@ -48,7 +65,8 @@ let requestWithoutHeader = (~url, ~decoder=?, ()) =>
     |> then_(Fetch.Response.json)
     |> then_(json =>
          switch (decoder) {
-         | Some(decoder) => json |> decoder |> (response => resolve(Some(response)))
+         | Some(decoder) =>
+           json |> decoder |> (response => resolve(Some(response)))
          | None => resolve(None)
          }
        )
@@ -58,7 +76,8 @@ let requestWithoutHeader = (~url, ~decoder=?, ()) =>
        })
   );
 
-let requestJsonResponseToAction = (~headers, ~url, ~successAction, ~failAction) =>
+let requestJsonResponseToAction =
+    (~headers, ~url, ~successAction, ~failAction) =>
   Js.Promise.(
     Fetch.fetchWithInit(url, headers)
     |> then_(response =>

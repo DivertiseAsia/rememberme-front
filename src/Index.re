@@ -6,4 +6,7 @@
 let appName = Config.Info.name;
 //let _ = [%bs.raw "console.log(`${appName}: ${BUILD.VERSION}`)"];
 
-ReactDOM.renderToElementWithId(<App />, "container");
+switch (ReactDOM.querySelector("#container")) {
+| Some(root) => ReactDOM.render(<App />, root)
+| None => ()
+};
