@@ -17,9 +17,22 @@ type action =
   | LoginFailed(string)
   | LoginSuccess(string);
 
+let initialState = {
+  sendingLogin: false,
+  loginError: None,
+  usename: "",
+  password: "",
+  loginHasSuccess: false,
+};
+
 let login = (usename, password) => {
   let payload =
-    Json.Encode.(object_([("username", usename |> Js.Json.string), ("password", password |> Js.Json.string)]));
+    Json.Encode.(
+      object_([
+        ("username", usename |> Js.Json.string),
+        ("password", password |> Js.Json.string),
+      ])
+    );
   requestJsonResponseToAction(
     ~headers=buildHeader(~verb=Post, ~body=payload, None),
     ~url=RememberMeApi.URL.login,
@@ -32,54 +45,67 @@ let login = (usename, password) => {
   );
 };
 
-let component = ReasonReact.reducerComponent("LoginContainerRe");
-let make = (~afterLoginUrl: option(string)=?, _children) => {
-  ...component,
-  initialState: () => {sendingLogin: false, loginError: None, usename: "", password: "", loginHasSuccess: false},
-  reducer: (action, state) =>
-    switch (action) {
-    | Login =>
-      UpdateWithSideEffects(
-        {...state, sendingLogin: true, loginError: None},
-        ({send, state}) =>
-          Js.Promise.(login(state.usename, state.password) |> then_(action => send(action) |> resolve) |> ignore),
-      )
-    | LoginSuccess(token) =>
-      UpdateWithSideEffects(
-        {...state, sendingLogin: false},
-        _self => {
-          Dom.Storage.(localStorage |> setItem("token", token));
-          switch (afterLoginUrl) {
-          | Some(route) => ReasonReact.Router.push(route)
-          | None => ReasonReact.Router.push(Links.home)
-          };
+[@react.component]
+let make = (~afterLoginUrl: option(string)=?) => {
+  let (state, dispatch) =
+    React.useReducer(
+      (state, action) =>
+        switch (action) {
+        | Login =>
+          // TODO: REWRITE
+          {...state, sendingLogin: true, loginError: None}
+        //        ({send, state}) =>
+        //          Js.Promise.(
+        //            login(state.usename, state.password)
+        //            |> then_(action => send(action) |> resolve)
+        //            |> ignore
+        //          ),
+        | LoginSuccess(token) =>
+          // TODO: REWRITE
+          {...state, sendingLogin: false}
+        //        _self => {
+        //          Dom.Storage.(localStorage |> setItem("token", token));
+        //          switch (afterLoginUrl) {
+        //          | Some(route) => ReasonReact.Router.push(route)
+        //          | None => ReasonReact.Router.push(Links.home)
+        //          };
+        //        },
+        | SetEmail(usename) => {...state, usename}
+        | SetPassword(password) => {...state, password}
+        | LoginFailed(error) => {
+            ...state,
+            loginError: Some(error),
+            sendingLogin: false,
+          }
         },
-      )
-    | SetEmail(usename) => Update({...state, usename})
-    | SetPassword(password) => Update({...state, password})
-    | LoginFailed(error) => Update({...state, loginError: Some(error), sendingLogin: false})
-    },
-  render: self => {
-    self.state.sendingLogin === true ?
-      <Loading /> :
-      <div className={"login-container " ++ (self.state.sendingLogin ? "loading" : "not-loading")}>
+      initialState,
+    );
+  state.sendingLogin === true
+    ? <Loading />
+    : <div
+        className={
+          "login-container "
+          ++ (state.sendingLogin ? "loading" : "not-loading")
+        }>
         <LoginForm
-          loading={self.state.sendingLogin}
-          setEmail={input => self.send(SetEmail(input))}
-          setPassword={password => self.send(SetPassword(password))}
+          loading={state.sendingLogin}
+          setEmail={input => dispatch(SetEmail(input))}
+          setPassword={password => dispatch(SetPassword(password))}
           onSubmit={e => {
             ReactEvent.Form.preventDefault(e);
             Js.log(e);
-            self.send(Login);
+            dispatch(Login);
           }}
         />
-        {self.state.loginHasSuccess ?
-           <div className="text-info"> {string("Logged in. Redirecting..")} </div> : ReasonReact.null}
-        {switch (self.state.loginError) {
+        {state.loginHasSuccess
+           ? <div className="text-info">
+               {string("Logged in. Redirecting..")}
+             </div>
+           : ReasonReact.null}
+        {switch (state.loginError) {
          | Some("")
          | None => ReasonReact.null
          | Some(x) => x |> getErrorMsgFromJson |> array
          }}
       </div>;
-  },
 };
