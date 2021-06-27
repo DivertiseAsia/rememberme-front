@@ -71,7 +71,7 @@ let dateForm =
         <div
           className="dropdown-menu"
           ariaLabelledby="dropdown-day"
-          style={ReactDOMRe.Style.make(
+          style={ReactDOM.Style.make(
             ~maxHeight="200px",
             ~overflowY="auto",
             (),
@@ -206,7 +206,7 @@ let dateForm =
   </>;
 };
 
-let onSubmit = ({state, send}) => {
+let onSubmit = (state, dispatch) => {
   let payload =
     Json.Encode.(
       object_([
@@ -236,16 +236,54 @@ let onSubmit = ({state, send}) => {
   RememberMeApi.postLeave(
     ~token=Utils.getToken(),
     ~payload,
-    ~successAction=_ => send(OnSubmitRequestLeaveSuccess),
-    ~failAction=json => json->Json.stringify->OnSubmitRequestLeaveFailed->send,
+    ~successAction=_ => dispatch(OnSubmitRequestLeaveSuccess),
+    ~failAction=json => json->Json.stringify->OnSubmitRequestLeaveFailed->dispatch,
   );
 };
 
-let component = ReasonReact.reducerComponent("RequestForm");
-
-let make = (~schedules, ~onRefresh, _children) => {
-  ...component,
-  initialState: () => {
+[@react.component]
+let make = (~schedules, ~onRefresh) => {
+  let (state, dispatch) = React.useReducer(
+  (state, action) => {
+ switch (action) {
+ | ChangeFormType(formType) => ({...state, formType})
+ | TogglePopup(showPopup) => ({...state, showPopup})
+ | ChangeStartDate(startDate) =>
+   ({
+     ...state,
+     startDate,
+     endDate: startDate > state.endDate ? startDate : state.endDate,
+   })
+ | ChangeEndDate(endDate) =>
+   {
+     ...state,
+     endDate,
+     startDate: state.startDate > endDate ? endDate : state.startDate,
+   }
+ | ChangeNote(note) => {...state, note}
+ | ChangeIsRemote(isRemote) => {...state, isRemote}
+ | OnSubmitRequestLeave =>
+    onSubmit(state, dispatch)// TODO: REWRITE
+   ({...state, loadState: Loading})
+ | OnSubmitRequestLeaveSuccess =>
+   {
+     ...state,
+     loadState: Succeed,
+     startDate: Js.Date.now(),
+     endDate: Js.Date.now(),
+     note: "",
+     isRemote: false,
+     showPopup: true,
+   }
+ | OnSubmitRequestLeaveFailed(errMsg) =>
+   {
+     ...state,
+     loadState: Failed(errMsg),
+     note: "",
+     isRemote: false,
+     showPopup: true,
+   }
+   }, {
     loadState: Idle,
     formType: Sick,
     startDate: Js.Date.now(),
@@ -253,53 +291,13 @@ let make = (~schedules, ~onRefresh, _children) => {
     note: "",
     isRemote: false,
     showPopup: false,
-  },
-  reducer: (action, state) => {
-    switch (action) {
-    | ChangeFormType(formType) => Update({...state, formType})
-    | TogglePopup(showPopup) => Update({...state, showPopup})
-    | ChangeStartDate(startDate) =>
-      Update({
-        ...state,
-        startDate,
-        endDate: startDate > state.endDate ? startDate : state.endDate,
-      })
-    | ChangeEndDate(endDate) =>
-      Update({
-        ...state,
-        endDate,
-        startDate: state.startDate > endDate ? endDate : state.startDate,
-      })
-    | ChangeNote(note) => Update({...state, note})
-    | ChangeIsRemote(isRemote) => Update({...state, isRemote})
-    | OnSubmitRequestLeave =>
-      UpdateWithSideEffects({...state, loadState: Loading}, onSubmit)
-    | OnSubmitRequestLeaveSuccess =>
-      Update({
-        ...state,
-        loadState: Succeed,
-        startDate: Js.Date.now(),
-        endDate: Js.Date.now(),
-        note: "",
-        isRemote: false,
-        showPopup: true,
-      })
-    | OnSubmitRequestLeaveFailed(errMsg) =>
-      Update({
-        ...state,
-        loadState: Failed(errMsg),
-        note: "",
-        isRemote: false,
-        showPopup: true,
-      })
-    };
-  },
-  render: ({state, send}) =>
+  })
+
     <div className="container mt-4 request-form-container">
       <div className="row"> <p> {string("Create Form")} </p> </div>
       <div
         className="row justify-content-center pt-5 pb-2"
-        style={ReactDOMRe.Style.make(
+        style={ReactDOM.Style.make(
           ~backgroundColor="white",
           ~borderTop="2px solid #FFA227",
           (),
@@ -317,7 +315,7 @@ let make = (~schedules, ~onRefresh, _children) => {
                     "btn btn-rounded btn-form-"
                     ++ (state.formType === menu ? " btn-form-active" : "")
                   }
-                  onClick={_ => send(ChangeFormType(menu))}>
+                  onClick={_ => dispatch(ChangeFormType(menu))}>
                   <img
                     className="form-icon mr-2"
                     src={
@@ -348,7 +346,7 @@ let make = (~schedules, ~onRefresh, _children) => {
                ~targetYear=
                  state.startDate |> Js.Date.fromFloat |> Js.Date.getFullYear,
                ~onChangeDate=startDate =>
-               send(ChangeStartDate(startDate))
+               dispatch(ChangeStartDate(startDate))
              )}
           </div>
           <div className="row mt-4 mb-5 pl-2 pr-2">
@@ -363,7 +361,7 @@ let make = (~schedules, ~onRefresh, _children) => {
                ~targetYear=
                  state.endDate |> Js.Date.fromFloat |> Js.Date.getFullYear,
                ~onChangeDate=startDate =>
-               send(ChangeEndDate(startDate))
+               dispatch(ChangeEndDate(startDate))
              )}
           </div>
           <div className="row mt-4">
@@ -373,8 +371,8 @@ let make = (~schedules, ~onRefresh, _children) => {
             <div className="col-12 col-md-8">
               <textarea
                 rows=2
-                style={ReactDOMRe.Style.make(~width="100%", ())}
-                onChange={e => send(ChangeNote(Utils.valueFromEvent(e)))}
+                style={ReactDOM.Style.make(~width="100%", ())}
+                onChange={e => dispatch(ChangeNote(Utils.valueFromEvent(e)))}
               />
             </div>
           </div>
@@ -386,7 +384,7 @@ let make = (~schedules, ~onRefresh, _children) => {
               <input
                 type_="checkbox"
                 onInput={e =>
-                  send(ChangeIsRemote(Utils.boolFromCheckbox(e)))
+                  dispatch(ChangeIsRemote(Utils.boolFromCheckbox(e)))
                 }
               />
             </div>
@@ -402,11 +400,11 @@ let make = (~schedules, ~onRefresh, _children) => {
                       id="file"
                       className="inputfile"
                       onChange=(e => Js.log(e |> Utils.filesFromEvent))
-                      style=(ReactDOMRe.Style.make(~display="none", ()))
+                      style=(ReactDOM.Style.make(~display="none", ()))
                     />
                     <label
                       htmlFor="file"
-                      style=(ReactDOMRe.Style.make(
+                      style=(ReactDOM.Style.make(
                         ~width="100%",
                         ~padding="5px",
                         ~border="1px solid rgba(0,0,0,0.3)",
@@ -414,7 +412,7 @@ let make = (~schedules, ~onRefresh, _children) => {
                     >
                       <div className="row">
                         <div className="col-4 text-center">
-                          <img className="m-auto" src="/images/upload.svg" style=(ReactDOMRe.Style.make(~width="80%", ())) />
+                          <img className="m-auto" src="/images/upload.svg" style=(ReactDOM.Style.make(~width="80%", ())) />
                         </div>
                         <div className="col-8 p-0">
                           <p className="mb-1">{string("Please, Upload the Medical certificate.")}</p>
@@ -431,8 +429,8 @@ let make = (~schedules, ~onRefresh, _children) => {
             <button
               type_="button"
               className="btn btn-rounded btn-form- btn-form-active m-auto"
-              onClick={_ => send(OnSubmitRequestLeave)}
-              style={ReactDOMRe.Style.make(~maxWidth="120px", ())}>
+              onClick={_ => dispatch(OnSubmitRequestLeave)}
+              style={ReactDOM.Style.make(~maxWidth="120px", ())}>
               {string("Submit")}
             </button>
           </div>
@@ -450,7 +448,7 @@ let make = (~schedules, ~onRefresh, _children) => {
            isSick={state.formType === Sick}
            loadState={state.loadState}
            onConfirm={_ => {
-             send(TogglePopup(false));
+             dispatch(TogglePopup(false));
              switch (state.loadState) {
              | Failed(_) => ()
              | _ => onRefresh()
@@ -458,5 +456,5 @@ let make = (~schedules, ~onRefresh, _children) => {
            }}
          /> :
          null}
-    </div>,
+    </div>
 };
