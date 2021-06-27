@@ -9,31 +9,15 @@ type leaveListApiState = apiState(list(leaveDetail));
 type profileApiState = apiState(profile);
 
 type state = {
-  profileApiState,
   showRequestLeave: bool,
   showRequestUserLeave: bool,
 };
 
 type action =
   | ToggleRequestLeave
-  | ToggleRequestUserLeave
-  | SetProfileApiState(profileApiState);
+  | ToggleRequestUserLeave;
 
-let initialState = {
-  profileApiState: NotLoaded,
-  showRequestLeave: false,
-  showRequestUserLeave: false,
-};
-
-let fetchProfile = dispatch => {
-  Loading->SetProfileApiState->dispatch;
-  fetchProfile(
-    ~token=Utils.getToken(),
-    ~successAction=profile => profile->Loaded->SetProfileApiState->dispatch,
-    ~failAction=
-      json => json->Json.stringify->Failed->SetProfileApiState->dispatch,
-  );
-};
+let initialState = {showRequestLeave: false, showRequestUserLeave: false};
 
 [@react.component]
 let make =
@@ -41,6 +25,8 @@ let make =
       ~month=Js.Date.make() |> Js.Date.getMonth |> int_of_float,
       ~year=Js.Date.make() |> Js.Date.getFullYear,
     ) => {
+  let {data: profileApiState, fetchData: loadProfile} =
+    ProfileContext.useProfileResults();
   let {
     events: {data: eventsApiState, fetchData: loadEvents},
     holidayList: {data: holidayListApiState, fetchData: loadHolidayList},
@@ -70,19 +56,19 @@ let make =
             ...state,
             showRequestUserLeave: !state.showRequestUserLeave,
           }
-        | SetProfileApiState(profileApiState) => {...state, profileApiState}
         }
       },
       initialState,
     );
 
   React.useEffect0(() => {
+    loadProfile();
+
     loadEvents();
     loadHolidayList();
     loadBirthdayList();
     loadLeaveList();
     loadUserLeaveList();
-    fetchProfile(dispatch);
     None;
   });
 
@@ -104,9 +90,7 @@ let make =
       <div
         className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-4 p-0  col-schedule">
         <Schedule
-          profile={
-            state.profileApiState->RememberMeUtils.getOptionDataFromState
-          }
+          profile={profileApiState->RememberMeUtils.getOptionDataFromState}
           holidayList={holidayListApiState->RememberMeUtils.getListFromState}
           listBirthDay={birthDayListApiState->RememberMeUtils.getListFromState}
           leaveList={leaveListApiState->RememberMeUtils.getListFromState}
@@ -123,7 +107,7 @@ let make =
     </div>
     <div className="error-status">
       eventsApiState->RememberMeUtils.getErrorElFromState
-      state.profileApiState->RememberMeUtils.getErrorElFromState
+      profileApiState->RememberMeUtils.getErrorElFromState
       holidayListApiState->RememberMeUtils.getErrorElFromState
       birthDayListApiState->RememberMeUtils.getErrorElFromState
       leaveListApiState->RememberMeUtils.getErrorElFromState

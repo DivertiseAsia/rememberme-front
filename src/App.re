@@ -6,6 +6,7 @@ open RememberMeApi;
 [@bs.get] external location: Dom.window => Dom.location = "location";
 [@bs.get] external href: Dom.location => string = "href";
 
+type profileApiState = apiState(profile);
 type eventsApiState = apiState(list(event));
 type holidayApiState = apiState(list(holiday));
 type birthDayApiState = apiState(list(birthDay));
@@ -15,6 +16,7 @@ type userLeaveListApiState = apiState(list(leaveDetail));
 type state = {
   route: ReasonReact.Router.url,
   loadState,
+  profileApiState,
   eventsApiState,
   holidayApiState,
   birthDayApiState,
@@ -24,11 +26,23 @@ type state = {
 
 type action =
   | RouteTo(Router.url)
+  | SetProfileApiState(profileApiState)
   | SetAllLeaveListApiState(allLeaveListApiState)
   | SetUserLeaveListApiState(userLeaveListApiState)
   | SetEventsApiState(eventsApiState)
   | SetBirthDayApiState(birthDayApiState)
   | SetHolidayApiState(holidayApiState);
+
+let initialState = {
+  route: Router.dangerouslyGetInitialUrl(),
+  loadState: Loading,
+  profileApiState: NotLoaded,
+  eventsApiState: NotLoaded,
+  holidayApiState: NotLoaded,
+  birthDayApiState: NotLoaded,
+  allLeaveListApiState: NotLoaded,
+  userLeaveListApiState: NotLoaded,
+};
 
 let loadToken = () =>
   switch (Dom.Storage.(localStorage |> getItem("token"))) {
@@ -45,6 +59,16 @@ let path = () =>
   };
 
 let routeMatches = (x, link) => "/" ++ x == link;
+
+let fetchProfile = dispatch => {
+  Loading->SetProfileApiState->dispatch;
+  fetchProfile(
+    ~token=Utils.getToken(),
+    ~successAction=profile => profile->Loaded->SetProfileApiState->dispatch,
+    ~failAction=
+      json => json->Json.stringify->Failed->SetProfileApiState->dispatch,
+  );
+};
 
 let fetchEvents = dispatch => {
   Loading->SetEventsApiState->dispatch;
@@ -104,6 +128,7 @@ let make = () => {
       (state, action) =>
         switch (action) {
         | RouteTo(route) => {...state, route}
+        | SetProfileApiState(profileApiState) => {...state, profileApiState}
         | SetEventsApiState(eventsApiState) => {...state, eventsApiState}
         | SetBirthDayApiState(birthDayApiState) => {
             ...state,
@@ -119,19 +144,16 @@ let make = () => {
             userLeaveListApiState,
           }
         },
-      {
-        route: Router.dangerouslyGetInitialUrl(),
-        loadState: Loading,
-        eventsApiState: NotLoaded,
-        holidayApiState: NotLoaded,
-        birthDayApiState: NotLoaded,
-        allLeaveListApiState: NotLoaded,
-        userLeaveListApiState: NotLoaded,
-      },
+      initialState,
     );
 
   let token = loadToken();
   let isLoggedIn = token !== "";
+
+  let fetchUserProfileIfNone = () => {
+    state.profileApiState
+    ->RememberMeUtils.doActionIfNotLoaded(_ => fetchProfile(dispatch));
+  };
 
   let fetchEventsIfNone = () => {
     state.eventsApiState
@@ -207,30 +229,38 @@ let make = () => {
     [|isLoggedIn|],
   );
 
-  <DaysContext.Provider value=daysContextValue>
-    {switch (state.route.path, isLoggedIn) {
-     | ([], true)
-     | ([""], true) => <PageHome />
-     | ([x, monthYear], true) when routeMatches(x, Links.dashboard) =>
-       let datetime = Js.String.split("-", monthYear);
-       <PageHome
-         year={datetime[1] |> float_of_string}
-         month={(datetime[0] |> int_of_string) - 1}
-       />;
-     | ([x], true) when routeMatches(x, Links.profile) => <PageProfile />
-     | ([x], true) when routeMatches(x, Links.allMonth) => <PageAllMonth />
-     | ([x], _) when routeMatches(x, Links.login) =>
-       <PageLogin queryString={state.route.search} />
-     | ([x], _) when routeMatches(x, Links.logout) =>
-       let _ = clearToken();
-       let _ = ReasonReact.Router.push("/?logout=true");
-       <PageLogin queryString={state.route.search} />;
-     | ([x], false) when routeMatches(x, Links.register) => <PageRegister />
-     | (_, false) =>
-       let queryParams = "next=" ++ encodeURIComponent(path());
-       let _ = ReasonReact.Router.push("/login?" ++ queryParams);
-       <PageLogin queryString=queryParams />;
-     | _ => <Page404 isLoggedIn />
-     }}
-  </DaysContext.Provider>;
+  <ProfileContext.Provider
+    value=(
+            {data: state.profileApiState, fetchData: fetchUserProfileIfNone}:
+              ProfileContext.contextValue(profileApiState)
+          )>
+    <DaysContext.Provider value=daysContextValue>
+      {switch (state.route.path, isLoggedIn) {
+       | ([], true)
+       | ([""], true) => <PageHome />
+       | ([x, monthYear], true) when routeMatches(x, Links.dashboard) =>
+         let datetime = Js.String.split("-", monthYear);
+         <PageHome
+           year={datetime[1] |> float_of_string}
+           month={(datetime[0] |> int_of_string) - 1}
+         />;
+       | ([x], true) when routeMatches(x, Links.profile) => <PageProfile />
+       | ([x], true) when routeMatches(x, Links.allMonth) =>
+         <PageAllMonth />
+       | ([x], _) when routeMatches(x, Links.login) =>
+         <PageLogin queryString={state.route.search} />
+       | ([x], _) when routeMatches(x, Links.logout) =>
+         let _ = clearToken();
+         let _ = ReasonReact.Router.push("/?logout=true");
+         <PageLogin queryString={state.route.search} />;
+       | ([x], false) when routeMatches(x, Links.register) =>
+         <PageRegister />
+       | (_, false) =>
+         let queryParams = "next=" ++ encodeURIComponent(path());
+         let _ = ReasonReact.Router.push("/login?" ++ queryParams);
+         <PageLogin queryString=queryParams />;
+       | _ => <Page404 isLoggedIn />
+       }}
+    </DaysContext.Provider>
+  </ProfileContext.Provider>;
 };
