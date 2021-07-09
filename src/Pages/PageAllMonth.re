@@ -1,6 +1,5 @@
 open ReasonReact;
 open RememberMeType;
-open RememberMeApi;
 
 let str = ReasonReact.string;
 
@@ -18,118 +17,75 @@ type state = {
   loadState,
   openDropdown: bool,
   targetYear: float,
-  holidayList: list(holiday),
-  listBirthDay: list(birthDay),
-  leaveList: list(leaveDetail),
-  eventList: list(event),
 };
 
 type action =
   | ToggleDropdown(bool)
-  | ChangeYear(float)
-  | FetchHolidayList
-  | FetchHolidayListSuccess(list(holiday))
-  | FetchHolidayListFail
-  | FetchBirthDayList
-  | FetchBirthDayListSuccess(list(birthDay))
-  | FetchBirthDayListFail
-  | FetchLeaveList
-  | FetchLeaveListSuccess(list(leaveDetail))
-  | FetchLeaveListFail
-  | FetchEventList
-  | FetchEventListSuccess(list(event))
-  | FetchEventListFail;
+  | ChangeYear(float);
 
-let fetchHolidayList = ({send}) => {
-  fetchHoliday(
-    ~successAction=holidayList => send(FetchHolidayListSuccess(holidayList)),
-    ~failAction=_ => send(FetchHolidayListFail),
-  );
+let initialState = {
+  loadState: Idle,
+  openDropdown: false,
+  targetYear: Js.Date.make() |> Js.Date.getFullYear,
 };
 
-let fetchBirthDay = ({send}) => {
-  fetchBirthDay(
-    ~token=Utils.getToken(),
-    ~successAction=birthdayList => send(FetchBirthDayListSuccess(birthdayList)),
-    ~failAction=_ => send(FetchBirthDayListFail),
-  );
-};
+[@react.component]
+let make = () => {
+  let {
+    events: {data: eventsApiState, fetchData: loadEvents},
+    holidayList: {data: holidayListApiState, fetchData: loadHolidayList},
+    birthDayList: {data: birthDayListApiState, fetchData: loadBirthdayList},
+    allLeaveList: {data: leaveListApiState, fetchData: loadLeaveList},
+  } =
+    DaysContext.useDaysResults();
 
-let fetchAllRequestLeave = ({send}) => {
-  fetchAllLeaves(
-    ~token=Utils.getToken(),
-    ~successAction=leaveList => send(FetchLeaveListSuccess(leaveList)),
-    ~failAction=_ => send(FetchLeaveListFail),
-  );
-};
+  let (state, dispatch) =
+    React.useReducer(
+      (state, action) => {
+        switch (action) {
+        | ToggleDropdown(openDropdown) => {...state, openDropdown}
+        | ChangeYear(targetYear) => {...state, targetYear}
+        }
+      },
+      initialState,
+    );
 
-let fetchEvent = ({send}) => {
-  fetchEvent(
-    ~token=Utils.getToken(),
-    ~successAction=eventList => send(FetchEventListSuccess(eventList)),
-    ~failAction=_ => send(FetchEventListFail),
-  );
-};
+  React.useEffect0(_ => {
+    loadBirthdayList();
+    loadEvents();
+    loadHolidayList();
+    loadLeaveList();
+    None;
+  });
 
-let component = ReasonReact.reducerComponent("PageAllMonth");
-
-let make = _children => {
-  ...component,
-  initialState: () => {
-    loadState: Idle,
-    openDropdown: false,
-    targetYear: Js.Date.make() |> Js.Date.getFullYear,
-    holidayList: [],
-    listBirthDay: [],
-    leaveList: [],
-    eventList: [],
-  },
-  reducer: (action, state) => {
-    switch (action) {
-    | ToggleDropdown(openDropdown) => Update({...state, openDropdown})
-    | ChangeYear(targetYear) => Update({...state, targetYear})
-    | FetchHolidayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchHolidayList)
-    | FetchHolidayListSuccess(holidayList) => Update({...state, loadState: Succeed, holidayList})
-    | FetchHolidayListFail => Update({...state, loadState: Failed, holidayList: []})
-    | FetchBirthDayList => UpdateWithSideEffects({...state, loadState: Loading}, fetchBirthDay)
-    | FetchBirthDayListSuccess(listBirthDay) => Update({...state, loadState: Succeed, listBirthDay})
-    | FetchBirthDayListFail => Update({...state, loadState: Failed, listBirthDay: []})
-    | FetchLeaveList => UpdateWithSideEffects({...state, loadState: Loading}, fetchAllRequestLeave)
-    | FetchLeaveListSuccess(leaveList) => Update({...state, loadState: Succeed, leaveList})
-    | FetchLeaveListFail => Update({...state, loadState: Failed, leaveList: []})
-    | FetchEventList => UpdateWithSideEffects({...state, loadState: Loading}, fetchEvent)
-    | FetchEventListSuccess(eventList) => Update({...state, loadState: Succeed, eventList})
-    | FetchEventListFail => Update({...state, loadState: Failed, eventList: []})
-    };
-  },
-  didMount: ({send}) => {
-    send(FetchHolidayList);
-    send(FetchBirthDayList);
-    send(FetchLeaveList);
-    send(FetchEventList);
-  },
-  render: ({state, send}) =>
-    <div className="allmonth-page container-fluid">
-      <div className="row">
-        <div className="col mb-5 mt-4">
-          <button
-            type_="button"
-            className="btn btn-rounded btn-main-color active-menu pl-4 pr-4 dropwdown-year"
-            onClick={_ => send(ToggleDropdown(!state.openDropdown))}>
-            <img src="/images/calendar.svg" style={ReactDOMRe.Style.make(~width="35px", ~height="35px", ())} />
-            {string(" " ++ (state.targetYear |> Js.Float.toString))}
-          </button>
-          {state.openDropdown ?
-             <>
-               <div className="dropdown-items-bg" onClick={_ => send(ToggleDropdown(false))} />
+  <div className="allmonth-page container-fluid">
+    <div className="row">
+      <div className="col mb-5 mt-4">
+        <button
+          type_="button"
+          className="btn btn-rounded btn-main-color active-menu pl-4 pr-4 dropwdown-year"
+          onClick={_ => dispatch(ToggleDropdown(!state.openDropdown))}>
+          <img
+            src="/images/calendar.svg"
+            style={ReactDOM.Style.make(~width="35px", ~height="35px", ())}
+          />
+          {string(" " ++ (state.targetYear |> Js.Float.toString))}
+        </button>
+        {state.openDropdown
+           ? <>
+               <div
+                 className="dropdown-items-bg"
+                 onClick={_ => dispatch(ToggleDropdown(false))}
+               />
                <div className="dropdown-items">
                  {years
                   |> List.mapi((i, year) =>
                        <div
+                         key={j|drowndown-item-$i-$year|j}
                          className="dropdown-item"
                          onClick={_ => {
-                           send(ChangeYear(year));
-                           send(ToggleDropdown(false));
+                           dispatch(ChangeYear(year));
+                           dispatch(ToggleDropdown(false));
                          }}>
                          {string(year |> int_of_float |> string_of_int)}
                        </div>
@@ -137,27 +93,33 @@ let make = _children => {
                   |> Array.of_list
                   |> array}
                </div>
-             </> :
-             null}
-        </div>
+             </>
+           : null}
       </div>
-      <div className="row mt-2">
-        {months
-         |> List.mapi((i, month) =>
-              <div key={"month-" ++ (i |> string_of_int)} className="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 mb-3">
-                <Calendar
-                  isMini=true
-                  month
-                  year={state.targetYear}
-                  holidayList={state.holidayList}
-                  listBirthDay={state.listBirthDay}
-                  leaveList={state.leaveList}
-                  eventList={state.eventList}
-                />
-              </div>
-            )
-         |> Array.of_list
-         |> array}
-      </div>
-    </div>,
+    </div>
+    <div className="row mt-2">
+      {months
+       |> List.mapi((i, month) =>
+            <div
+              key={"month-" ++ (i |> string_of_int)}
+              className="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 mb-3">
+              <Calendar
+                isMini=true
+                month
+                year={state.targetYear}
+                listBirthDay={
+                  birthDayListApiState->RememberMeUtils.getListFromState
+                }
+                leaveList={leaveListApiState->RememberMeUtils.getListFromState}
+                eventList={eventsApiState->RememberMeUtils.getListFromState}
+                holidayList={
+                  holidayListApiState->RememberMeUtils.getListFromState
+                }
+              />
+            </div>
+          )
+       |> Array.of_list
+       |> array}
+    </div>
+  </div>;
 };
