@@ -212,7 +212,7 @@ let make = () => {
 
   React.useEffect0(_ => {
     let watcherID = Router.watchUrl(url => dispatch(RouteTo(url)));
-
+    ServiceWorkerLoader.register();
     Some(_ => Router.unwatchUrl(watcherID));
   });
 

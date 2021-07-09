@@ -25,6 +25,7 @@
     "bs-css": "^14.0.2",
     "bs-fetch": "^0.6.2",
     "bs-promise-monad": "^0.2.9",
+    "bs-service-worker": "0.0.33",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "reason-react": "^0.9.1",
