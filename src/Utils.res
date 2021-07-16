@@ -1,5 +1,11 @@
 let errorMessage = "Something went wrong please try again later."
 
+let errorMessagesEl = errorMessages =>
+  Js.String.split(":", errorMessages)
+  ->Belt.Array.mapWithIndex((idx, s) =>
+    <p key=j`msg-$idx`> {React.string(s)} </p>
+  )
+
 let getErrorMsgFromJson = json =>
   Js.String.replaceByRe(Js.Re.fromStringWithFlags("[{}\"[\\]]", ~flags="g"), " ", json)
   |> Js.String.split(",")
@@ -12,6 +18,17 @@ let getErrorMsgFromJson = json =>
       }
     )
   )
+
+let getResponseMsgFromJson = json => {
+  switch Js.Json.classify(json) {
+  | Js.Json.JSONNull => errorMessage
+  | _ =>
+    let jsonString = Json.stringify(json)
+    let re = Js.Re.fromStringWithFlags("[\\[\\]\\{\\}\"]", ~flags="g")
+    let splitMsg = Js.String.split(":", Js.String.replaceByRe(re, "", jsonString))
+    Js.Array.joinWith(" ", splitMsg)
+  }
+}
 
 let getValueOfForm = e => ReactEvent.Form.target(e)["value"]
 
@@ -94,3 +111,4 @@ let mapOpt = (opt, ~defaultValue) =>
   }
 
 let mapOptStr = optStr => optStr |> mapOpt(~defaultValue="")
+

@@ -34,6 +34,18 @@ type action =
   | SetBirthDate(birthDate)
   | SetChangePassState(changePassState)
 
+let reducer = (state, action) =>
+  switch action {
+  | SetEmail(email) => {...state, email: email}
+  | SetOldPassword(oldPassword) => {...state, oldPassword: oldPassword}
+  | SetPassword(password) => {...state, password: password}
+  | SetConfirmPassword(confirmPassword) => {...state, confirmPassword: confirmPassword}
+  | SetBirthDate(birthDate) => {...state, birthDate: birthDate}
+  | SetFirstName(firstName) => {...state, firstName: firstName}
+  | SetLastName(lastName) => {...state, lastName: lastName}
+  | SetChangePassState(changePassState) => {...state, changePassState: changePassState}
+  }
+
 let getClassName = (~extraStyle="", ~invalid=false, ()) => {
   let invalidStyle = invalid ? "invalid" : ""
   j`form-control $extraStyle $invalidStyle`
@@ -41,18 +53,8 @@ let getClassName = (~extraStyle="", ~invalid=false, ()) => {
 
 @react.component
 let make = (~profile: profile) => {
-  let (state, dispatch) = React.useReducer((state, action) =>
-    switch action {
-    | SetEmail(email) => {...state, email: email}
-    | SetOldPassword(oldPassword) => {...state, oldPassword: oldPassword}
-    | SetPassword(password) => {...state, password: password}
-    | SetConfirmPassword(confirmPassword) => {...state, confirmPassword: confirmPassword}
-    | SetBirthDate(birthDate) => {...state, birthDate: birthDate}
-    | SetFirstName(firstName) => {...state, firstName: firstName}
-    | SetLastName(lastName) => {...state, lastName: lastName}
-    | SetChangePassState(changePassState) => {...state, changePassState: changePassState}
-    }
-  , {
+  let (state, dispatch) = React.useReducer(reducer,
+  {
     email: profile.email,
     oldPassword: "",
     password: "",
@@ -78,7 +80,7 @@ let make = (~profile: profile) => {
       ),
       ~url=URL.password,
       ~successAction=_json => Loaded("Password Updated !")->SetChangePassState->dispatch,
-      ~failAction=json => json->Json.stringify->Failed->SetChangePassState->dispatch,
+      ~failAction=json => json->Utils.getResponseMsgFromJson->Failed->SetChangePassState->dispatch
     ) |> ignore
   }
 
@@ -191,7 +193,7 @@ let make = (~profile: profile) => {
         <div className="error-message">
           {switch state.changePassState {
           | Loaded(msg) => <p> {msg->str} </p>
-          | Failed(messages) => messages->getErrorMsgFromJson->array
+          | Failed(messages) => messages->Utils.errorMessagesEl->array
           | _ => null
           }}
           {state.confirmPassword->Js.String.length > 0 &&
