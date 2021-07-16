@@ -96,9 +96,11 @@ let make = (~profile: profile) => {
       {state.changePassState === Loading ? <Loading /> : null}
       <form id="signup-form">
         <div className="row justify-content-between">
+          <div className="col-12 pl-0">
+            <h6> {string("Profile Detail")} </h6>
+          </div>
           <div className="col-6 pl-0">
             <input
-              disabled=true
               type_="text"
               id="firstname"
               className={getClassName(
@@ -113,7 +115,6 @@ let make = (~profile: profile) => {
           </div>
           <div className="col-6 pr-0">
             <input
-              disabled=true
               type_="text"
               id="lastname"
               className={getClassName(
@@ -127,7 +128,6 @@ let make = (~profile: profile) => {
             />
           </div>
           <input
-            disabled=true
             type_="email"
             id="inputEmail"
             className={getClassName(~invalid=!checkEmail(state.email), ())}
@@ -148,7 +148,7 @@ let make = (~profile: profile) => {
             value=state.birthDate
             onChange={e => dispatch(SetBirthDate(valueFromEvent(e)))}
           />
-          <div className="col-12 p-0">
+          <div className="col-12 py-4 px-0">
             <h6> {string("Change Password")} </h6>
             <input
               type_="password"
@@ -207,10 +207,11 @@ let make = (~profile: profile) => {
             : null}
         </div>
         <button
-          id="signup_btn"
-          className="btn btn-blue btn-signup mb-5"
+          id="profile_submit_btn"
+          className="btn btn-blue btn-submit mb-5"
           disabled=buttonDisabled
-          onClick={_ => changePassword()}>
+          onClick={_ => changePassword()}
+          >
           {"Confirm" |> str}
         </button>
       </form>
