@@ -84,11 +84,11 @@ let make = (~profile: profile) => {
 
   let buttonDisabled =
     state.changePassState === Loading ||
-      (state.oldPassword === "" ||
+      (state.oldPassword !== "" &&
       (!checkPassword(state.password) ||
       !checkIsSamePassword(
         ~confirmPassword=state.confirmPassword,
-        ~password=state.confirmPassword,
+        ~password=state.password,
       )))
 
   <div className="row">
