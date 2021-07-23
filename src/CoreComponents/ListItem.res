@@ -1,6 +1,3 @@
-open ReasonReact
-//open Css;
-open Css_Js_Core
 
 type itemEnd =
   | Text(string)
@@ -22,11 +19,6 @@ type item = {
   onClick: option<ReactEvent.Mouse.t => unit>,
 }
 
-let imageStyle = ""
-//  style([display(inlineBlock), height(`px(20)), width(`px(20))]); //TODO:
-
-//let component = ReasonReact.statelessComponent("ListItemRe");
-
 let renderItemEnd = (itemEnd: option<itemEnd>, extraClass: string) =>
   switch itemEnd {
   | None => ReasonReact.null
@@ -36,7 +28,7 @@ let renderItemEnd = (itemEnd: option<itemEnd>, extraClass: string) =>
       | Text(s) => <span> {ReasonReact.string(s)} </span>
       | Image(s) =>
         <span
-          className=imageStyle
+          className="list-time-image"
           style={ReactDOM.Style.make(~backgroundImage="url('" ++ (s ++ "')"), ())}
         />
       | Button(s, onClick) => <button onClick> {ReasonReact.string(s)} </button>

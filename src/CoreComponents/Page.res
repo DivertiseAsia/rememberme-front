@@ -1,7 +1,5 @@
 open ReasonReact
 open Belt
-//open Css_Js_Core;
-//open Css_Legacy_Core
 
 type pageEnd =
   | Text(string)
@@ -11,17 +9,6 @@ type pageEnds = {
   top: list<pageEnd>,
   bottom: list<pageEnd>,
 }
-
-let pageStyle = ""
-//  style([ TODO:
-//    display(flexBox),
-//    flexDirection(column),
-//    maxHeight(vh(100.0)),
-//    height(`percent(100.0)),
-//  ]);
-
-let pageContentsStyle = ""
-//style([overflow(auto), flex(1)]); TODO:
 
 let mapPageEnd = (pageEndArray: list<pageEnd>, extraClass: string) =>
   switch List.length(pageEndArray) {
@@ -66,9 +53,9 @@ let make = (
   <div
     className={"page " ++
     (extraClasses ++
-    (" " ++ (Js.Option.getWithDefault("page-default", className) ++ (" " ++ pageStyle))))}>
+    (" " ++ (Js.Option.getWithDefault("page-default", className))))}>
     {mapPageEnd(pageEnds.top, "top")}
-    <div className={"page-content-container " ++ pageContentsStyle} key="children">
+    <div className="page-content-container" key="children">
       <div className="page-content"> children </div>
     </div>
     {mapPageEnd(pageEnds.bottom, "bottom")}
