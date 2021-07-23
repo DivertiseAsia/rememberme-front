@@ -1,4 +1,3 @@
-open ReasonReact
 open Page
 open Belt
 

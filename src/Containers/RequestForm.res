@@ -86,8 +86,11 @@ let dateForm = (
               (datetime |> Js.Date.valueOf >= today &&
               (!RememberMeUtils.validateWeekend(datetime) && !isLeaveDay))
           isValidate
-            ? <a className="dropdown-item" onClick={_ => onChangeDate(datetime |> Js.Date.valueOf)}>
-                {string(idx + 1 |> string_of_int)}
+            ? <a 
+                key=`dropdown-item-date-${idx->Belt.Int.toString}-${datetime->Js.Date.toLocaleString}` 
+                className="dropdown-item" 
+                onClick={_ => onChangeDate(datetime |> Js.Date.valueOf)}>
+                  {string(idx + 1 |> string_of_int)}
               </a>
             : null
         })

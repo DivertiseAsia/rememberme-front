@@ -197,13 +197,13 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
               |> array}
               {schedulesLeave
               |> List.filter((schedule: RememberMeType.schedule) => schedule.date === jsDate)
-              |> List.map(_schedule => <div className="point point-leave" />)
+              |> List.map((schedule: RememberMeType.schedule) => <div key=`schedule-point-${idx->Belt.Int.toString}-${schedule.title}` className="point point-leave" />)
               |> Array.of_list
               |> array}
               {eventList
               |> List.find_all((event: event) => event.date |> Js.Date.valueOf === jsDate)
-              |> List.map(_event =>
-                <div key={"event-point-" ++ (idx |> string_of_int)} className="point point-event" />
+              |> List.map((event: event) =>
+                <div key={`event-point-${idx->Belt.Int.toString}-${event.name}`} className="point point-event" />
               )
               |> Array.of_list
               |> array}

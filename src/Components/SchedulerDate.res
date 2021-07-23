@@ -3,7 +3,6 @@ open ReasonReact
 @react.component
 let make = (
   ~isToday=false,
-  ~scheduleList=list{},
   ~datetime="",
   ~schedules: list<RememberMeType.schedule>,
 ) =>
