@@ -19,9 +19,6 @@ type state = {
   oldPassword: string,
   password: password,
   confirmPassword: confirmPassword,
-  firstName: firstName,
-  lastName: lastName,
-  birthDate: birthDate,
   changePassState: changePassState,
 }
 
@@ -31,9 +28,6 @@ type action =
   | SetOldPassword(string)
   | SetPassword(string)
   | SetConfirmPassword(string)
-  | SetFirstName(firstName)
-  | SetLastName(lastName)
-  | SetBirthDate(birthDate)
   | SetChangePassState(changePassState)
 
 let reducer = (state, action) =>
@@ -43,9 +37,6 @@ let reducer = (state, action) =>
   | SetOldPassword(oldPassword) => {...state, oldPassword: oldPassword}
   | SetPassword(password) => {...state, password: password}
   | SetConfirmPassword(confirmPassword) => {...state, confirmPassword: confirmPassword}
-  | SetBirthDate(birthDate) => {...state, birthDate: birthDate}
-  | SetFirstName(firstName) => {...state, firstName: firstName}
-  | SetLastName(lastName) => {...state, lastName: lastName}
   | SetChangePassState(changePassState) => {...state, changePassState: changePassState}
   }
 
@@ -64,9 +55,6 @@ let make = (~profile: profile) => {
       oldPassword: "",
       password: "",
       confirmPassword: "",
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      birthDate: profile.birthDate->Js.Date.valueOf->RememberMeType.Encode.getDateStrRequestLeave,
       changePassState: NotLoaded,
     },
   )
@@ -90,41 +78,43 @@ let make = (~profile: profile) => {
     ) |> ignore
   }
 
-  let handleSubmit = () => {
-    if state.oldPassword !== "" {
-      changePassword()
-    }
-  }
-
-  let isCanChangePassword = 
+  let isCanChangePassword =
     state.changePassState !== Loading &&
       (state.oldPassword !== "" &&
-        (checkPassword(state.password) &&
-        checkIsSamePassword(~confirmPassword=state.confirmPassword, ~password=state.password)))
-  
+      (checkPassword(state.password) &&
+      checkIsSamePassword(~confirmPassword=state.confirmPassword, ~password=state.password)))
+
   let isCanUpdateProfile = state.profile != profile
   let buttonDisabled = !(isCanUpdateProfile || isCanChangePassword)
+
+  let handleSubmit = () => {
+    if isCanChangePassword {
+      // changePassword()
+      Js.log(">>> change password")
+    }
+
+    Js.log2(">>> profile: ", profile)
+    Js.log2(">>> state.profile: ", state.profile)
+  }
 
   <div className="row">
     <div className="col-sm-9 col-md-9 col-lg-9 mx-auto signup-container">
       {state.changePassState === Loading ? <Loading /> : null}
       <form id="signup-form">
         <div className="row justify-content-between">
-          <div className="col-12 pl-0">
-            <h6> {string("Profile Detail")} </h6>
-          </div>
+          <div className="col-12 pl-0"> <h6> {string("Profile Detail")} </h6> </div>
           <div className="col-6 pl-0">
             <input
               type_="text"
               id="firstname"
               className={getClassName(
                 ~extraStyle="form-control-smaller mr-2",
-                ~invalid=state.firstName |> isStringEmpty,
+                ~invalid=state.profile.firstName |> isStringEmpty,
                 (),
               )}
               placeholder="First Name"
-              value=state.firstName
-              onChange={e => dispatch(SetFirstName(valueFromEvent(e)))}
+              value=state.profile.firstName
+              onChange={e => {...state.profile, firstName: e->valueFromEvent}->SetProfile->dispatch}
             />
           </div>
           <div className="col-6 pr-0">
@@ -133,21 +123,21 @@ let make = (~profile: profile) => {
               id="lastname"
               className={getClassName(
                 ~extraStyle="form-control-smaller mr-2",
-                ~invalid=state.lastName |> isStringEmpty,
+                ~invalid=state.profile.lastName |> isStringEmpty,
                 (),
               )}
               placeholder="Last Name"
-              value=state.lastName
-              onChange={e => dispatch(SetLastName(valueFromEvent(e)))}
+              value=state.profile.lastName
+              onChange={e => {...state.profile, lastName: e->valueFromEvent}->SetProfile->dispatch}
             />
           </div>
           <input
             type_="email"
             id="inputEmail"
-            className={getClassName(~invalid=!checkEmail(state.email), ())}
+            className={getClassName(~invalid=!checkEmail(state.profile.email), ())}
             placeholder="Your Email"
-            value=state.email
-            onChange={e => dispatch(SetEmail(e |> valueFromEvent))}
+            value=state.profile.email
+            onChange={e => {...state.profile, email: e->valueFromEvent}->SetProfile->dispatch}
           />
           <small> {string("Birthday")} </small>
           <input
@@ -155,12 +145,15 @@ let make = (~profile: profile) => {
             id="birthday"
             className={getClassName(
               ~extraStyle="form-control-smaller",
-              ~invalid=state.birthDate |> isStringEmpty,
+              ~invalid=state.profile.birthDate->Utils.Date.dateInputValue->isStringEmpty,
               (),
             )}
             placeholder="Birthday"
-            value=state.birthDate
-            onChange={e => dispatch(SetBirthDate(valueFromEvent(e)))}
+            value={state.profile.birthDate->Utils.Date.dateInputValue}
+            onChange={e =>
+              {...state.profile, birthDate: e->valueFromEvent->Js.Date.fromString}
+              ->SetProfile
+              ->dispatch}
           />
           <div className="col-12 py-4 px-0">
             <h6> {string("Change Password")} </h6>
@@ -224,7 +217,10 @@ let make = (~profile: profile) => {
           id="profile_submit_btn"
           className="btn btn-blue btn-submit mb-5"
           disabled=buttonDisabled
-          onClick={_ => handleSubmit()}>
+          onClick={e => {
+            ReactEvent.Mouse.preventDefault(e)
+            handleSubmit()
+          }}>
           {"Confirm" |> str}
         </button>
       </form>
