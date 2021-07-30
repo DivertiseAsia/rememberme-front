@@ -14,6 +14,7 @@ type birthDate = string
 type changePassState = RememberMeType.apiState<string>
 
 type state = {
+  profile: profile,
   email: email,
   oldPassword: string,
   password: password,
@@ -25,6 +26,7 @@ type state = {
 }
 
 type action =
+  | SetProfile(profile)
   | SetEmail(string)
   | SetOldPassword(string)
   | SetPassword(string)
@@ -36,6 +38,7 @@ type action =
 
 let reducer = (state, action) =>
   switch action {
+  | SetProfile(profile) => {...state, profile: profile}
   | SetEmail(email) => {...state, email: email}
   | SetOldPassword(oldPassword) => {...state, oldPassword: oldPassword}
   | SetPassword(password) => {...state, password: password}
@@ -53,17 +56,20 @@ let getClassName = (~extraStyle="", ~invalid=false, ()) => {
 
 @react.component
 let make = (~profile: profile) => {
-  let (state, dispatch) = React.useReducer(reducer,
-  {
-    email: profile.email,
-    oldPassword: "",
-    password: "",
-    confirmPassword: "",
-    firstName: profile.firstName,
-    lastName: profile.lastName,
-    birthDate: profile.birthDate->Js.Date.valueOf->RememberMeType.Encode.getDateStrRequestLeave,
-    changePassState: NotLoaded,
-  })
+  let (state, dispatch) = React.useReducer(
+    reducer,
+    {
+      profile: profile,
+      email: profile.email,
+      oldPassword: "",
+      password: "",
+      confirmPassword: "",
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      birthDate: profile.birthDate->Js.Date.valueOf->RememberMeType.Encode.getDateStrRequestLeave,
+      changePassState: NotLoaded,
+    },
+  )
 
   let changePassword = () => {
     Loading->SetChangePassState->dispatch
@@ -80,18 +86,24 @@ let make = (~profile: profile) => {
       ),
       ~url=URL.password,
       ~successAction=_json => Loaded("Password Updated !")->SetChangePassState->dispatch,
-      ~failAction=json => json->Utils.getResponseMsgFromJson->Failed->SetChangePassState->dispatch
+      ~failAction=json => json->Utils.getResponseMsgFromJson->Failed->SetChangePassState->dispatch,
     ) |> ignore
   }
 
-  let buttonDisabled =
-    state.changePassState === Loading ||
+  let handleSubmit = () => {
+    if state.oldPassword !== "" {
+      changePassword()
+    }
+  }
+
+  let isCanChangePassword = 
+    state.changePassState !== Loading &&
       (state.oldPassword !== "" &&
-      (!checkPassword(state.password) ||
-      !checkIsSamePassword(
-        ~confirmPassword=state.confirmPassword,
-        ~password=state.password,
-      )))
+        (checkPassword(state.password) &&
+        checkIsSamePassword(~confirmPassword=state.confirmPassword, ~password=state.password)))
+  
+  let isCanUpdateProfile = state.profile != profile
+  let buttonDisabled = !(isCanUpdateProfile || isCanChangePassword)
 
   <div className="row">
     <div className="col-sm-9 col-md-9 col-lg-9 mx-auto signup-container">
@@ -212,8 +224,7 @@ let make = (~profile: profile) => {
           id="profile_submit_btn"
           className="btn btn-blue btn-submit mb-5"
           disabled=buttonDisabled
-          onClick={_ => changePassword()}
-          >
+          onClick={_ => handleSubmit()}>
           {"Confirm" |> str}
         </button>
       </form>
