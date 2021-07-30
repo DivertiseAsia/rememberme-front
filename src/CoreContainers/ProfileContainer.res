@@ -12,6 +12,7 @@ type lastName = string
 type birthDate = string
 
 type changePassState = RememberMeType.apiState<string>
+type updateProfileState = RememberMeType.apiState<string>
 
 type state = {
   profile: profile,
@@ -20,6 +21,7 @@ type state = {
   password: password,
   confirmPassword: confirmPassword,
   changePassState: changePassState,
+  updateProfileState: updateProfileState,
 }
 
 type action =
@@ -29,6 +31,7 @@ type action =
   | SetPassword(string)
   | SetConfirmPassword(string)
   | SetChangePassState(changePassState)
+  | SetUpdateProfileState(updateProfileState)
 
 let reducer = (state, action) =>
   switch action {
@@ -38,6 +41,7 @@ let reducer = (state, action) =>
   | SetPassword(password) => {...state, password: password}
   | SetConfirmPassword(confirmPassword) => {...state, confirmPassword: confirmPassword}
   | SetChangePassState(changePassState) => {...state, changePassState: changePassState}
+  | SetUpdateProfileState(updateProfileState) => {...state, updateProfileState: updateProfileState}
   }
 
 let getClassName = (~extraStyle="", ~invalid=false, ()) => {
@@ -56,6 +60,7 @@ let make = (~profile: profile) => {
       password: "",
       confirmPassword: "",
       changePassState: NotLoaded,
+      updateProfileState: NotLoaded,
     },
   )
 
@@ -78,6 +83,15 @@ let make = (~profile: profile) => {
     ) |> ignore
   }
 
+  let updateProfile = () => {
+    Loading->SetUpdateProfileState->dispatch
+    RememberMeApi.updateProfile(
+      ~profile=state.profile,
+      ~successAction=_ => Loaded("Profile Updated !")->SetUpdateProfileState->dispatch,
+      ~failAction=msg => msg->Failed->SetUpdateProfileState->dispatch,
+    )
+  }
+
   let isCanChangePassword =
     state.changePassState !== Loading &&
       (state.oldPassword !== "" &&
@@ -89,12 +103,11 @@ let make = (~profile: profile) => {
 
   let handleSubmit = () => {
     if isCanChangePassword {
-      // changePassword()
-      Js.log(">>> change password")
+      changePassword()
     }
-
-    Js.log2(">>> profile: ", profile)
-    Js.log2(">>> state.profile: ", state.profile)
+    if isCanUpdateProfile {
+      updateProfile()
+    }
   }
 
   <div className="row">
@@ -218,7 +231,7 @@ let make = (~profile: profile) => {
           className="btn btn-blue btn-submit mb-5"
           disabled=buttonDisabled
           onClick={e => {
-            ReactEvent.Mouse.preventDefault(e)
+            ReactEvent.Mouse.preventDefault(e) //TODO: Remove this line?
             handleSubmit()
           }}>
           {"Confirm" |> str}

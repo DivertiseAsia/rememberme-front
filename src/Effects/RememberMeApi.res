@@ -205,3 +205,26 @@ let fetchEvent = (~token, ~successAction, ~failAction) =>
     ~successAction=json => json |> Decode.eventList |> successAction,
     ~failAction,
   ) |> ignore
+
+let updateProfile = (~profile, ~successAction, ~failAction) => {
+
+  let body = {
+    open Json.Encode
+    object_(list{
+      ("first_name", profile.firstName |> Js.Json.string),
+      ("last_name", profile.lastName |> Js.Json.string),
+      ("birth_date", profile.birthDate |> Utils.Date.dateInputValue |> Js.Json.string),
+    })
+  }
+
+  RequestUtils.requestJsonResponseToAction(
+      ~headers=RequestUtils.buildHeader(
+        ~verb=Patch,
+        ~body,
+        Utils.getToken(),
+      ),
+      ~url=URL.profile,
+      ~successAction=_json => successAction(),
+      ~failAction=json => json->Utils.getResponseMsgFromJson->failAction,
+    ) |> ignore
+}
