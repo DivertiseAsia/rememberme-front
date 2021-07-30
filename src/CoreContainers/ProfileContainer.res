@@ -214,6 +214,12 @@ let make = (~profile: profile) => {
           | Failed(messages) => messages->Utils.errorMessagesEl->array
           | _ => null
           }}
+          {switch state.updateProfileState {
+          | Loaded(msg) => <p> {msg->str} </p>
+          | Failed(messages) => messages->Utils.errorMessagesEl->array
+          | _ => null
+          }}
+
           {state.confirmPassword->Js.String.length > 0 &&
             !(state.confirmPassword === state.password)
             ? <p id="error_confirm_password">
