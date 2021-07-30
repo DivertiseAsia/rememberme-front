@@ -112,3 +112,20 @@ let mapOpt = (opt, ~defaultValue) =>
 
 let mapOptStr = optStr => optStr |> mapOpt(~defaultValue="")
 
+
+module Date = {
+  
+  @deriving(abstract)
+  type dateOptions = {
+    @optional month: string,
+    @optional year: string,
+    @optional day: string,
+    @optional hour: string,
+    @optional minute: string,
+  };
+
+  @bs.send external toLocaleDateString: (Js.Date.t, string, dateOptions) => string = "toLocaleDateString"
+
+  let dateInputValue = (date): string => toLocaleDateString(date, "en-CA", dateOptions(~year="numeric", ~month="numeric", ~day="numeric", ()))
+  
+}
