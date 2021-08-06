@@ -346,7 +346,6 @@ let make = (~schedules, ~onRefresh) => {
           <button
             type_="submit"
             className="btn btn-rounded btn-form- btn-form-active m-auto"
-            // onClick={_ => onSubmit()}
             style={ReactDOM.Style.make(~maxWidth="120px", ())}>
             {string("Submit")}
           </button>
