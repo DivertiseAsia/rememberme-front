@@ -292,6 +292,7 @@ let make = (~schedules, ~onRefresh) => {
           <div className="col-12 col-md-8">
             <textarea
               rows=2
+              required=true
               style={ReactDOM.Style.make(~width="100%", ())}
               onChange={e => dispatch(ChangeNote(Utils.valueFromEvent(e)))}
             />
