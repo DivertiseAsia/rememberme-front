@@ -233,9 +233,11 @@ let make = (~schedules, ~onRefresh) => {
   }
   <div className="container mt-4 request-form-container">
     <div className="row"> <p> {string("Create Form")} </p> </div>
-    <div
+    <form
       className="row justify-content-center pt-5 pb-2"
-      style={ReactDOM.Style.make(~backgroundColor="white", ~borderTop="2px solid #FFA227", ())}>
+      style={ReactDOM.Style.make(~backgroundColor="white", ~borderTop="2px solid #FFA227", ())}
+      onSubmit={e => {ReactEvent.Form.preventDefault(e); onSubmit()}}
+      >
       {requestMenus
       |> List.map((menu: formType) =>
         <div
@@ -341,9 +343,9 @@ let make = (~schedules, ~onRefresh) => {
           }*/
         <div className="row mt-5">
           <button
-            type_="button"
+            type_="submit"
             className="btn btn-rounded btn-form- btn-form-active m-auto"
-            onClick={_ => onSubmit()}
+            // onClick={_ => onSubmit()}
             style={ReactDOM.Style.make(~maxWidth="120px", ())}>
             {string("Submit")}
           </button>
@@ -356,7 +358,7 @@ let make = (~schedules, ~onRefresh) => {
         | _ => null
         }}
       </div>
-    </div>
+    </form>
     {state.showPopup
       ? <PopupRequestForm
           isSick={state.formType === Sick}
