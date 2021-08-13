@@ -218,7 +218,7 @@ let updateProfile = (~profile, ~successAction, ~failAction) => {
     ) |> ignore
 }
 
-let resetPassword = (~email, ~successAction, ~failAction) => {
+let forgotPassword = (~email, ~successAction, ~failAction) => {
 
   let body = {
     open Json.Encode

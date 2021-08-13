@@ -11,7 +11,7 @@ let make = () => {
   let onSubmit = e => {
     ReactEvent.Form.preventDefault(e)
     setApiState(_ => Loading)
-    RememberMeApi.resetPassword(
+    RememberMeApi.forgotPassword(
       ~email,
       ~successAction={_ => setApiState(_ => RememberMeType.Loaded(true))},
       ~failAction={err => setApiState(_ => RememberMeType.Failed(err))},
