@@ -32,6 +32,7 @@ let make = () => {
             type_="email"
             id="inputEmail"
             placeholder="Your Email"
+            autoComplete="email"
             value=email
             onChange={e => {
               ReactEvent.Form.persist(e)
