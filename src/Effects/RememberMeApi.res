@@ -38,25 +38,14 @@ type birthDay = {
   name: string,
   birthDate: Js.Date.t,
 }
-//   "rid": "9094c152-9f70-4c46-88a4-e3edc5443225",
-//   "user": {
-//     "username": "dev",
-//     "email": "dev@divertise.asia",
-//     "first_name": "Dev",
-//     "last_name": "Divertise",
-//     "birth_date": "1997-06-12"
-//   },
-//   "type": 1,
-//   "from_date": "2019-06-27",
-//   "to_date": "2019-06-27",
-//   "reason": "Trust me, I'm sick.",
-//   "is_approved": true
+
 let baseApiUrl = "https://rememberme-server.herokuapp.com"
 
 module URL = {
   let login = j`$baseApiUrl/account/login/`
   let signUp = j`$baseApiUrl/account/register/`
   let password = j`$baseApiUrl/password/change/`
+  let resetPassword = j`$baseApiUrl/password/reset/`
   let profile = j`$baseApiUrl/account/profile/`
   let birthday = j`$baseApiUrl/account/birthday/`
   let leave = j`$baseApiUrl/leave/`
@@ -224,6 +213,27 @@ let updateProfile = (~profile, ~successAction, ~failAction) => {
         Utils.getToken(),
       ),
       ~url=URL.profile,
+      ~successAction=_json => successAction(),
+      ~failAction=json => json->Utils.getResponseMsgFromJson->failAction,
+    ) |> ignore
+}
+
+let resetPassword = (~email, ~successAction, ~failAction) => {
+
+  let body = {
+    open Json.Encode
+    object_(list{
+      ("email", email |> Js.Json.string),
+    })
+  }
+
+  RequestUtils.requestJsonResponseToAction(
+      ~headers=RequestUtils.buildHeader(
+        ~verb=Post,
+        ~body,
+        Utils.getToken(),
+      ),
+      ~url=URL.resetPassword,
       ~successAction=_json => successAction(),
       ~failAction=json => json->Utils.getResponseMsgFromJson->failAction,
     ) |> ignore
