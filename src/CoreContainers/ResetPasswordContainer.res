@@ -53,7 +53,8 @@ let make = () => {
     <div className="login-container ">
       <form className="form-group form-login " onSubmit>
         <div className="section-login content -text-center">
-          <small> {string("Email")} </small>
+        <h2>{"Reset password"->React.string}</h2>
+        <p>{"Set the new password for your account"->React.string}</p>
           <input
             disabled=true
             required=true
@@ -66,7 +67,7 @@ let make = () => {
           />
           <input
             required=true
-            className="login-filled"
+            className="form-control"
             placeholder="New Password"
             onChange={e => e->Utils.getValueOfForm->SetNewPassword->dispatch}
             type_="password"
@@ -74,7 +75,7 @@ let make = () => {
           />
           <input
             required=true
-            className="login-filled"
+            className="form-control"
             placeholder="New Password Again"
             onChange={e => e->Utils.getValueOfForm->SetConfirmNewPassword->dispatch}
             type_="password"
