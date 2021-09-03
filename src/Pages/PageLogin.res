@@ -24,6 +24,9 @@ let make = (~queryString="") => {
       </div>
       <div className="col-12 text-center link-signup">
         <u> <Link href=Links.register> {string("Sign up")} </Link> </u>
+        <br />
+        <br />
+        <u> <Link href=Links.forgot> {string("Forgot password?")} </Link> </u>
       </div>
     </div>
   </div>

@@ -234,6 +234,8 @@ let make = () => {
         let _ = ReasonReact.Router.push("/?logout=true")
         <PageLogin queryString=state.route.search />
       | (list{x}, false) when routeMatches(x, Links.register) => <PageRegister />
+      | (list{x}, false) when routeMatches(x, Links.forgot) => <PageForgotPassword />
+      | (list{x}, false) when routeMatches(x, Links.resetPassword) => <PageResetPassword />
       | (_, false) =>
         let queryParams = "next=" ++ encodeURIComponent(path())
         let _ = ReasonReact.Router.push("/login?" ++ queryParams)
