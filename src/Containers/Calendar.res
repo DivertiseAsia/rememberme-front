@@ -117,46 +117,40 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
         (),
       ))
     |> Js.Date.valueOf
+
   Array.make(boxs, null)
   |> Array.mapi((idx, _) =>
     if idx < startDayInWeek {
-      <td
-        key={idx |> string_of_int}
-        className=j`day not-current-month`
-        style={ReactDOM.Style.make(~paddingTop="20px", ())}>
-        <span>
-          {lastDatePreviousMonth - (startDayInWeek - (idx + 1)) |> string_of_int |> str}
-        </span>
-      </td>
+      <CalendarDateCell
+        key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
+        extraClassName=`day not-current-month`
+        cell=NotCurrentMonth({lastDatePreviousMonth - (startDayInWeek - (idx + 1))})
+      />
     } else if idx - startDayInWeek + 1 > lastDate {
-      <td
-        key={idx |> string_of_int}
-        className=j`day not-current-month`
-        style={ReactDOM.Style.make(~paddingTop="20px", ())}>
-        <span> {idx - startDayInWeek + 1 - lastDate |> string_of_int |> str} </span>
-      </td>
+      <CalendarDateCell
+        key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
+        extraClassName=j`day not-current-month`
+        cell=NotCurrentMonth({idx - startDayInWeek + 1 - lastDate})
+      />
     } else {
       let date = idx - startDayInWeek + 1
       let jsDate =
         Js.Date.makeWithYMD(~year, ~month, ~date=date |> float_of_int, ()) |> Js.Date.valueOf
-      let classThisDay = switch jsDate {
-      | date when today === date => "today"
-      | _ => ""
-      }
       let schedulesLeave =
         leaveList
         |> List.map((requestLeave: leaveDetail) =>
           requestLeave |> RememberMeUtils.splitRequestLeave
         )
         |> List.concat
-      <td
-        key={idx |> string_of_int}
-        className=j`day $classThisDay`
-        style={ReactDOM.Style.make(~paddingTop="20px", ())}>
-        <div className="circle-today" />
-        <span className={String.length(date |> string_of_int) === 1 ? "single-char" : ""}>
-          {date |> string_of_int |> str}
-        </span>
+      <CalendarDateCell
+        key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
+        extraClassName="day"
+        cell={today === jsDate ? Today(date) : CurrentMonth(date)}
+        >
+        // <div className="circle-today" />
+        // <span className={String.length(date |> string_of_int) === 1 ? "single-char" : ""}>
+        //   {date |> string_of_int |> str}
+        // </span>
         {List.length(
           holidayList |> List.find_all((holiday: holiday) => holiday.date === jsDate),
         ) > 0 ||
@@ -197,19 +191,27 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
               |> array}
               {schedulesLeave
               |> List.filter((schedule: RememberMeType.schedule) => schedule.date === jsDate)
-              |> List.map((schedule: RememberMeType.schedule) => <div key=`schedule-point-${idx->Belt.Int.toString}-${schedule.title}` className="point point-leave" />)
+              |> List.map((schedule: RememberMeType.schedule) =>
+                <div
+                  key={`schedule-point-${idx->Belt.Int.toString}-${schedule.title}`}
+                  className="point point-leave"
+                />
+              )
               |> Array.of_list
               |> array}
               {eventList
               |> List.find_all((event: event) => event.date |> Js.Date.valueOf === jsDate)
               |> List.map((event: event) =>
-                <div key={`event-point-${idx->Belt.Int.toString}-${event.name}`} className="point point-event" />
+                <div
+                  key={`event-point-${idx->Belt.Int.toString}-${event.name}`}
+                  className="point point-event"
+                />
               )
               |> Array.of_list
               |> array}
             </div>
           : null}
-      </td>
+      </CalendarDateCell>
     }
   )
   |> (arr =>
