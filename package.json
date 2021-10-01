@@ -25,6 +25,8 @@
     "bs-css": "^14.0.2",
     "bs-fetch": "^0.6.2",
     "bs-promise-monad": "^0.2.9",
+    "bs-service-worker": "0.0.33",
+    "node-sass": "^6.0.1",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "reason-react": "^0.9.1"
@@ -45,7 +47,6 @@
     "html-webpack-exclude-assets-plugin": "0.0.7",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.4.1",
-    "node-sass": "^4.13.1",
     "normalize.css": "^8.0.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
