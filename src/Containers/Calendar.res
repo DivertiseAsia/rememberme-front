@@ -39,11 +39,11 @@ type action =
   | OnChangeMonth(RememberMeType.month)
   | OnChangeYear(float)
 
-let getMonthFloat = month => months |> Array.of_list |> Js.Array.indexOf(month) |> float_of_int
+let getMonthFloat = month => months->Array.of_list->Js.Array2.indexOf(month)->float_of_int
 
 let getMonthType = idx => {
   open RememberMeType
-  switch Js.List.nth(months, idx |> int_of_float) {
+  switch Js.List.nth(months, idx->int_of_float) {
   | None => Jan
   | Some(month) => month
   }
@@ -56,44 +56,36 @@ function f (year, month){
 }
 `)
 
-let getLastDate = (~year, ~realMonth) => getLastDateObj(year, realMonth) |> Js.Date.getDate
+let getLastDate = (~year, ~realMonth) => getLastDateObj(year, realMonth)->Js.Date.getDate
 
 let getDateOnlyDate = date =>
   Js.Date.makeWithYMD(
-    ~year=date |> Js.Date.getFullYear,
-    ~month=date |> Js.Date.getMonth,
-    ~date=date |> Js.Date.getDate,
+    ~year=date->Js.Date.getFullYear,
+    ~month=date->Js.Date.getMonth,
+    ~date=date->Js.Date.getDate,
     (),
   )
 
 let mocks: list<holiday> = list{
   {
     name: "DAY 1 ",
-    date: "2019-06-01" |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf,
+    date: "2019-06-01"->Js.Date.fromString->getDateOnlyDate->Js.Date.valueOf,
     isVacation: true,
   },
   {
     name: "DAY 2 ",
-    date: "2019-06-27" |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf,
+    date: "2019-06-27"->Js.Date.fromString->getDateOnlyDate->Js.Date.valueOf,
     isVacation: true,
   },
 }
 
 let getHolidayData = (holidayList, date) =>
-  switch holidayList |> List.find(vacation => vacation.date === date) {
-  | holiday => Some(holiday)
-  | exception Not_found => None
-  }
+  holidayList->Belt.List.getBy(vacation => vacation.date === date)
 
 let getBirthDayElement = (birthList, date) =>
-  switch birthList |> List.find((data: birthDay) =>
-    data.birthDate |> getDateOnlyDate |> Js.Date.valueOf === date
-  ) {
-  //false
-
-  | data => Some(<p> {data.name ++ " BirthDay" |> str} </p>)
-  | exception Not_found => None
-  }
+  birthList
+  ->Belt.List.getBy(({birthDate}: birthDay) => birthDate->getDateOnlyDate->Js.Date.valueOf === date)
+  ->Belt.Option.map(({name}: birthDay) => <p> {`${name} BirthDay`->React.string} </p>)
 
 let getDayByStartOnMonday = (dayInWeek: int) => dayInWeek === 0 ? 6 : dayInWeek - 1
 
@@ -101,38 +93,38 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
   let col = 7
   let row = 6
   let boxs = col * row
-  let lastDatePreviousMonth = getLastDate(~year, ~realMonth=month) |> int_of_float
-  let lastDate = getLastDate(~year, ~realMonth=month +. 1.) |> int_of_float
+  let lastDatePreviousMonth = getLastDate(~year, ~realMonth=month)->int_of_float
+  let lastDate = getLastDate(~year, ~realMonth=month +. 1.)->int_of_float
 
   let startDayInWeek =
-    Js.Date.makeWithYM(~year, ~month, ()) |> Js.Date.getDay |> int_of_float |> getDayByStartOnMonday
+    Js.Date.makeWithYM(~year, ~month, ())->Js.Date.getDay->int_of_float->getDayByStartOnMonday
 
   let today =
     Js.Date.make()
-    |> (date =>
+    ->(date =>
       Js.Date.makeWithYMD(
-        ~year=date |> Js.Date.getFullYear,
-        ~month=date |> Js.Date.getMonth,
-        ~date=date |> Js.Date.getDate,
+        ~year=date->Js.Date.getFullYear,
+        ~month=date->Js.Date.getMonth,
+        ~date=date->Js.Date.getDate,
         (),
       ))
-    |> Js.Date.valueOf
+    ->Js.Date.valueOf
 
-  Array.make(boxs, null)
-  |> Array.mapi((idx, _) =>
-    if idx < startDayInWeek {
+  Belt.Array.range(0, boxs)->Belt.Array.mapWithIndex((idx, _) =>
+    switch idx {
+    | idx when idx < startDayInWeek =>
       <CalendarDateCell
         key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
         extraClassName=`day not-current-month`
         cell=NotCurrentMonth({lastDatePreviousMonth - (startDayInWeek - (idx + 1))})
       />
-    } else if idx - startDayInWeek + 1 > lastDate {
+    | idx when idx - startDayInWeek + 1 > lastDate =>
       <CalendarDateCell
         key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
         extraClassName=j`day not-current-month`
         cell=NotCurrentMonth({idx - startDayInWeek + 1 - lastDate})
       />
-    } else {
+    | _ =>
       let date = idx - startDayInWeek + 1
       let jsDate =
         Js.Date.makeWithYMD(~year, ~month, ~date=date |> float_of_int, ()) |> Js.Date.valueOf
@@ -145,13 +137,9 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
       <CalendarDateCell
         key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
         extraClassName="day"
-        cell={today === jsDate ? Today(date) : CurrentMonth(date)}
-        >
-        // <div className="circle-today" />
-        // <span className={String.length(date |> string_of_int) === 1 ? "single-char" : ""}>
-        //   {date |> string_of_int |> str}
-        // </span>
-        {List.length(
+        cell={today === jsDate ? Today(date) : CurrentMonth(date)}>
+        {
+        List.length(
           holidayList |> List.find_all((holiday: holiday) => holiday.date === jsDate),
         ) > 0 ||
           (List.length(
@@ -214,13 +202,13 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
       </CalendarDateCell>
     }
   )
-  |> (arr =>
+  -> (arr =>
     Array.make(row, null) |> Array.mapi((idx, _) => {
       let end_ = (idx + 1) * col
       let start = idx > 0 ? idx * col : idx
       <tr key=j`row-$idx`> {arr |> Js.Array.slice(~start, ~end_) |> array} </tr>
     }))
-  |> array
+  -> React.array
 }
 
 @react.component
