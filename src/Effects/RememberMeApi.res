@@ -1,12 +1,5 @@
 open RequestUtils
-
-type profile = {
-  username: string,
-  email: string,
-  firstName: string,
-  lastName: string,
-  birthDate: Js.Date.t,
-}
+type profile = RememberMeType.profile
 
 type leaveType =
   | Sick
@@ -190,7 +183,7 @@ let fetchEvent = (~token, ~successAction, ~failAction) =>
     ~failAction,
   ) |> ignore
 
-let updateProfile = (~profile, ~successAction, ~failAction) => {
+let updateProfile = (~profile: profile, ~successAction, ~failAction) => {
 
   let body = {
     open Json.Encode

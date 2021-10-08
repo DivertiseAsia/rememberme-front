@@ -53,6 +53,14 @@ type apiState<'a> =
   | Loaded('a)
   | Failed(string)
 
+type profile = {
+  username: string,
+  email: string,
+  firstName: string,
+  lastName: string,
+  birthDate: Js.Date.t,
+}
+
 type schedule = {
   scheduleMenu: scheduleMenu,
   title: string,
