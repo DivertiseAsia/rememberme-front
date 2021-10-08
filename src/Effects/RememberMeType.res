@@ -65,6 +65,7 @@ type schedule = {
   scheduleMenu: scheduleMenu,
   title: string,
   date: float,
+  date2: Js.Date.t,
   detail: string,
 }
 

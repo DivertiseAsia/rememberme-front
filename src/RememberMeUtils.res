@@ -176,6 +176,7 @@ let mapHolidayToSchedule = (holiday: holiday) => {
     scheduleMenu: Holiday,
     title: holiday.name,
     date: holiday.date,
+    date2: holiday.date2,
     detail: "",
   }
   schedule
@@ -186,6 +187,7 @@ let mapEventToSchedule = (event: event) => {
     scheduleMenu: Event,
     title: event.name,
     date: event.date |> Js.Date.valueOf,
+    date2: event.date,
     detail: event.details,
   }
   schedule
@@ -197,6 +199,7 @@ let mapLeaveToSchedule = (leaveDetail: RememberMeApi.leaveDetail) => {
     (leaveDetail.user ++
     (leaveDetail.leaveType === Sick ? " Sick" : " Vacation")),
     date: leaveDetail.fromDate |> Js.Date.valueOf,
+    date2: leaveDetail.fromDate,
     detail: "",
   }
   schedule
@@ -217,6 +220,7 @@ let splitRequestLeave = (leaveDetail: RememberMeApi.leaveDetail) => {
         scheduleMenu: Leave,
         title: leaveDetail.user ++ (leaveDetail.leaveType === Sick ? " Sick" : " Vacation"),
         date: date,
+        date2: date->Js.Date.fromFloat,
         detail: "",
       }
       schedule
@@ -226,15 +230,17 @@ let splitRequestLeave = (leaveDetail: RememberMeApi.leaveDetail) => {
 }
 
 let mapBirthDayToSchedule = (birthday: birthDay) => {
+  let date = Js.Date.makeWithYMD(
+    ~year=Js.Date.now() |> Js.Date.fromFloat |> Js.Date.getFullYear,
+    ~month=birthday.birthDate |> Js.Date.getMonth,
+    ~date=birthday.birthDate |> Js.Date.getDate,
+    (),
+  )
   let schedule = {
     scheduleMenu: Birthday,
     title: birthday.name ++ "'s birthday",
-    date: Js.Date.makeWithYMD(
-      ~year=Js.Date.now() |> Js.Date.fromFloat |> Js.Date.getFullYear,
-      ~month=birthday.birthDate |> Js.Date.getMonth,
-      ~date=birthday.birthDate |> Js.Date.getDate,
-      (),
-    ) |> Js.Date.valueOf,
+    date: date->Js.Date.valueOf,
+    date2: date,
     detail: "",
   }
   schedule
@@ -242,6 +248,10 @@ let mapBirthDayToSchedule = (birthday: birthDay) => {
 
 let validateBirthday = (birthday: Js.Date.t, month, date) =>
   birthday |> Js.Date.getMonth === month && birthday |> Js.Date.getDate === date
+
+let validateBirthday2 = (birthday: Js.Date.t, date: Js.Date.t) =>
+  birthday->Js.Date.getMonth === date->Js.Date.getMonth &&
+    birthday->Js.Date.getDate === date->Js.Date.getDate
 
 let setStrToJsDate = (datetime: string) => {
   /* xxxx-xx-xx */
