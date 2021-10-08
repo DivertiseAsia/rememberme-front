@@ -1,12 +1,13 @@
 open RememberMeApi
 
+type birthDay = RememberMeType.birthDay
 type event = RememberMeType.event
 type holiday = RememberMeType.holiday
 
 type date = int
 type eventData = {
   holidays: array<holiday>,
-  birthdays: array<RememberMeApi.birthDay>,
+  birthdays: array<birthDay>,
   leaves: array<RememberMeType.schedule>,
   events: array<RememberMeType.event>,
 }
@@ -48,7 +49,7 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
       ->Array.of_list
       ->React.array}
       {birthDayList
-      ->Belt.List.keep(birthDay =>
+      ->Belt.List.keep((birthDay: birthDay) =>
         birthDay.name !== "" &&
           RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)
       )

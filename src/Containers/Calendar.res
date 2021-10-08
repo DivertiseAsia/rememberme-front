@@ -3,7 +3,7 @@ open RememberMeApi
 
 let str = ReasonReact.string
 
-type birthDay = RememberMeApi.birthDay
+type birthDay = RememberMeType.birthDay
 type event = RememberMeType.event
 type holiday = RememberMeType.holiday
 
@@ -163,7 +163,7 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
             ),
           ) > 0 ||
             List.length(
-              birthDayList |> List.find_all(birthDay =>
+              birthDayList |> List.find_all((birthDay: birthDay) =>
                 RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)
               ),
             ) > 0))
@@ -178,8 +178,8 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
               |> Array.of_list
               |> array}
               {birthDayList
-              |> List.filter(birthDay => birthDay.name !== "")
-              |> List.find_all(birthDay =>
+              |> List.filter((birthDay: birthDay) => birthDay.name !== "")
+              |> List.find_all((birthDay: birthDay) =>
                 RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)
               )
               |> List.map(_birthDay =>

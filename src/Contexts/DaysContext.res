@@ -9,7 +9,7 @@ type dayContext<'a> = {
 type days = {
   events: dayContext<apiState<list<RememberMeType.event>>>,
   holidayList: dayContext<apiState<list<RememberMeType.holiday>>>,
-  birthDayList: dayContext<apiState<list<RememberMeApi.birthDay>>>,
+  birthDayList: dayContext<apiState<list<RememberMeType.birthDay>>>,
   allLeaveList: dayContext<apiState<list<RememberMeApi.leaveDetail>>>,
   userLeaveList: dayContext<apiState<list<RememberMeApi.leaveDetail>>>,
 }

@@ -16,10 +16,6 @@ type leaveDetail = {
   status: RememberMeType.requestStatus,
 }
 
-type birthDay = {
-  name: string,
-  birthDate: Js.Date.t,
-}
 
 let baseApiUrl = "https://rememberme-server.herokuapp.com"
 

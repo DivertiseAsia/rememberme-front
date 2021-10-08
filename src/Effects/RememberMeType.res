@@ -81,6 +81,11 @@ type holiday = {
   isVacation: bool,
 }
 
+type birthDay = {
+  name: string,
+  birthDate: Js.Date.t,
+}
+
 module Encode = {
   let changePassword = (~oldPassword, ~password, ~confirmPassword) => {
     open Json.Encode

@@ -225,7 +225,7 @@ let splitRequestLeave = (leaveDetail: RememberMeApi.leaveDetail) => {
   }
 }
 
-let mapBirthDayToSchedule = (birthday: RememberMeApi.birthDay) => {
+let mapBirthDayToSchedule = (birthday: RememberMeType.birthDay) => {
   let schedule = {
     scheduleMenu: Birthday,
     title: birthday.name ++ "'s birthday",
