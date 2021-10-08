@@ -68,23 +68,26 @@ type schedule = {
   detail: string,
 }
 
-type event = {
-  name: string,
-  date: Js.Date.t,
-  details: string,
+module Event = {
+  type event = {
+    name: string,
+    date: Js.Date.t,
+    details: string,
+  }
+
+  type holiday = {
+    name: string,
+    date: float,
+    date2: Js.Date.t,
+    isVacation: bool,
+  }
+
+  type birthDay = {
+    name: string,
+    birthDate: Js.Date.t,
+  }
 }
 
-type holiday = {
-  name: string,
-  date: float,
-  date2: Js.Date.t,
-  isVacation: bool,
-}
-
-type birthDay = {
-  name: string,
-  birthDate: Js.Date.t,
-}
 
 module Encode = {
   let changePassword = (~oldPassword, ~password, ~confirmPassword) => {

@@ -64,6 +64,7 @@ let mapRequestStatus = (requestStatus: int) => {
 module Decode = {
   open Json.Decode
   open RememberMeType
+  open RememberMeType.Event
 
   let decodeDateStringToDate = (~key="date", json, ) =>
      json-> optional(field(key, string), _)->Belt.Option.mapWithDefault(Js.Date.make(), Js.Date.fromString)

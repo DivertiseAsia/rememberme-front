@@ -1,5 +1,6 @@
 open ReasonReact
 open RememberMeType
+open RememberMeType.Event
 open RememberMeApi
 
 let menus = list{All, Leave, Holiday, Event}
@@ -167,7 +168,7 @@ let make = (
                 let lastEndDate = [0.]
                 let birthdaySchedules =
                   allBirthDay
-                  |> List.filter(birthDay => birthDay.name !== "")
+                  |> List.filter((birthDay: birthDay) => birthDay.name !== "")
                   |> List.map(birthDay => birthDay |> RememberMeUtils.mapBirthDayToSchedule)
                 let holidaySchedules =
                   allHoliday |> List.map(holiday => holiday |> RememberMeUtils.mapHolidayToSchedule)

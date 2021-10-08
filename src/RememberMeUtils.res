@@ -1,4 +1,5 @@
 open RememberMeType
+open RememberMeType.Event
 
 let scheduleMenuToStr = scheduleMenu =>
   switch scheduleMenu {
@@ -171,7 +172,7 @@ let getDateStrRequestLeave = (datetime: float) =>
       |> string_of_int
       |> getTwoPositionStr))))
 
-let mapHolidayToSchedule = (holiday: RememberMeType.holiday) => {
+let mapHolidayToSchedule = (holiday: holiday) => {
   let schedule = {
     scheduleMenu: Holiday,
     title: holiday.name,
@@ -181,7 +182,7 @@ let mapHolidayToSchedule = (holiday: RememberMeType.holiday) => {
   schedule
 }
 
-let mapEventToSchedule = (event:RememberMeType.event) => {
+let mapEventToSchedule = (event: event) => {
   let schedule = {
     scheduleMenu: Event,
     title: event.name,
@@ -225,7 +226,7 @@ let splitRequestLeave = (leaveDetail: RememberMeApi.leaveDetail) => {
   }
 }
 
-let mapBirthDayToSchedule = (birthday: RememberMeType.birthDay) => {
+let mapBirthDayToSchedule = (birthday: birthDay) => {
   let schedule = {
     scheduleMenu: Birthday,
     title: birthday.name ++ "'s birthday",

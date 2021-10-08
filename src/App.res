@@ -1,5 +1,6 @@
 open ReasonReact
 open RememberMeType
+open RememberMeType.Event
 open RememberMeApi
 
 @bs.val external encodeURIComponent: string => string = "encodeURIComponent"
