@@ -181,7 +181,7 @@ let mapHolidayToSchedule = (holiday: RememberMeType.holiday) => {
   schedule
 }
 
-let mapEventToSchedule = (event: RememberMeApi.event) => {
+let mapEventToSchedule = (event:RememberMeType.event) => {
   let schedule = {
     scheduleMenu: Event,
     title: event.name,

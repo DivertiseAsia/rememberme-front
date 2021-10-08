@@ -60,6 +60,12 @@ type schedule = {
   detail: string,
 }
 
+type event = {
+  name: string,
+  date: Js.Date.t,
+  details: string,
+}
+
 type holiday = {
   name: string,
   date: float,

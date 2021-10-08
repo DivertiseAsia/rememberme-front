@@ -1,12 +1,14 @@
 open RememberMeApi
 
+type event = RememberMeType.event
 type holiday = RememberMeType.holiday
+
 type date = int
 type eventData = {
   holidays: array<holiday>,
   birthdays: array<RememberMeApi.birthDay>,
   leaves: array<RememberMeType.schedule>,
-  events: array<RememberMeApi.event>,
+  events: array<RememberMeType.event>,
 }
 
 type cell = Today(date, eventData) | CurrentMonth(date, eventData) | NotCurrentMonth(date)

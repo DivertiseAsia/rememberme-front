@@ -8,11 +8,6 @@ type profile = {
   birthDate: Js.Date.t,
 }
 
-type event = {
-  name: string,
-  date: Js.Date.t,
-  details: string,
-}
 type leaveType =
   | Sick
   | Personal

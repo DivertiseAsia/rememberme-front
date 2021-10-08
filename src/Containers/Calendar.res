@@ -4,6 +4,7 @@ open RememberMeApi
 let str = ReasonReact.string
 
 type birthDay = RememberMeApi.birthDay
+type event = RememberMeType.event
 type holiday = RememberMeType.holiday
 
 let months: list<RememberMeType.month> = list{
@@ -83,7 +84,7 @@ let mocks: list<holiday> = list{
 }
 
 let getHolidayData = (holidayList, date) =>
-  holidayList->Belt.List.getBy(vacation => vacation.date === date)
+  holidayList->Belt.List.getBy((vacation: holiday) => vacation.date === date)
 
 let getBirthDayElement = (birthList, date) =>
   birthList
