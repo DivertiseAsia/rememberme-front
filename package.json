@@ -29,7 +29,9 @@
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "reason-react": "^0.9.1",
-    "workbox-sw": "^6.1.5"
+    "workbox-build": "^6.2.0",
+    "workbox-routing": "^6.2.4",
+    "workbox-strategies": "^6.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",

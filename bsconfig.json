@@ -19,7 +19,8 @@
     "bs-webapi",
     "@glennsl/bs-json",
     "bs-promise-monad",
-    "bs-service-worker"
+    "bs-service-worker",
+    "bs-notifications"
   ],
   "reason": {
     "react-jsx": 3
