@@ -1,5 +1,4 @@
 open RememberMeType
-open RememberMeType.Event
 
 let scheduleMenuToStr = scheduleMenu =>
   switch scheduleMenu {

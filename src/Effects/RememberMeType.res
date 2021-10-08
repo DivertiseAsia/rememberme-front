@@ -87,7 +87,9 @@ module Event = {
     birthDate: Js.Date.t,
   }
 }
-
+type event = Event.event
+type holiday = Event.holiday
+type birthDay = Event.birthDay
 
 module Encode = {
   let changePassword = (~oldPassword, ~password, ~confirmPassword) => {

@@ -2,8 +2,9 @@ open RememberMeType
 open RememberMeApi
 
 let str = ReasonReact.string
-type birthDay = RememberMeType.Event.birthDay
-type holiday = RememberMeType.Event.holiday
+type birthDay = RememberMeType.birthDay
+type holiday = RememberMeType.holiday
+
 type holidayApiState = apiState<list<holiday>>
 type birthDayApiState = apiState<list<birthDay>>
 type leaveListApiState = apiState<list<leaveDetail>>

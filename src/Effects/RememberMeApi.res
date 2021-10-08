@@ -64,13 +64,12 @@ let mapRequestStatus = (requestStatus: int) => {
 module Decode = {
   open Json.Decode
   open RememberMeType
-  open RememberMeType.Event
 
   let decodeDateStringToDate = (~key="date", json, ) =>
      json-> optional(field(key, string), _)->Belt.Option.mapWithDefault(Js.Date.make(), Js.Date.fromString)
 
 
-  let birthDay = json => {
+  let birthDay = (json):birthDay => {
     name: json |> field("name", optional(string)) |> Utils.mapOptStr,
     birthDate: json
     |> field("birth_date", optional(string))
@@ -80,14 +79,15 @@ module Decode = {
   }
   let birthDayList = json => json |> list(birthDay)
 
-  let holiday = json => {
+  let holiday = (json):holiday => {
     name: json |> field("name", string),
     date: json |> field("date", string) |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf,
     date2: decodeDateStringToDate(json),
     isVacation: json |> field("is_vacation", bool),
   }
   let holidayList = json => json |> list(holiday)
-  let event = json => {
+
+  let event = (json):event => {
     name: json |> field("name", string),
     date: json |> field("date", string) |> Js.Date.fromString |> getDateOnlyDate,
     details: json |> field("details", string),

@@ -1,8 +1,8 @@
 open RememberMeType
 
-type birthDay = RememberMeType.Event.birthDay
-type event = RememberMeType.Event.event
-type holiday = RememberMeType.Event.holiday
+type birthDay = RememberMeType.birthDay
+type event = RememberMeType.event
+type holiday = RememberMeType.holiday
 
 
 type dayContext<'a> = {

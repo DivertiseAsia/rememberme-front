@@ -1,6 +1,5 @@
 open ReasonReact
 open RememberMeType
-open RememberMeType.Event
 open RememberMeApi
 
 let menus = list{All, Leave, Holiday, Event}
