@@ -60,6 +60,13 @@ type schedule = {
   detail: string,
 }
 
+type holiday = {
+  name: string,
+  date: float,
+  date2: Js.Date.t,
+  isVacation: bool,
+}
+
 module Encode = {
   let changePassword = (~oldPassword, ~password, ~confirmPassword) => {
     open Json.Encode

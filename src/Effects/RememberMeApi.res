@@ -8,12 +8,6 @@ type profile = {
   birthDate: Js.Date.t,
 }
 
-type holiday = {
-  name: string,
-  date: float,
-  isVacation: bool,
-}
-
 type event = {
   name: string,
   date: Js.Date.t,
@@ -85,6 +79,11 @@ let mapRequestStatus = (requestStatus: int) => {
 
 module Decode = {
   open Json.Decode
+  open RememberMeType
+
+  let decodeDateStringToDate = (~key="date", json, ) =>
+     json-> optional(field(key, string), _)->Belt.Option.mapWithDefault(Js.Date.make(), Js.Date.fromString)
+
 
   let birthDay = json => {
     name: json |> field("name", optional(string)) |> Utils.mapOptStr,
@@ -99,6 +98,7 @@ module Decode = {
   let holiday = json => {
     name: json |> field("name", string),
     date: json |> field("date", string) |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf,
+    date2: decodeDateStringToDate(json),
     isVacation: json |> field("is_vacation", bool),
   }
   let holidayList = json => json |> list(holiday)

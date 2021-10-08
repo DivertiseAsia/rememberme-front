@@ -32,7 +32,7 @@ type action =
   | OnSubmitRequestLeaveFailed(string)
 
 let dateForm = (
-  ~schedules=list{},
+  ~schedules: list<DiverTemplate.RememberMeType.schedule>=list{},
   ~title="Start",
   ~targetDate,
   ~targetMonth,
@@ -75,7 +75,7 @@ let dateForm = (
             ~date=idx + 1 |> float_of_int,
             (),
           )
-          let isLeaveDay = switch schedules |> List.find(schedule =>
+          let isLeaveDay = switch schedules |> List.find((schedule: RememberMeType.schedule) =>
             schedule.date === (datetime |> Js.Date.valueOf)
           ) {
           | _leaveDay => true
@@ -86,11 +86,11 @@ let dateForm = (
               (datetime |> Js.Date.valueOf >= today &&
               (!RememberMeUtils.validateWeekend(datetime) && !isLeaveDay))
           isValidate
-            ? <a 
-                key=`dropdown-item-date-${idx->Belt.Int.toString}-${datetime->Js.Date.toLocaleString}` 
-                className="dropdown-item" 
+            ? <a
+                key={`dropdown-item-date-${idx->Belt.Int.toString}-${datetime->Js.Date.toLocaleString}`}
+                className="dropdown-item"
                 onClick={_ => onChangeDate(datetime |> Js.Date.valueOf)}>
-                  {string(idx + 1 |> string_of_int)}
+                {string(idx + 1 |> string_of_int)}
               </a>
             : null
         })
@@ -236,8 +236,10 @@ let make = (~schedules, ~onRefresh) => {
     <form
       className="row justify-content-center pt-5 pb-2"
       style={ReactDOM.Style.make(~backgroundColor="white", ~borderTop="2px solid #FFA227", ())}
-      onSubmit={e => {ReactEvent.Form.preventDefault(e); onSubmit()}}
-      >
+      onSubmit={e => {
+        ReactEvent.Form.preventDefault(e)
+        onSubmit()
+      }}>
       {requestMenus
       |> List.map((menu: formType) =>
         <div

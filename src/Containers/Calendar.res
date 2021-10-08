@@ -4,6 +4,7 @@ open RememberMeApi
 let str = ReasonReact.string
 
 type birthDay = RememberMeApi.birthDay
+type holiday = RememberMeType.holiday
 
 let months: list<RememberMeType.month> = list{
   Jan,
@@ -70,11 +71,13 @@ let mocks: list<holiday> = list{
   {
     name: "DAY 1 ",
     date: "2019-06-01"->Js.Date.fromString->getDateOnlyDate->Js.Date.valueOf,
+    date2: "2019-06-01"->Js.Date.fromString,
     isVacation: true,
   },
   {
     name: "DAY 2 ",
     date: "2019-06-27"->Js.Date.fromString->getDateOnlyDate->Js.Date.valueOf,
+    date2: "2019-06-27"->Js.Date.fromString,
     isVacation: true,
   },
 }
@@ -110,7 +113,14 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
       ))
     ->Js.Date.valueOf
 
-  Belt.Array.range(0, boxs)->Belt.Array.mapWithIndex((idx, _) =>
+  let monthEventsData: CalendarDateCell.eventData = {
+    holidays: holidayList->Array.of_list,
+    birthdays: birthDayList->Array.of_list,
+    leaves: list{}->Array.of_list,
+    events: eventList->Array.of_list,
+  }
+  Belt.Array.range(0, boxs)
+  ->Belt.Array.mapWithIndex((idx, _) =>
     switch idx {
     | idx when idx < startDayInWeek =>
       <CalendarDateCell
@@ -137,9 +147,10 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
       <CalendarDateCell
         key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
         extraClassName="day"
-        cell={today === jsDate ? Today(date) : CurrentMonth(date)}>
-        {
-        List.length(
+        cell={today === jsDate
+          ? Today(date, monthEventsData)
+          : CurrentMonth(date, monthEventsData)}>
+        {List.length(
           holidayList |> List.find_all((holiday: holiday) => holiday.date === jsDate),
         ) > 0 ||
           (List.length(
@@ -202,13 +213,13 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
       </CalendarDateCell>
     }
   )
-  -> (arr =>
+  ->(arr =>
     Array.make(row, null) |> Array.mapi((idx, _) => {
       let end_ = (idx + 1) * col
       let start = idx > 0 ? idx * col : idx
       <tr key=j`row-$idx`> {arr |> Js.Array.slice(~start, ~end_) |> array} </tr>
     }))
-  -> React.array
+  ->React.array
 }
 
 @react.component

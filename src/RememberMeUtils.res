@@ -171,7 +171,7 @@ let getDateStrRequestLeave = (datetime: float) =>
       |> string_of_int
       |> getTwoPositionStr))))
 
-let mapHolidayToSchedule = (holiday: RememberMeApi.holiday) => {
+let mapHolidayToSchedule = (holiday: RememberMeType.holiday) => {
   let schedule = {
     scheduleMenu: Holiday,
     title: holiday.name,
