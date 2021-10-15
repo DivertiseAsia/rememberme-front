@@ -113,13 +113,18 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
         (),
       ))
     ->Js.Date.valueOf
+  let schedulesLeave =
+    leaveList
+    |> List.map((requestLeave: leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
+    |> List.concat
 
   let monthEventsData: CalendarDateCell.eventData = {
     holidays: holidayList->Array.of_list,
     birthdays: birthDayList->Array.of_list,
-    leaves: list{}->Array.of_list,
+    leaves: schedulesLeave->Array.of_list,
     events: eventList->Array.of_list,
   }
+
   Belt.Array.range(0, boxs)
   ->Belt.Array.mapWithIndex((idx, _) =>
     switch idx {
@@ -139,79 +144,16 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
       let date = idx - startDayInWeek + 1
       let jsDate =
         Js.Date.makeWithYMD(~year, ~month, ~date=date |> float_of_int, ()) |> Js.Date.valueOf
-      let schedulesLeave =
-        leaveList
-        |> List.map((requestLeave: leaveDetail) =>
-          requestLeave |> RememberMeUtils.splitRequestLeave
-        )
-        |> List.concat
+
+      let dateObject = Js.Date.makeWithYMD(~year, ~month, ~date=date |> float_of_int, ())
+
       <CalendarDateCell
         key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
         extraClassName="day"
         cell={today === jsDate
-          ? Today(date, monthEventsData)
-          : CurrentMonth(date, monthEventsData)}>
-        {List.length(
-          holidayList |> List.find_all((holiday: holiday) => holiday.date === jsDate),
-        ) > 0 ||
-          (List.length(
-            eventList |> List.find_all((event: event) => event.date |> Js.Date.valueOf === jsDate),
-          ) > 0 ||
-          (List.length(
-            schedulesLeave |> List.find_all((schedule: RememberMeType.schedule) =>
-              schedule.date === jsDate
-            ),
-          ) > 0 ||
-            List.length(
-              birthDayList |> List.find_all((birthDay: birthDay) =>
-                RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)
-              ),
-            ) > 0))
-          ? <div className="points">
-              {holidayList
-              |> List.find_all((holiday: holiday) => holiday.date === jsDate)
-              |> List.map(_holiday =>
-                <div
-                  key={"holiday-point-" ++ (idx |> string_of_int)} className="point point-holiday"
-                />
-              )
-              |> Array.of_list
-              |> array}
-              {birthDayList
-              |> List.filter((birthDay: birthDay) => birthDay.name !== "")
-              |> List.find_all((birthDay: birthDay) =>
-                RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)
-              )
-              |> List.map(_birthDay =>
-                <div
-                  key={"birthday-point-" ++ (idx |> string_of_int)} className="point point-birthday"
-                />
-              )
-              |> Array.of_list
-              |> array}
-              {schedulesLeave
-              |> List.filter((schedule: RememberMeType.schedule) => schedule.date === jsDate)
-              |> List.map((schedule: RememberMeType.schedule) =>
-                <div
-                  key={`schedule-point-${idx->Belt.Int.toString}-${schedule.title}`}
-                  className="point point-leave"
-                />
-              )
-              |> Array.of_list
-              |> array}
-              {eventList
-              |> List.find_all((event: event) => event.date |> Js.Date.valueOf === jsDate)
-              |> List.map((event: event) =>
-                <div
-                  key={`event-point-${idx->Belt.Int.toString}-${event.name}`}
-                  className="point point-event"
-                />
-              )
-              |> Array.of_list
-              |> array}
-            </div>
-          : null}
-      </CalendarDateCell>
+          ? Today(dateObject, monthEventsData)
+          : CurrentMonth(dateObject, monthEventsData)}
+      />
     }
   )
   ->(arr =>
