@@ -1,4 +1,3 @@
-open ReasonReact
 
 @react.component
 let make = () =>
@@ -10,7 +9,7 @@ let make = () =>
       </div>
       <div className="col-12 text-center link-login">
         <a id="signup_login" href=Links.login className="text-blue">
-          {"Return to login" |> string}
+          {"Return to login" |> React.string}
         </a>
       </div>
     </div>

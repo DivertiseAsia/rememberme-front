@@ -3,13 +3,13 @@ type itemEnd =
   | Text(string)
   | Image(string)
   | Button(string, ReactEvent.Mouse.t => unit)
-  | Children(array<ReasonReact.reactElement>)
+  | Children(array<React.element>)
 
 type itemBody = {
   title: string,
   subtitle: option<string>,
   topTitle: option<string>,
-  children: option<array<ReasonReact.reactElement>>,
+  children: option<array<React.element>>,
 }
 
 type item = {
@@ -21,17 +21,17 @@ type item = {
 
 let renderItemEnd = (itemEnd: option<itemEnd>, extraClass: string) =>
   switch itemEnd {
-  | None => ReasonReact.null
+  | None => React.null
   | Some(value) =>
     <span className={"item-end item-end-" ++ extraClass}>
       {switch value {
-      | Text(s) => <span> {ReasonReact.string(s)} </span>
+      | Text(s) => <span> {React.string(s)} </span>
       | Image(s) =>
         <span
           className="list-time-image"
           style={ReactDOM.Style.make(~backgroundImage="url('" ++ (s ++ "')"), ())}
         />
-      | Button(s, onClick) => <button onClick> {ReasonReact.string(s)} </button>
+      | Button(s, onClick) => <button onClick> {React.string(s)} </button>
       | _ => <span />
       }}
     </span>
@@ -40,17 +40,17 @@ let renderItemEnd = (itemEnd: option<itemEnd>, extraClass: string) =>
 let renderToDiv = (text: option<string>, extraClass: string) =>
   switch text {
   | None
-  | Some("") => ReasonReact.null
-  | Some(s) => <div className=extraClass> {ReasonReact.string(s)} </div>
+  | Some("") => React.null
+  | Some(s) => <div className=extraClass> {React.string(s)} </div>
   }
 
 let renderItemBody = (itemBody: itemBody) =>
   <span className="item-body">
     {renderToDiv(itemBody.topTitle, "item-top")}
-    <div className="list-item-title"> {ReasonReact.string(itemBody.title)} </div>
+    <div className="list-item-title"> {React.string(itemBody.title)} </div>
     {renderToDiv(itemBody.subtitle, "item-sub")}
     {switch itemBody.children {
-    | None => ReasonReact.null
+    | None => React.null
     | Some(children) => <div className="list-item-subchildren"> {children->React.array} </div>
     }}
   </span>

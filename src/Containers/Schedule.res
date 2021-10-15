@@ -1,4 +1,3 @@
-open ReasonReact
 open RememberMeType
 open RememberMeApi
 
@@ -45,11 +44,11 @@ let findAllSchedules = (schedules, key, today) => {
           schedules
         />
       </div>
-    | _ => null
+    | _ => React.null
     }
   )
   |> Array.of_list
-  |> array
+  |> React.array
 }
 
 @react.component
@@ -110,22 +109,22 @@ let make = (
           />
           <span>
             {switch state.contentForm {
-            | Idle => string("My Form")
-            | _ => string("Back")
+            | Idle => React.string("My Form")
+            | _ => React.string("Back")
             }}
           </span>
         </div>
       </div>
       <div className="col-6 text-right">
         <span className="cursor-pointer" onClick={_ => dispatch(TogglePopover(!state.showPopover))}>
-          {string(
+          {React.string(
             switch profile {
             | Some(p) => p.firstName
             | None => "-"
             },
           )}
         </span>
-        {state.showPopover ? <Popover onClose={_ => dispatch(TogglePopover(false))} /> : null}
+        {state.showPopover ? <Popover onClose={_ => dispatch(TogglePopover(false))} /> : React.null}
       </div>
     </div>
     {switch state.contentForm {
@@ -146,12 +145,12 @@ let make = (
                         : " none-active-menu"
                     )}
                     onClick={_ => dispatch(ChangeScheduleMenu(menu))}>
-                    {string(menu |> RememberMeUtils.scheduleMenuToStr)}
+                    {React.string(menu |> RememberMeUtils.scheduleMenuToStr)}
                   </button>
                 </div>
               )
               |> Array.of_list
-              |> array}
+              |> React.array}
             </div>
           </div>
           <div className="col-12 content-schedule- p-0">
@@ -201,11 +200,11 @@ let make = (
                       key={"scheduler-all-" ++ (schedule.title ++ ("-" ++ (i |> string_of_int)))}>
                       <SchedulerDate isToday={schedule.date === today} datetime schedules />
                     </div>
-                  | _ => null
+                  | _ => React.null
                   }
                 )
                 |> Array.of_list
-                |> array
+                |> React.array
               | (Leave, _, _, allLeave, _) when allLeave !== list{} => <>
                   {findAllSchedules(allLeave, "scheduler-leave-", today)}
                 </>
@@ -229,7 +228,7 @@ let make = (
                 </>
               | _ =>
                 <div className="col-12 text-center pt-5 pb-5">
-                  <p> {string("Data not found")} </p>
+                  <p> {React.string("Data not found")} </p>
                 </div>
               }
             }
@@ -240,7 +239,7 @@ let make = (
           className="btn btn-request"
           onClick={_ => dispatch(ChangeContentForm(RequestForm))}>
           <img className="requestform-icon" src="/images/request_form.svg" />
-          {string("Request Form")}
+          {React.string("Request Form")}
         </button>
       </>
     | RequestForm =>

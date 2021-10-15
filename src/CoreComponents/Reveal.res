@@ -13,6 +13,6 @@ let make = (~before: string, ~after: string, ~className: option<string>=?) => {
       className=`reveal-after ${show ? "reveal-after-open" : ""}`
       dangerouslySetInnerHTML={"__html": after}
     />
-    <button onClick={_e => setShow(_ => !show)}> {ReasonReact.string(changeText(show))} </button>
+    <button onClick={_e => setShow(_ => !show)}> {React.string(changeText(show))} </button>
   </div>
 }

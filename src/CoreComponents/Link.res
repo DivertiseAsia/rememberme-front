@@ -7,7 +7,7 @@ let handleClick = (href, target, event, isExternal) =>
     | Some("") =>
       if !ReactEvent.Mouse.defaultPrevented(event) {
         ReactEvent.Mouse.preventDefault(event)
-        ReasonReact.Router.push(href)
+        RescriptReactRouter.push(href)
       }
     | _ => ()
     }

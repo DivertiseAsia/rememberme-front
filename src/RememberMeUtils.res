@@ -211,7 +211,7 @@ let splitRequestLeave = (leaveDetail: RememberMeApi.leaveDetail) => {
   switch dateFloat {
   | x when x === 0. => list{leaveDetail |> mapLeaveToSchedule}
   | _ =>
-    Array.make(dateFloat /. (1000. *. 60. *. 60. *. 24.) +. 1. |> int_of_float, ReasonReact.null)
+    Array.make(dateFloat /. (1000. *. 60. *. 60. *. 24.) +. 1. |> int_of_float, React.null)
     |> Array.mapi((idx, _) => {
       let date =
         (leaveDetail.fromDate |> Js.Date.valueOf) +.

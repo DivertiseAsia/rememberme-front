@@ -1,4 +1,3 @@
-open ReasonReact
 
 @react.component
 let make = (
@@ -9,7 +8,7 @@ let make = (
   <div className="container mt-3">
     <div className="row">
       <div className="col">
-        <p className="mb-2"> {string(datetime)} </p>
+        <p className="mb-2"> {React.string(datetime)} </p>
         <hr
           className="mt-0"
           style={ReactDOM.Style.make(
@@ -32,20 +31,20 @@ let make = (
           <div className={"scheduler-status" ++ (backgroundColor ++ border)} />
         </div>
         <div className="col-10">
-          <p> {string(schedule.title)} </p>
+          <p> {React.string(schedule.title)} </p>
           {switch schedule.scheduleMenu {
           | Event =>
             let details = Js.String.split("\n", schedule.detail)
             details
             |> Array.to_list
-            |> List.map(detail => <div> <p> {string(detail)} </p> </div>)
+            |> List.map(detail => <div> <p> {React.string(detail)} </p> </div>)
             |> Array.of_list
-            |> array
-          | _ => null
+            |> React.array
+          | _ => React.null
           }}
         </div>
       </div>
     })
     |> Array.of_list
-    |> array}
+    |> React.array}
   </div>

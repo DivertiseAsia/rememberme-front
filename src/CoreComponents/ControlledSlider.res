@@ -1,5 +1,4 @@
 open BaseSlider
-open ReasonReact
 open Belt
 
 type state = {slide: int}
@@ -51,7 +50,7 @@ let make = (
       </div>
       <div className="slider-bullets-container">
         <div className="slider-bullets">
-          {array(
+          {React.array(
             List.toArray(
               List.mapWithIndex(slides, (index, slide) =>
                 <div

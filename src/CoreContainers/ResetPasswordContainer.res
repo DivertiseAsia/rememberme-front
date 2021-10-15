@@ -1,4 +1,3 @@
-open ReasonReact
 open Utils
 
 type apiState = RememberMeType.apiState<bool>
@@ -19,7 +18,7 @@ type action =
 
 @react.component
 let make = () => {
-  let querystring = ReasonReactRouter.useUrl().search
+  let querystring = RescriptReactRouter.useUrl().search
   let (state, dispatch) = React.useReducer((state, action) =>
     switch action {
     | SetEmail(email) => {...state, email: email}
@@ -90,9 +89,9 @@ let make = () => {
       </form>
       {switch state.apiState {
       | Loaded(true) =>
-        <div className="text-info"> {string("Your password have been change.")} </div>
-      | Failed(x) when x != "" => x |> getErrorMsgFromJson |> array
-      | _ => ReasonReact.null
+        <div className="text-info"> {React.string("Your password have been change.")} </div>
+      | Failed(x) when x != "" => x |> getErrorMsgFromJson |> React.array
+      | _ => React.null
       }}
     </div>
   }

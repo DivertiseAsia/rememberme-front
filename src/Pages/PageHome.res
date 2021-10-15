@@ -1,7 +1,7 @@
 open RememberMeType
 open RememberMeApi
 
-let str = ReasonReact.string
+let str = React.string
 type birthDay = RememberMeType.birthDay
 type holiday = RememberMeType.holiday
 

@@ -1,7 +1,6 @@
-open ReasonReact
 open RememberMeApi
 
-let str = ReasonReact.string
+let str = React.string
 
 type birthDay = RememberMeType.birthDay
 type event = RememberMeType.event
@@ -157,10 +156,10 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
     }
   )
   ->(arr =>
-    Array.make(row, null) |> Array.mapi((idx, _) => {
+    Array.make(row, React.null) |> Array.mapi((idx, _) => {
       let end_ = (idx + 1) * col
       let start = idx > 0 ? idx * col : idx
-      <tr key=j`row-$idx`> {arr |> Js.Array.slice(~start, ~end_) |> array} </tr>
+      <tr key=j`row-$idx`> {arr |> Js.Array.slice(~start, ~end_) |> React.array} </tr>
     }))
   ->React.array
 }
@@ -214,7 +213,7 @@ let make = (
     (isMini ? " mini-calendar" : ""))}
     onClick={_ =>
       isMini
-        ? Router.push(
+        ? RescriptReactRouter.push(
             "dashboard/" ++
             ((month + 1 |> string_of_int) ++
             ("-" ++ (targetYear |> int_of_float |> string_of_int))),
@@ -223,16 +222,16 @@ let make = (
     <div className="row">
       <div className="col">
         {isMini
-          ? null
+          ? React.null
           : <button
               type_="button"
               className="btn btn-rounded btn-main-color active-menu pl-4 pr-4"
-              onClick={_ => Router.push("all-month")}>
+              onClick={_ => RescriptReactRouter.push("all-month")}>
               <img
                 src="/images/calendar.svg"
                 style={ReactDOM.Style.make(~width="35px", ~height="35px", ())}
               />
-              {string(" " ++ (targetYear |> Js.Float.toString))}
+              {React.string(" " ++ (targetYear |> Js.Float.toString))}
             </button>}
       </div>
     </div>
@@ -279,12 +278,12 @@ let make = (
             </th>
           )
           |> Array.of_list
-          |> array}
+          |> React.array}
         </tr>
       </thead>
       <tbody>
         {state.loadState === Loading
-          ? null
+          ? React.null
           : dates(
               (isMini ? month |> float_of_int |> getMonthType : state.month) |> getMonthFloat,
               targetYear,

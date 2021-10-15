@@ -11,7 +11,7 @@
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
-    "reason-react",
+    "@rescript/react",
     "bs-css",
     "bs-fetch",
     "bs-webapi",

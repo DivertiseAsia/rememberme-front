@@ -14,7 +14,7 @@ let getErrorMsgFromJson = json =>
       arrErrMsg => {
         let field = arrErrMsg[Array.length(arrErrMsg) - 2]
         let msg = arrErrMsg[Array.length(arrErrMsg) - 1]
-        <p key=j`msg-$idx`> {ReasonReact.string(Js.String.replace("This field", field, msg))} </p>
+        <p key=j`msg-$idx`> {React.string(Js.String.replace("This field", field, msg))} </p>
       }
     )
   )
@@ -114,7 +114,7 @@ let mapOptStr = optStr => optStr |> mapOpt(~defaultValue="")
 
 
 module Date = {
-  
+
   @deriving(abstract)
   type dateOptions = {
     @optional month: string,
@@ -127,5 +127,8 @@ module Date = {
   @bs.send external toLocaleDateString: (Js.Date.t, string, dateOptions) => string = "toLocaleDateString"
 
   let dateInputValue = (date): string => toLocaleDateString(date, "en-CA", dateOptions(~year="numeric", ~month="numeric", ~day="numeric", ()))
-  
+
+  let isSameTimestamp = (firstDate, secondDate) => {
+    firstDate->Js.Date.valueOf === secondDate->Js.Date.valueOf
+  }
 }

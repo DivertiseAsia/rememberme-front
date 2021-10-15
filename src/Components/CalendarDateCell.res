@@ -88,7 +88,7 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
       }
     }
 
-  <td className style={ReactDOM.Style.make(~paddingTop="20px", ())}>
+  <td className style={ReactDOM.Style.make(~paddingTop="20px", ())} >
     {switch cell {
     | NotCurrentMonth(date) => <span> {date->Belt.Int.toString->React.string} </span>
     | CurrentMonth(date, events) | Today(date, events) =>

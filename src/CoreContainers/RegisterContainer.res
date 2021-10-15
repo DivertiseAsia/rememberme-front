@@ -1,8 +1,8 @@
-open ReasonReact
+open React
 open RememberMeApi
 open Utils
 
-let str = ReasonReact.string
+let str = React.string
 
 type username = string
 type email = string
@@ -98,7 +98,7 @@ let make = () => {
 
   <div className="row">
     <div className="col-sm-9 col-md-9 col-lg-9 mx-auto signup-container">
-      {state.apiState === Loading ? <Loading /> : null}
+      {state.apiState === Loading ? <Loading /> : React.null}
       <form id="signup-form">
         <div className="row justify-content-between">
           <div className="col-6 pl-0">
@@ -177,7 +177,7 @@ let make = () => {
             onChange={e => dispatch(SetConfirmPassword(e |> valueFromEvent))}
           />
           <div className="line-signup" />
-          <small> {string("Birthday")} </small>
+          <small> {React.string("Birthday")} </small>
           <input
             type_="date"
             id="birthday"

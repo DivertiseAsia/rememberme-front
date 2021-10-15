@@ -1,4 +1,3 @@
-open ReasonReact
 open RememberMeApi
 open RememberMeType
 
@@ -40,7 +39,7 @@ let make = (~requestLeaves, ~onRefresh) => {
           className="cursor-pointer"
           onClick={_ => dispatch(ChangeFormMenu(MyForm))}
           style={ReactDOM.Style.make(~marginTop="8px", ~marginBottom="0px", ())}>
-          {string("My Form")}
+          {React.string("My Form")}
         </p>
       </div>
       <div className="col-5 col-md-6 col-lg-5 col-xl-3 pl-0">
@@ -53,7 +52,7 @@ let make = (~requestLeaves, ~onRefresh) => {
           {state.formMenu === History
             ? <img src="/images/history.svg" />
             : <img src="/images/history_blue.svg" />}
-          {string(" History")}
+          {React.string(" History")}
         </button>
       </div>
     </div>
@@ -80,7 +79,7 @@ let make = (~requestLeaves, ~onRefresh) => {
           key={"RequestLeave-" ++ (i |> string_of_int)}
           className="container "
           style={ReactDOM.Style.make(~width="100%", ())}>
-          {i === 0 ? <hr /> : null}
+          {i === 0 ? <hr /> : React.null}
           <RequestLeave
             requestLeave onCancel={_ => removeRequestLeave(requestLeave.id, dispatch)}
           />
@@ -88,7 +87,7 @@ let make = (~requestLeaves, ~onRefresh) => {
         </div>
       )
       |> Array.of_list
-      |> array}
+      |> React.array}
     </div>
   </div>
 }

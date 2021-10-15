@@ -1,5 +1,4 @@
 open Belt
-open ReasonReact
 
 type navItem = {
   href: string,
@@ -25,7 +24,7 @@ let make = (~items: list<navItem>, ~current: string, ~className: option<string>=
     {items
     ->Belt.List.map(item =>
       <li key=item.match className={isSelected(item, items, current) ? "selected" : ""}>
-        <Link href=item.href> {string(item.caption)} </Link>
+        <Link href=item.href> {React.string(item.caption)} </Link>
       </li>
     )
     ->List.toArray
