@@ -1,4 +1,3 @@
-open RememberMeApi
 open RememberMeType
 
 @react.component
