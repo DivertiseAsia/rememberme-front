@@ -21,6 +21,7 @@
   "author": "Divertise Asia Co., Ltd.",
   "license": "MIT",
   "dependencies": {
+    "@divertise-asia/bs-mui": "^2.0.1",
     "@glennsl/bs-json": "^5.0.4",
     "@mobily/re-date": "^0.10.0",
     "@rescript/react": "^0.10.3",

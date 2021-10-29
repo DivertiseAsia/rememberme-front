@@ -17,7 +17,8 @@
     "bs-webapi",
     "@glennsl/bs-json",
     "bs-promise-monad",
-    "@mobily/re-date"
+    "@mobily/re-date",
+    "@divertise-asia/bs-mui"
   ],
   "reason": { "react-jsx": 3 },
   "refmt": 3
