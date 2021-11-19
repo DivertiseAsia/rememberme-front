@@ -76,6 +76,7 @@ let eventDetails = ({holidays, birthdays, events, leaves}) => {
 @react.component
 let make = (~extraClassName="", ~cell: cell, ~children=?) => {
   let (anchorEl, setanchorEl) = React.useState(_ => None)
+  let dateRef = React.useRef(Js.Nullable.null)
   let className =
     "day" ++
     {
@@ -89,7 +90,7 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
   let togglePopover = el =>
     setanchorEl(curEl =>
       switch curEl {
-      | None => Some(el)
+      | None => el
       | Some(_) => None
       }
     )
@@ -98,8 +99,8 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
     <td
       className
       style={ReactDOM.Style.make(~paddingTop="20px", ())}
-      onClick={e => togglePopover(ReactEvent.Mouse.target(e))}
-      onTouchEnd={e => togglePopover(ReactEvent.Touch.target(e))}>
+      onClick={e => togglePopover(Js.Nullable.toOption(dateRef.current))}
+      onTouchEnd={e => togglePopover(Js.Nullable.toOption(dateRef.current))}>
       {switch cell {
       | NotCurrentMonth(date) => <span> {date->Belt.Int.toString->React.string} </span>
       | CurrentMonth(date, events) | Today(date, events) =>
@@ -108,7 +109,9 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
 
         <>
           <div className="circle-today" />
-          <span className={String.length(dateNumber->string_of_int) === 1 ? "single-char" : ""}>
+          <span
+            ref={ReactDOM.Ref.domRef(dateRef)}
+            className={String.length(dateNumber->string_of_int) === 1 ? "single-char" : ""}>
             {dateNumber->Belt.Int.toString->React.string}
           </span>
           {eventElements(~targetDate=date, eventsOfDate)}
