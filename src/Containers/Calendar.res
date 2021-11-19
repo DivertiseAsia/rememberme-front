@@ -67,21 +67,6 @@ let getDateOnlyDate = date =>
     (),
   )
 
-let mocks: list<holiday> = list{
-  {
-    name: "DAY 1 ",
-    date: "2019-06-01"->Js.Date.fromString->getDateOnlyDate->Js.Date.valueOf,
-    date2: "2019-06-01"->Js.Date.fromString,
-    isVacation: true,
-  },
-  {
-    name: "DAY 2 ",
-    date: "2019-06-27"->Js.Date.fromString->getDateOnlyDate->Js.Date.valueOf,
-    date2: "2019-06-27"->Js.Date.fromString,
-    isVacation: true,
-  },
-}
-
 let getHolidayData = (holidayList, date) =>
   holidayList->Belt.List.getBy((vacation: holiday) => vacation.date === date)
 
