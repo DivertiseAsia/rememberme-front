@@ -131,4 +131,12 @@ module Date = {
   let isSameTimestamp = (firstDate, secondDate) => {
     firstDate->Js.Date.valueOf === secondDate->Js.Date.valueOf
   }
+
+  //dd Mmm YYYY
+  let dateWithShortMonthFullYear = date =>
+    toLocaleDateString(
+      date,
+      "en-GB",
+      dateOptions(~month="short", ~day="numeric", ~year="numeric", ()),
+    )
 }
