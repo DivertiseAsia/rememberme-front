@@ -70,7 +70,7 @@ let eventDetails = ({holidays, birthdays, events, leaves}) => {
     birthdays->Belt.Array.map(RememberMeUtils.mapBirthDayToSchedule),
     events->Belt.Array.map(RememberMeUtils.mapEventToSchedule),
     leaves,
-  ])->(schedules => <SchedulerDate schedules={schedules->Array.to_list} />)
+  ])->(schedules => (schedules->Belt.Array.length > 0, <SchedulerDate schedules={schedules->Array.to_list} />))
 }
 
 @react.component
@@ -106,7 +106,7 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
       | CurrentMonth(date, events) | Today(date, events) =>
         let dateNumber = date->Js.Date.getDate->Belt.Int.fromFloat
         let eventsOfDate = getEventsOfTargetDaye(~targerDate=date, events)
-
+        let (hasEvent, eventDetailsEl) = eventDetails(eventsOfDate)
         <>
           <div className="circle-today" />
           <span
@@ -115,7 +115,8 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
             {dateNumber->Belt.Int.toString->React.string}
           </span>
           {eventElements(~targetDate=date, eventsOfDate)}
-          <MaterialUI_Popper
+          {if hasEvent {
+<MaterialUI_Popper
             id={`popper-event-details-${date->Js.Date.toDateString}`}
             _open={anchorEl->Belt.Option.isSome}
             anchorEl
@@ -126,8 +127,12 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
                 "element": anchorEl,
               },
             }>
-            <MaterialUI_Paper> {eventDetails(eventsOfDate)} </MaterialUI_Paper>
+            <MaterialUI_Paper> {eventDetailsEl} </MaterialUI_Paper>
           </MaterialUI_Popper>
+          } else {
+            React.null
+          }}
+
         </>
       }}
       {children->Belt.Option.getWithDefault(React.null)}
