@@ -64,6 +64,15 @@ let eventElements = (~targetDate: Js.Date.t, {holidays, birthdays, events, leave
   </div>
 }
 
+let eventDetails = ({holidays, birthdays, events, leaves}) => {
+  Belt.Array.concatMany([
+    holidays->Belt.Array.map(RememberMeUtils.mapHolidayToSchedule),
+    birthdays->Belt.Array.map(RememberMeUtils.mapBirthDayToSchedule),
+    events->Belt.Array.map(RememberMeUtils.mapEventToSchedule),
+    leaves,
+  ])->(schedules => <SchedulerDate schedules={schedules->Array.to_list} />)
+}
+
 @react.component
 let make = (~extraClassName="", ~cell: cell, ~children=?) => {
   let (anchorEl, setanchorEl) = React.useState(_ => None)
@@ -107,8 +116,14 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
             id={`popper-event-details-${date->Js.Date.toDateString}`}
             _open={anchorEl->Belt.Option.isSome}
             anchorEl
-            placement="top">
-            <div> <p> {"Events:"->React.string} </p> </div>
+            placement="top"
+            modifiers={
+              "arrow": {
+                "enabled": "true",
+                "element": anchorEl,
+              },
+            }>
+            <MaterialUI_Paper> {eventDetails(eventsOfDate)} </MaterialUI_Paper>
           </MaterialUI_Popper>
         </>
       }}
