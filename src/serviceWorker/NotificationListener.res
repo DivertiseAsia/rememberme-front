@@ -16,8 +16,6 @@ let requestPermission = () => {
   , _)->ignore
 }
 
-let dailyInfoText = (_leaveInfo, _holidayInfo) => ()
-
 let showNotification = %raw(`
   function showNotification (infos) {
       navigator.serviceWorker.ready.then(function(registration) {
