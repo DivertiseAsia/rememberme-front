@@ -28,7 +28,10 @@ let showDailyNoti = (dailyInfoText, dailyType) => {
   switch self->navigator->ServiceWorkerLoader.swOpt {
   | Some(_serviceWorker) =>
     switch Dom.Storage.getItem(Config.LocalStorageInfo.dailyReportKey, Dom.Storage.localStorage) {
-    | Some(dailyReport) when Js.Date.fromString(dailyReport)->Utils.Date.isToday => ()
+    | Some(dailyReport)
+      when Js.Date.fromString(
+        Js.String.split(Config.LocalStorageInfo.dailyReportValueSeparateStr, dailyReport)[0],
+      )->Utils.Date.isToday => ()
     | _ => {
         dailyInfoText->showNotification->ignore
         let today = Js.Date.now()->Js.Date.fromFloat
