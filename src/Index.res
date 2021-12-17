@@ -4,7 +4,10 @@
  */
 
 let appName = Config.Info.name
-//let _ = [%bs.raw "console.log(`${appName}: ${BUILD.VERSION}`)"];
+
+%%raw(`
+  console.log("App Version", BUILD.VERSION)
+`)
 
 switch ReactDOM.querySelector("#container") {
 | Some(root) => ReactDOM.render(<App />, root)
