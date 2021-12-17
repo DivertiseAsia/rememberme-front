@@ -28,7 +28,7 @@ let make = (
       | Birthday => (isToday ? " bg-schedule-birthday" : " ", " border-schedule-birthday")
       | _ => (isToday ? " bg-schedule-event" : " ", " border-schedule-event")
       }
-      <div className="row" key={"schedule-date-" ++ (i |> string_of_int)}>
+      <div className="row" key={`schedule-date-${datetime}-${i->Belt.Int.toString}-${dateType === Short ? "short" : "full"}`}>
         <div className="col-2 p-0 text-right">
           <div className={"scheduler-status" ++ (backgroundColor ++ border)} />
         </div>
@@ -38,10 +38,11 @@ let make = (
           | (Event, Full) =>
             let details = Js.String.split("\n", schedule.detail)
             details
-            |> Array.to_list
-            |> List.map(detail => <div> <p> {React.string(detail)} </p> </div>)
-            |> Array.of_list
-            |> React.array
+            -> Belt.Array.mapWithIndex((idx, detail) =>
+                <div className={`event-date-details-${idx->Belt.Int.toString}-${datetime}-${i->Belt.Int.toString}-${dateType === Short ? "short" : "full"}`}>
+                  <p> {React.string(detail)} </p>
+                </div>)
+            -> React.array
           | _ => React.null
           }}
         </div>

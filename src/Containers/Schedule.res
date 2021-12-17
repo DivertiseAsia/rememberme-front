@@ -37,7 +37,7 @@ let findAllSchedules = (schedules, key, today) => {
         ),
       )
       lastEndDate[0] = (schedules |> List.rev |> List.hd).date
-      <div key={key ++ (i |> string_of_int)}>
+      <div key={`schedule-date-findall-${key}-${i |> string_of_int}`}>
         <SchedulerDate
           isToday={schedule.date === today}
           datetime={RememberMeUtils.getDatetimeStr(schedule.date)}
