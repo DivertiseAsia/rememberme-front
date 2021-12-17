@@ -26,7 +26,8 @@ try {
 module.exports = {
   entry: {
     'index': './lib/js/src/Index.bs.js',
-    'style': path.join(__dirname, 'public', 'css', 'style.scss')
+    'style': path.join(__dirname, 'public', 'css', 'style.scss'),
+    'sw': "./lib/js/src/serviceWorker/ServiceWorkerListener.bs.js",
   },
   output: {
     path: outputDir,
@@ -61,7 +62,7 @@ module.exports = {
         options: {
           name: '[path][name]-[hash:6].[ext]'
         },
-      }, ]
+      },]
     },
     {
       use: 'babel-loader',
@@ -71,7 +72,7 @@ module.exports = {
     {
       test: /\.scss$/,
       use: [
-          MiniCssExtractPlugin.loader,
+        MiniCssExtractPlugin.loader,
         {
           loader: "css-loader" // translates CSS into CommonJS
         },
@@ -80,6 +81,6 @@ module.exports = {
         }
       ]
     }
-  ]
+    ]
   },
 };

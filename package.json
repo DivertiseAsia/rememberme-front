@@ -25,9 +25,13 @@
     "bs-css": "^14.0.2",
     "bs-fetch": "^0.6.2",
     "bs-promise-monad": "^0.2.9",
+    "bs-service-worker": "0.0.33",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "reason-react": "^0.9.1"
+    "reason-react": "^0.9.1",
+    "workbox-build": "^6.2.0",
+    "workbox-routing": "^6.2.4",
+    "workbox-strategies": "^6.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",

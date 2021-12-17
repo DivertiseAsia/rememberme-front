@@ -1,8 +1,7 @@
 let errorMessage = "Something went wrong please try again later."
 
 let errorMessagesEl = errorMessages =>
-  Js.String.split(":", errorMessages)
-  ->Belt.Array.mapWithIndex((idx, s) =>
+  Js.String.split(":", errorMessages)->Belt.Array.mapWithIndex((idx, s) =>
     <p key=j`msg-$idx`> {React.string(s)} </p>
   )
 
@@ -112,9 +111,7 @@ let mapOpt = (opt, ~defaultValue) =>
 
 let mapOptStr = optStr => optStr |> mapOpt(~defaultValue="")
 
-
 module Date = {
-  
   @deriving(abstract)
   type dateOptions = {
     @optional month: string,
@@ -122,10 +119,28 @@ module Date = {
     @optional day: string,
     @optional hour: string,
     @optional minute: string,
-  };
+  }
 
-  @bs.send external toLocaleDateString: (Js.Date.t, string, dateOptions) => string = "toLocaleDateString"
+  @bs.send
+  external toLocaleDateString: (Js.Date.t, string, dateOptions) => string = "toLocaleDateString"
 
-  let dateInputValue = (date): string => toLocaleDateString(date, "en-CA", dateOptions(~year="numeric", ~month="numeric", ~day="numeric", ()))
-  
+  let dateInputValue = (date): string =>
+    toLocaleDateString(
+      date,
+      "en-CA",
+      dateOptions(~year="numeric", ~month="numeric", ~day="numeric", ()),
+    )
+
+  let isToday = (datetime: Js.Date.t) => {
+    let today = Js.Date.now()
+    let currentDate = today->Js.Date.fromFloat->Js.Date.getDate
+    let currentMonth = today->Js.Date.fromFloat->Js.Date.getMonth
+    let currentYear = today->Js.Date.fromFloat->Js.Date.getFullYear
+
+    let date = datetime->Js.Date.getDate
+    let month = datetime->Js.Date.getMonth
+    let year = datetime->Js.Date.getFullYear
+
+    currentDate === date && currentMonth === month && currentYear === year
+  }
 }
