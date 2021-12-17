@@ -1,13 +1,15 @@
 {
   "name": "diver-template",
   "sources": {
-    "dir" : "src",
-    "subdirs" : true
+    "dir": "src",
+    "subdirs": true
   },
-  "package-specs": [{
-    "module": "commonjs",
-    "in-source": false
-  }],
+  "package-specs": [
+    {
+      "module": "commonjs",
+      "in-source": false
+    }
+  ],
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
@@ -18,8 +20,12 @@
     "@glennsl/bs-json",
     "bs-promise-monad",
     "@mobily/re-date",
-    "@divertise-asia/bs-mui"
+    "@divertise-asia/bs-mui",
+    "bs-service-worker",
+    "bs-notifications"
   ],
-  "reason": { "react-jsx": 3 },
+  "reason": {
+    "react-jsx": 3
+  },
   "refmt": 3
 }

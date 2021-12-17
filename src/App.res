@@ -1,5 +1,5 @@
-open RememberMeType
 open RememberMeApi
+open RememberMeType
 
 @bs.val external encodeURIComponent: string => string = "encodeURIComponent"
 @bs.get external location: Dom.window => Dom.location = "location"
@@ -193,8 +193,9 @@ let make = () => {
   }
 
   React.useEffect0(_ => {
+    NotificationListener.requestPermission()
     let watcherID = RescriptReactRouter.watchUrl(url => dispatch(RouteTo(url)))
-
+    ServiceWorkerLoader.register()
     Some(_ => RescriptReactRouter.unwatchUrl(watcherID))
   })
 
@@ -207,6 +208,88 @@ let make = () => {
     }
     None
   }, [isLoggedIn])
+  React.useEffect1(_ => {
+    switch state.holidayApiState {
+    | Loaded(holidayList) => {
+        let holidayInfo = ["[Holiday]\n"]
+        let filteredHoliday =
+          holidayList->Belt.List.keep(holiday =>
+            holiday.date->Js.Date.fromFloat->Utils.Date.isToday
+          )
+        switch filteredHoliday {
+        | list{} => ()
+        | _ => {
+            filteredHoliday
+            ->Belt.List.mapWithIndex((index, holiday) => {
+              if index === 0 {
+                holidayInfo[0] = holiday.name
+              } else {
+                holidayInfo[0] = holidayInfo[0] ++ "\n " ++ holiday.name
+              }
+            })
+            ->ignore
+            NotificationListener.showDailyNoti(holidayInfo[0], "holiday")
+          }
+        }
+      }
+    | _ => ()
+    }
+    None
+  }, [state.holidayApiState])
+  React.useEffect1(_ => {
+    switch state.eventsApiState {
+    | Loaded(eventList) => {
+        let eventInfo = ["[Events]\n"]
+        let filteredEvents = eventList->Belt.List.keep(event => event.date->Utils.Date.isToday)
+        switch filteredEvents {
+        | list{} => ()
+        | _ => {
+            filteredEvents
+            ->Belt.List.mapWithIndex((index, event) => {
+              if index === 0 {
+                eventInfo[0] = event.name
+              } else {
+                eventInfo[0] = eventInfo[0] ++ "\n " ++ event.name
+              }
+            })
+            ->ignore
+            NotificationListener.showDailyNoti(eventInfo[0], "event")
+          }
+        }
+      }
+    | _ => ()
+    }
+    None
+  }, [state.eventsApiState])
+  React.useEffect1(_ => {
+    switch state.allLeaveListApiState {
+    | Loaded(leaveList) => {
+        let leaveInfo = ["[Leaves]\n"]
+        let filteredLeaves = leaveList->Belt.List.keep(leave => {
+          leave.fromDate->Js.Date.valueOf <= Js.Date.now() &&
+          leave.toDate->Js.Date.valueOf >= Js.Date.now() &&
+          leave.status === Approve
+        })
+        switch filteredLeaves {
+        | list{} => ()
+        | _ => {
+            filteredLeaves
+            ->Belt.List.mapWithIndex((index, leave) => {
+              if index === 0 {
+                leaveInfo[0] = leave.user
+              } else {
+                leaveInfo[0] = leaveInfo[0] ++ "\n " ++ leave.user
+              }
+            })
+            ->ignore
+            NotificationListener.showDailyNoti(leaveInfo[0], "leave")
+          }
+        }
+      }
+    | _ => ()
+    }
+    None
+  }, [state.allLeaveListApiState])
 
   <ProfileContext.Provider
     value={(
