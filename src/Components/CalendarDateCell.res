@@ -70,7 +70,12 @@ let eventDetails = ({holidays, birthdays, events, leaves}) => {
     birthdays->Belt.Array.map(RememberMeUtils.mapBirthDayToSchedule),
     events->Belt.Array.map(RememberMeUtils.mapEventToSchedule),
     leaves,
-  ])->(schedules => (schedules->Belt.Array.length > 0, <SchedulerDate schedules={schedules->Array.to_list} />))
+  ])->(
+    schedules => (
+      schedules->Belt.Array.length > 0,
+      <SchedulerDate schedules={schedules->Array.to_list} />,
+    )
+  )
 }
 
 @react.component
@@ -116,23 +121,22 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
           </span>
           {eventElements(~targetDate=date, eventsOfDate)}
           {if hasEvent {
-<MaterialUI_Popper
-            id={`popper-event-details-${date->Js.Date.toDateString}`}
-            _open={anchorEl->Belt.Option.isSome}
-            anchorEl
-            placement="top"
-            modifiers={
-              "arrow": {
-                "enabled": "true",
-                "element": anchorEl,
-              },
-            }>
-            <MaterialUI_Paper> {eventDetailsEl} </MaterialUI_Paper>
-          </MaterialUI_Popper>
+            <MaterialUI_Popper
+              id={`popper-event-details-${date->Js.Date.toDateString}`}
+              _open={anchorEl->Belt.Option.isSome}
+              anchorEl
+              placement="top"
+              modifiers={
+                "arrow": {
+                  "enabled": "true",
+                  "element": anchorEl,
+                },
+              }>
+              <MaterialUI_Paper> {eventDetailsEl} </MaterialUI_Paper>
+            </MaterialUI_Popper>
           } else {
             React.null
           }}
-
         </>
       }}
       {children->Belt.Option.getWithDefault(React.null)}
