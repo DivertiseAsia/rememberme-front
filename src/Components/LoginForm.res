@@ -1,4 +1,3 @@
-open ReasonReact
 open Utils
 
 @react.component
@@ -11,7 +10,7 @@ let make = (
 ) =>
   <form className={"form-group form-login " ++ Belt.Option.getWithDefault(className, "")} onSubmit>
     <div className="section-login content -text-center">
-      <small> {string("Username")} </small>
+      <small> {React.string("Username")} </small>
       <input
         disabled=loading
         className="form-control"

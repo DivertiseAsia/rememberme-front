@@ -2,7 +2,7 @@ open Page
 open Belt
 
 @react.component
-let make = (~isLoggedIn: bool, ~className: option<string>=?, ~children: ReasonReact.reactElement) =>
+let make = (~isLoggedIn: bool, ~className: option<string>=?, ~children: React.element) =>
   <Page
     pageEnds={
       top: list{Children(List.toArray(list{<Header isLoggedIn />}))},

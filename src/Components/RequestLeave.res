@@ -1,4 +1,3 @@
-open ReasonReact
 open RememberMeApi
 open RememberMeType
 open RememberMeUtils
@@ -23,17 +22,17 @@ let make = (~requestLeave: leaveDetail, ~onCancel) => {
         }}
       </div>
       <div className="col-6">
-        <p className="mb-1"> <b> {string(datetimeStr)} </b> </p>
-        <p className="mb-1"> {string(detailStr)} </p>
+        <p className="mb-1"> <b> {React.string(datetimeStr)} </b> </p>
+        <p className="mb-1"> {React.string(detailStr)} </p>
         {switch requestLeave.status {
         | Pending =>
           <button
             type_="button"
             className="btn btn-rounded btn-outline btn-cancel-request"
             onClick=onCancel>
-            {string("Cancel")}
+            {React.string("Cancel")}
           </button>
-        | _ => null
+        | _ => React.null
         }}
       </div>
       <div className="col-4 pl-0">
@@ -44,7 +43,7 @@ let make = (~requestLeave: leaveDetail, ~onCancel) => {
               src="/images/pending.svg"
               style={ReactDOM.Style.make(~width="13px", ~height="13px", ~marginBottom="2px", ())}
             />
-            {string(" Pending")}
+            {React.string(" Pending")}
           </div>
         | Fail =>
           <div className="request-status btn-rounded btn-fail">
@@ -52,7 +51,7 @@ let make = (~requestLeave: leaveDetail, ~onCancel) => {
               src="/images/pending.svg"
               style={ReactDOM.Style.make(~width="13px", ~height="13px", ~marginBottom="2px", ())}
             />
-            {string(" Rejected")}
+            {React.string(" Rejected")}
           </div>
         | Approve =>
           <div className="request-status btn-rounded btn-approve">
@@ -60,7 +59,7 @@ let make = (~requestLeave: leaveDetail, ~onCancel) => {
               src="/images/pending.svg"
               style={ReactDOM.Style.make(~width="13px", ~height="13px", ~marginBottom="2px", ())}
             />
-            {string(" Approved")}
+            {React.string(" Approved")}
           </div>
         }}
       </div>

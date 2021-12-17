@@ -1,4 +1,3 @@
-open ReasonReact
 open RememberMeApi
 open RememberMeType
 
@@ -14,7 +13,7 @@ type allLeaveListApiState = apiState<list<leaveDetail>>
 type userLeaveListApiState = apiState<list<leaveDetail>>
 
 type state = {
-  route: ReasonReact.Router.url,
+  route: RescriptReactRouter.url,
   loadState: loadState,
   profileApiState: profileApiState,
   eventsApiState: eventsApiState,
@@ -25,7 +24,7 @@ type state = {
 }
 
 type action =
-  | RouteTo(Router.url)
+  | RouteTo(RescriptReactRouter.url)
   | SetProfileApiState(profileApiState)
   | SetAllLeaveListApiState(allLeaveListApiState)
   | SetUserLeaveListApiState(userLeaveListApiState)
@@ -34,7 +33,7 @@ type action =
   | SetHolidayApiState(holidayApiState)
 
 let initialState = {
-  route: Router.dangerouslyGetInitialUrl(),
+  route: RescriptReactRouter.dangerouslyGetInitialUrl(),
   loadState: Loading,
   profileApiState: NotLoaded,
   eventsApiState: NotLoaded,
@@ -195,9 +194,9 @@ let make = () => {
 
   React.useEffect0(_ => {
     NotificationListener.requestPermission()
-    let watcherID = Router.watchUrl(url => dispatch(RouteTo(url)))
+    let watcherID = RescriptReactRouter.watchUrl(url => dispatch(RouteTo(url)))
     ServiceWorkerLoader.register()
-    Some(_ => Router.unwatchUrl(watcherID))
+    Some(_ => RescriptReactRouter.unwatchUrl(watcherID))
   })
 
   React.useEffect1(_ => {
@@ -314,14 +313,14 @@ let make = () => {
         <PageLogin queryString=state.route.search />
       | (list{x}, _) when routeMatches(x, Links.logout) =>
         let _ = clearToken()
-        let _ = ReasonReact.Router.push("/?logout=true")
+        let _ = RescriptReactRouter.push("/?logout=true")
         <PageLogin queryString=state.route.search />
       | (list{x}, false) when routeMatches(x, Links.register) => <PageRegister />
       | (list{x}, false) when routeMatches(x, Links.forgot) => <PageForgotPassword />
       | (list{x}, false) when routeMatches(x, Links.resetPassword) => <PageResetPassword />
       | (_, false) =>
         let queryParams = "next=" ++ encodeURIComponent(path())
-        let _ = ReasonReact.Router.push("/login?" ++ queryParams)
+        let _ = RescriptReactRouter.push("/login?" ++ queryParams)
         <PageLogin queryString=queryParams />
       | _ => <Page404 isLoggedIn />
       }}

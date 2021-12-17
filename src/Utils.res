@@ -13,7 +13,7 @@ let getErrorMsgFromJson = json =>
       arrErrMsg => {
         let field = arrErrMsg[Array.length(arrErrMsg) - 2]
         let msg = arrErrMsg[Array.length(arrErrMsg) - 1]
-        <p key=j`msg-$idx`> {ReasonReact.string(Js.String.replace("This field", field, msg))} </p>
+        <p key=j`msg-$idx`> {React.string(Js.String.replace("This field", field, msg))} </p>
       }
     )
   )
@@ -140,7 +140,19 @@ module Date = {
     let date = datetime->Js.Date.getDate
     let month = datetime->Js.Date.getMonth
     let year = datetime->Js.Date.getFullYear
-
     currentDate === date && currentMonth === month && currentYear === year
   }
+
+  let isSameTimestamp = (firstDate, secondDate) => {
+    firstDate->Js.Date.valueOf === secondDate->Js.Date.valueOf
+  }
+
+  //dd Mmm YYYY
+  let dateWithShortMonthFullYear = date =>
+    toLocaleDateString(
+      date,
+      "en-GB",
+      dateOptions(~month="short", ~day="numeric", ~year="numeric", ()),
+    )
+
 }

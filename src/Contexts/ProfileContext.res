@@ -3,7 +3,7 @@ type contextValue<'a> = {
   fetchData: unit => unit,
 }
 
-let initValue: contextValue<RememberMeType.apiState<RememberMeApi.profile>> = {
+let initValue: contextValue<RememberMeType.apiState<RememberMeType.profile>> = {
   data: RememberMeType.NotLoaded,
   fetchData: _ => ignore(),
 }

@@ -1,8 +1,8 @@
-open ReasonReact
+open React
 open Belt
 
 type slide = {
-  content: ReasonReact.reactElement,
+  content: React.element,
   slideNumber: int,
 }
 
@@ -42,7 +42,7 @@ let make = (
       let offset = slide.slideNumber - currentSlide
       renderSlide(slide, offset)
     } else {
-      ReasonReact.null
+      React.null
     }
   )
   let beginExtra = switch (config.loopSlides, currentSlide < config.slideOffset) {
@@ -52,10 +52,10 @@ let make = (
       if offset >= -1 * config.slideOffset {
         renderSlide(slide, offset)
       } else {
-        ReasonReact.null
+        React.null
       }
     })
-  | (_, _) => list{ReasonReact.null}
+  | (_, _) => list{React.null}
   }
   let endExtra = switch (
     config.loopSlides,
@@ -67,10 +67,10 @@ let make = (
       if offset <= config.slideOffset {
         renderSlide(slide, offset)
       } else {
-        ReasonReact.null
+        React.null
       }
     })
-  | (_, _) => list{ReasonReact.null}
+  | (_, _) => list{React.null}
   }
 
   <div className={"slider " ++ Js.Option.getWithDefault("slider-default", className)}>

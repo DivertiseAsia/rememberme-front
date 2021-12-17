@@ -1,9 +1,10 @@
-open ReasonReact
 open RememberMeApi
 
-let str = ReasonReact.string
+let str = React.string
 
-type birthDay = RememberMeApi.birthDay
+type birthDay = RememberMeType.birthDay
+type event = RememberMeType.event
+type holiday = RememberMeType.holiday
 
 let months: list<RememberMeType.month> = list{
   Jan,
@@ -39,11 +40,11 @@ type action =
   | OnChangeMonth(RememberMeType.month)
   | OnChangeYear(float)
 
-let getMonthFloat = month => months |> Array.of_list |> Js.Array.indexOf(month) |> float_of_int
+let getMonthFloat = month => months->Array.of_list->Js.Array2.indexOf(month)->float_of_int
 
 let getMonthType = idx => {
   open RememberMeType
-  switch Js.List.nth(months, idx |> int_of_float) {
+  switch Js.List.nth(months, idx->int_of_float) {
   | None => Jan
   | Some(month) => month
   }
@@ -56,44 +57,23 @@ function f (year, month){
 }
 `)
 
-let getLastDate = (~year, ~realMonth) => getLastDateObj(year, realMonth) |> Js.Date.getDate
+let getLastDate = (~year, ~realMonth) => getLastDateObj(year, realMonth)->Js.Date.getDate
 
 let getDateOnlyDate = date =>
   Js.Date.makeWithYMD(
-    ~year=date |> Js.Date.getFullYear,
-    ~month=date |> Js.Date.getMonth,
-    ~date=date |> Js.Date.getDate,
+    ~year=date->Js.Date.getFullYear,
+    ~month=date->Js.Date.getMonth,
+    ~date=date->Js.Date.getDate,
     (),
   )
 
-let mocks: list<holiday> = list{
-  {
-    name: "DAY 1 ",
-    date: "2019-06-01" |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf,
-    isVacation: true,
-  },
-  {
-    name: "DAY 2 ",
-    date: "2019-06-27" |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf,
-    isVacation: true,
-  },
-}
-
 let getHolidayData = (holidayList, date) =>
-  switch holidayList |> List.find(vacation => vacation.date === date) {
-  | holiday => Some(holiday)
-  | exception Not_found => None
-  }
+  holidayList->Belt.List.getBy((vacation: holiday) => vacation.date === date)
 
 let getBirthDayElement = (birthList, date) =>
-  switch birthList |> List.find((data: birthDay) =>
-    data.birthDate |> getDateOnlyDate |> Js.Date.valueOf === date
-  ) {
-  //false
-
-  | data => Some(<p> {data.name ++ " BirthDay" |> str} </p>)
-  | exception Not_found => None
-  }
+  birthList
+  ->Belt.List.getBy(({birthDate}: birthDay) => birthDate->getDateOnlyDate->Js.Date.valueOf === date)
+  ->Belt.Option.map(({name}: birthDay) => <p> {`${name} BirthDay`->React.string} </p>)
 
 let getDayByStartOnMonday = (dayInWeek: int) => dayInWeek === 0 ? 6 : dayInWeek - 1
 
@@ -101,126 +81,72 @@ let dates = (month, year, holidayList, birthDayList, leaveList, eventList) => {
   let col = 7
   let row = 6
   let boxs = col * row
-  let lastDatePreviousMonth = getLastDate(~year, ~realMonth=month) |> int_of_float
-  let lastDate = getLastDate(~year, ~realMonth=month +. 1.) |> int_of_float
+  let lastDatePreviousMonth = getLastDate(~year, ~realMonth=month)->int_of_float
+  let lastDate = getLastDate(~year, ~realMonth=month +. 1.)->int_of_float
 
   let startDayInWeek =
-    Js.Date.makeWithYM(~year, ~month, ()) |> Js.Date.getDay |> int_of_float |> getDayByStartOnMonday
+    Js.Date.makeWithYM(~year, ~month, ())->Js.Date.getDay->int_of_float->getDayByStartOnMonday
 
   let today =
     Js.Date.make()
-    |> (date =>
+    ->(date =>
       Js.Date.makeWithYMD(
-        ~year=date |> Js.Date.getFullYear,
-        ~month=date |> Js.Date.getMonth,
-        ~date=date |> Js.Date.getDate,
+        ~year=date->Js.Date.getFullYear,
+        ~month=date->Js.Date.getMonth,
+        ~date=date->Js.Date.getDate,
         (),
       ))
-    |> Js.Date.valueOf
+    ->Js.Date.valueOf
+  let schedulesLeave =
+    leaveList
+    |> List.map((requestLeave: leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
+    |> List.concat
 
-  Array.make(boxs, null)
-  |> Array.mapi((idx, _) =>
-    if idx < startDayInWeek {
+  let monthEventsData: CalendarDateCell.eventData = {
+    holidays: holidayList->Array.of_list,
+    birthdays: birthDayList->Array.of_list,
+    leaves: schedulesLeave->Array.of_list,
+    events: eventList->Array.of_list,
+  }
+
+  Belt.Array.range(0, boxs)
+  ->Belt.Array.mapWithIndex((idx, _) =>
+    switch idx {
+    | idx when idx < startDayInWeek =>
       <CalendarDateCell
         key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
         extraClassName=`day not-current-month`
         cell=NotCurrentMonth({lastDatePreviousMonth - (startDayInWeek - (idx + 1))})
       />
-    } else if idx - startDayInWeek + 1 > lastDate {
+    | idx when idx - startDayInWeek + 1 > lastDate =>
       <CalendarDateCell
         key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
         extraClassName=j`day not-current-month`
         cell=NotCurrentMonth({idx - startDayInWeek + 1 - lastDate})
       />
-    } else {
+    | _ =>
       let date = idx - startDayInWeek + 1
       let jsDate =
         Js.Date.makeWithYMD(~year, ~month, ~date=date |> float_of_int, ()) |> Js.Date.valueOf
-      let schedulesLeave =
-        leaveList
-        |> List.map((requestLeave: leaveDetail) =>
-          requestLeave |> RememberMeUtils.splitRequestLeave
-        )
-        |> List.concat
+
+      let dateObject = Js.Date.makeWithYMD(~year, ~month, ~date=date |> float_of_int, ())
+
       <CalendarDateCell
         key={`date-cell-${year->Belt.Float.toString}-${month->Belt.Float.toString}-${idx->Belt.Int.toString}`}
         extraClassName="day"
-        cell={today === jsDate ? Today(date) : CurrentMonth(date)}
-        >
-        // <div className="circle-today" />
-        // <span className={String.length(date |> string_of_int) === 1 ? "single-char" : ""}>
-        //   {date |> string_of_int |> str}
-        // </span>
-        {List.length(
-          holidayList |> List.find_all((holiday: holiday) => holiday.date === jsDate),
-        ) > 0 ||
-          (List.length(
-            eventList |> List.find_all((event: event) => event.date |> Js.Date.valueOf === jsDate),
-          ) > 0 ||
-          (List.length(
-            schedulesLeave |> List.find_all((schedule: RememberMeType.schedule) =>
-              schedule.date === jsDate
-            ),
-          ) > 0 ||
-            List.length(
-              birthDayList |> List.find_all(birthDay =>
-                RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)
-              ),
-            ) > 0))
-          ? <div className="points">
-              {holidayList
-              |> List.find_all((holiday: holiday) => holiday.date === jsDate)
-              |> List.map(_holiday =>
-                <div
-                  key={"holiday-point-" ++ (idx |> string_of_int)} className="point point-holiday"
-                />
-              )
-              |> Array.of_list
-              |> array}
-              {birthDayList
-              |> List.filter(birthDay => birthDay.name !== "")
-              |> List.find_all(birthDay =>
-                RememberMeUtils.validateBirthday(birthDay.birthDate, month, date |> float_of_int)
-              )
-              |> List.map(_birthDay =>
-                <div
-                  key={"birthday-point-" ++ (idx |> string_of_int)} className="point point-birthday"
-                />
-              )
-              |> Array.of_list
-              |> array}
-              {schedulesLeave
-              |> List.filter((schedule: RememberMeType.schedule) => schedule.date === jsDate)
-              |> List.map((schedule: RememberMeType.schedule) =>
-                <div
-                  key={`schedule-point-${idx->Belt.Int.toString}-${schedule.title}`}
-                  className="point point-leave"
-                />
-              )
-              |> Array.of_list
-              |> array}
-              {eventList
-              |> List.find_all((event: event) => event.date |> Js.Date.valueOf === jsDate)
-              |> List.map((event: event) =>
-                <div
-                  key={`event-point-${idx->Belt.Int.toString}-${event.name}`}
-                  className="point point-event"
-                />
-              )
-              |> Array.of_list
-              |> array}
-            </div>
-          : null}
-      </CalendarDateCell>
+        cell={today === jsDate
+          ? Today(dateObject, monthEventsData)
+          : CurrentMonth(dateObject, monthEventsData)}
+      />
     }
   )
-  |> (arr =>
-    Array.make(row, null) |> Array.mapi((idx, _) => {
+  ->(arr =>
+    Array.make(row, React.null) |> Array.mapi((idx, _) => {
       let end_ = (idx + 1) * col
       let start = idx > 0 ? idx * col : idx
-      <tr key=j`row-$idx`> {arr |> Js.Array.slice(~start, ~end_) |> array} </tr>
+      <tr key=j`row-$idx`> {arr |> Js.Array.slice(~start, ~end_) |> React.array} </tr>
     }))
-  |> array
+  ->React.array
 }
 
 @react.component
@@ -272,7 +198,7 @@ let make = (
     (isMini ? " mini-calendar" : ""))}
     onClick={_ =>
       isMini
-        ? Router.push(
+        ? RescriptReactRouter.push(
             "dashboard/" ++
             ((month + 1 |> string_of_int) ++
             ("-" ++ (targetYear |> int_of_float |> string_of_int))),
@@ -281,16 +207,16 @@ let make = (
     <div className="row">
       <div className="col">
         {isMini
-          ? null
+          ? React.null
           : <button
               type_="button"
               className="btn btn-rounded btn-main-color active-menu pl-4 pr-4"
-              onClick={_ => Router.push("all-month")}>
+              onClick={_ => RescriptReactRouter.push("all-month")}>
               <img
                 src="/images/calendar.svg"
                 style={ReactDOM.Style.make(~width="35px", ~height="35px", ())}
               />
-              {string(" " ++ (targetYear |> Js.Float.toString))}
+              {React.string(" " ++ (targetYear |> Js.Float.toString))}
             </button>}
       </div>
     </div>
@@ -337,12 +263,12 @@ let make = (
             </th>
           )
           |> Array.of_list
-          |> array}
+          |> React.array}
         </tr>
       </thead>
       <tbody>
         {state.loadState === Loading
-          ? null
+          ? React.null
           : dates(
               (isMini ? month |> float_of_int |> getMonthType : state.month) |> getMonthFloat,
               targetYear,

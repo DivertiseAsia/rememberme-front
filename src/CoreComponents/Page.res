@@ -1,9 +1,8 @@
-open ReasonReact
 open Belt
 
 type pageEnd =
   | Text(string)
-  | Children(array<ReasonReact.reactElement>)
+  | Children(array<React.element>)
 
 type pageEnds = {
   top: list<pageEnd>,
@@ -12,15 +11,15 @@ type pageEnds = {
 
 let mapPageEnd = (pageEndArray: list<pageEnd>, extraClass: string) =>
   switch List.length(pageEndArray) {
-  | 0 => ReasonReact.null
+  | 0 => React.null
   | _ =>
     <div className={"page-end-container page-end-" ++ extraClass} key=extraClass>
-      {array(
+      {React.array(
         List.toArray(
           List.mapWithIndex(pageEndArray, (i, info: pageEnd) =>
             <div className={"page-end page-end-" ++ string_of_int(i)} key={string_of_int(i)}>
               {switch (info: pageEnd) {
-              | Text(s) => <div className="page-end-text"> {ReasonReact.string(s)} </div>
+              | Text(s) => <div className="page-end-text"> {React.string(s)} </div>
               | Children(children) =>
                 <div className="page-end-children"> {children->React.array} </div>
               }}
@@ -47,7 +46,7 @@ let extraClasses = (pageEnds: pageEnds) => {
 let make = (
   ~pageEnds: pageEnds,
   ~className: option<string>=?,
-  ~children: ReasonReact.reactElement,
+  ~children: React.element,
 ) => {
   let extraClasses = extraClasses(pageEnds)
   <div
