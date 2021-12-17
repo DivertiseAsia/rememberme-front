@@ -125,7 +125,7 @@ td{
     }
     .link-signup, .link-login {
       margin-top: 20px;
-      a { 
+      a {
         color: white;
       }
     }
@@ -428,8 +428,8 @@ td{
   color: white;
   z-index: 10;
   .popover-arrow {
-    width: 0; 
-    height: 0; 
+    width: 0;
+    height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-bottom: 5px solid $main-color;
@@ -515,6 +515,10 @@ td{
   }
 }
 
+.popper-event-details .MuiPaper-root {
+  min-width: 180px;
+}
+
 .mini-calendar {
   padding: 0px 10px !important;
   border: 1px solid #567289;
@@ -537,7 +541,7 @@ td{
   width: 170px;
   height: 200px;
   overflow-y: auto;
-  
+
   background-color: $main-btn-color;
   z-index: 998;
   padding: 10px;
@@ -628,8 +632,8 @@ td{
   max-height: 1000vw;
 }
 
-@media screen and (min-width: 768px) { 
-  
+@media screen and (min-width: 768px) {
+
   .col-calendar, .col-schedule {
     height: 100%;
   }
@@ -686,10 +690,10 @@ td{
       font-size: 20px;
     }
   }
-  
+
 }
-@media screen and (max-width: 767px) { 
-  
+@media screen and (max-width: 767px) {
+
   .home-page {
     overflow-y: auto;
   }
@@ -718,4 +722,3 @@ td{
     margin-top: -20px !important;
   }
 }
-

@@ -1,9 +1,11 @@
+type dateType = Short | Full
 
 @react.component
 let make = (
   ~isToday=false,
   ~datetime="",
   ~schedules: list<RememberMeType.schedule>,
+  ~dateType=Full,
 ) =>
   <div className="container mt-3">
     <div className="row">
@@ -32,8 +34,8 @@ let make = (
         </div>
         <div className="col-10">
           <p> {React.string(schedule.title)} </p>
-          {switch schedule.scheduleMenu {
-          | Event =>
+          {switch (schedule.scheduleMenu, dateType) {
+          | (Event, Full) =>
             let details = Js.String.split("\n", schedule.detail)
             details
             |> Array.to_list

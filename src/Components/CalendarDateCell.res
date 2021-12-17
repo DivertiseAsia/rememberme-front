@@ -73,7 +73,7 @@ let eventDetails = ({holidays, birthdays, events, leaves}) => {
   ])->(
     schedules => (
       schedules->Belt.Array.length > 0,
-      <SchedulerDate schedules={schedules->Array.to_list} />,
+      <SchedulerDate schedules={schedules->Array.to_list} dateType=SchedulerDate.Short />,
     )
   )
 }
@@ -123,6 +123,7 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
           {if hasEvent {
             <MaterialUI_Popper
               id={`popper-event-details-${date->Js.Date.toDateString}`}
+              className={"popper-event-details"}
               _open={anchorEl->Belt.Option.isSome}
               anchorEl
               placement="top"
