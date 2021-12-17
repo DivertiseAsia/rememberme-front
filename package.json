@@ -30,9 +30,9 @@
     "bs-fetch": "^0.6.2",
     "bs-promise-monad": "^0.2.9",
     "bs-service-worker": "0.0.33",
-    "node-sass": "^6.0.1",
     "react": "^16.14.0",
-    "react-dom": "^16.14.0"
+    "react-dom": "^16.14.0",
+    "sass": "^1.45.0"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",
