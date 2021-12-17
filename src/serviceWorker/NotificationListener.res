@@ -27,13 +27,15 @@ let showNotification = %raw(`
 let showDailyNoti = (dailyInfoText, dailyType) => {
   switch self->navigator->ServiceWorkerLoader.swOpt {
   | Some(_serviceWorker) =>
-    switch Dom.Storage.getItem(Config.LocalStorageInfo.dailyReportKey, Dom.Storage.localStorage) {
+    switch Dom.Storage.getItem(
+      Config.LocalStorageInfo.dailyReportKey ++ `-${dailyType}`,
+      Dom.Storage.localStorage,
+    ) {
     | Some(dailyReport)
       when Js.Date.fromString(
         Js.String.split(Config.LocalStorageInfo.dailyReportValueSeparateStr, dailyReport)[0],
       )->Utils.Date.isToday => ()
     | _ => {
-        dailyInfoText->showNotification->ignore
         let today = Js.Date.now()->Js.Date.fromFloat
         let dateStr =
           (today->Js.Date.getMonth->int_of_float + 1)->string_of_int ++
@@ -43,10 +45,11 @@ let showDailyNoti = (dailyInfoText, dailyType) => {
           today->Js.Date.getFullYear->int_of_float->string_of_int
 
         Dom.Storage.setItem(
-          Config.LocalStorageInfo.dailyReportKey,
+          Config.LocalStorageInfo.dailyReportKey ++ `-${dailyType}`,
           Config.LocalStorageInfo.dailyReportValueFormate(~dateStr, ~dailyType),
           Dom.Storage.localStorage,
         )
+        dailyInfoText->showNotification->ignore
       }
     }
   | None => Js.log("service worker cannot be found.")
