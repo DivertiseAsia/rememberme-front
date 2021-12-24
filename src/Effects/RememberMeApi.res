@@ -1,24 +1,5 @@
 open RequestUtils
 
-type profile = {
-  username: string,
-  email: string,
-  firstName: string,
-  lastName: string,
-  birthDate: Js.Date.t,
-}
-
-type holiday = {
-  name: string,
-  date: float,
-  isVacation: bool,
-}
-
-type event = {
-  name: string,
-  date: Js.Date.t,
-  details: string,
-}
 type leaveType =
   | Sick
   | Personal
@@ -34,10 +15,6 @@ type leaveDetail = {
   status: RememberMeType.requestStatus,
 }
 
-type birthDay = {
-  name: string,
-  birthDate: Js.Date.t,
-}
 
 let baseApiUrl = "https://rememberme-server.herokuapp.com"
 
@@ -85,8 +62,13 @@ let mapRequestStatus = (requestStatus: int) => {
 
 module Decode = {
   open Json.Decode
+  open RememberMeType
 
-  let birthDay = json => {
+  let decodeDateStringToDate = (~key="date", json, ) =>
+     json-> optional(field(key, string), _)->Belt.Option.mapWithDefault(Js.Date.make(), Js.Date.fromString)
+
+
+  let birthDay = (json):birthDay => {
     name: json |> field("name", optional(string)) |> Utils.mapOptStr,
     birthDate: json
     |> field("birth_date", optional(string))
@@ -96,13 +78,15 @@ module Decode = {
   }
   let birthDayList = json => json |> list(birthDay)
 
-  let holiday = json => {
+  let holiday = (json):holiday => {
     name: json |> field("name", string),
     date: json |> field("date", string) |> Js.Date.fromString |> getDateOnlyDate |> Js.Date.valueOf,
+    date2: decodeDateStringToDate(json),
     isVacation: json |> field("is_vacation", bool),
   }
   let holidayList = json => json |> list(holiday)
-  let event = json => {
+
+  let event = (json):event => {
     name: json |> field("name", string),
     date: json |> field("date", string) |> Js.Date.fromString |> getDateOnlyDate,
     details: json |> field("details", string),
@@ -195,7 +179,7 @@ let fetchEvent = (~token, ~successAction, ~failAction) =>
     ~failAction,
   ) |> ignore
 
-let updateProfile = (~profile, ~successAction, ~failAction) => {
+let updateProfile = (~profile: RememberMeType.profile, ~successAction, ~failAction) => {
 
   let body = {
     open Json.Encode

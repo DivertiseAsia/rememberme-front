@@ -1,4 +1,4 @@
-open ReasonReact
+
 type iconType =
   | Home
   | Location
@@ -6,7 +6,7 @@ type iconType =
 type icon = {
   iconType: iconType,
   className: string,
-  content: ReasonReact.reactElement,
+  content: React.element,
 }
 
 let mapStringToIconType = (icon: string) =>
@@ -22,7 +22,7 @@ let mapIcon = icon =>
       iconType: Home,
       className: "house",
       content: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.78 12.66">
-        <title> {string("House")} </title>
+        <title> {React.string("House")} </title>
         <g id="Layer_2">
           <g id="Layer_1-2">
             <path
@@ -37,7 +37,7 @@ let mapIcon = icon =>
       className: "location",
       content: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
         <defs>
-          <style> {string(".a{fill:none;}.b{fill:#838383;fill-rule:evenodd;}")} </style>
+          <style> {React.string(".a{fill:none;}.b{fill:#838383;fill-rule:evenodd;}")} </style>
         </defs>
         <g transform="translate(-207 -596)">
           <rect className="a" width="16" height="16" transform="translate(207 596)" />

@@ -53,12 +53,44 @@ type apiState<'a> =
   | Loaded('a)
   | Failed(string)
 
+type profile = {
+  username: string,
+  email: string,
+  firstName: string,
+  lastName: string,
+  birthDate: Js.Date.t,
+}
+
 type schedule = {
   scheduleMenu: scheduleMenu,
   title: string,
   date: float,
+  date2: Js.Date.t,
   detail: string,
 }
+
+module Event = {
+  type event = {
+    name: string,
+    date: Js.Date.t,
+    details: string,
+  }
+
+  type holiday = {
+    name: string,
+    date: float,
+    date2: Js.Date.t,
+    isVacation: bool,
+  }
+
+  type birthDay = {
+    name: string,
+    birthDate: Js.Date.t,
+  }
+}
+type event = Event.event
+type holiday = Event.holiday
+type birthDay = Event.birthDay
 
 module Encode = {
   let changePassword = (~oldPassword, ~password, ~confirmPassword) => {

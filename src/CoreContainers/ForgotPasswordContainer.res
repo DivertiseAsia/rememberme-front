@@ -1,4 +1,3 @@
-open ReasonReact
 open Utils
 
 type apiState = RememberMeType.apiState<bool>
@@ -24,7 +23,7 @@ let make = () => {
     <div className="login-container ">
       <form className="form-group form-login " onSubmit>
         <div className="section-login content -text-center">
-          <small> {string("Email")} </small>
+          <small> {React.string("Email")} </small>
           <input
             autoFocus=true
             required=true
@@ -47,9 +46,9 @@ let make = () => {
         </div>
       </form>
       {switch apiState {
-      | Loaded(true) => <div className="text-info"> {string("Reset password email have been sent")} </div>
-      | Failed(x) when x != "" => x |> getErrorMsgFromJson |> array
-      | _ => ReasonReact.null
+      | Loaded(true) => <div className="text-info"> {React.string("Reset password email have been sent")} </div>
+      | Failed(x) when x != "" => x |> getErrorMsgFromJson |> React.array
+      | _ => React.null
       }}
     </div>
   }

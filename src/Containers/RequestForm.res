@@ -1,4 +1,3 @@
-open ReasonReact
 open RememberMeType
 
 let requestMenus = list{Sick, Vacation}
@@ -34,32 +33,31 @@ type action =
   | OnSubmitRequestLeaveFailed(string)
 
 let dateForm = (
-  ~schedules=list{},
+  ~schedules: list<DiverTemplate.RememberMeType.schedule>=list{},
   ~title="Start",
   ~targetDate,
   ~targetMonth,
   ~targetYear,
   ~onChangeDate,
 ) => <>
-  <div className="col-12 col-md-2 pt-3"> {string(title)} </div>
+  <div className="col-12 col-md-2 pt-3"> {React.string(title)} </div>
   <div className="col-3 col-md-3 p-1">
     <div className="dropdown show dropdown-request-leave">
-      {cloneElement(
+      {React.cloneElement(
         <a className="btn dropdown-toggle" role="button" id="dropdown-day">
-          {string(targetDate |> int_of_float |> string_of_int)}
+          {React.string(targetDate |> int_of_float |> string_of_int)}
         </a>,
-        ~props={
+        {
           "data-toggle": "dropdown",
           "aria-haspopup": "true",
           "aria-expanded": "false",
         },
-        [],
       )}
       <div
         className="dropdown-menu"
         ariaLabelledby="dropdown-day"
         style={ReactDOM.Style.make(~maxHeight="200px", ~overflowY="auto", ())}>
-        {Array.make(31, null)
+        {Array.make(31, React.null)
         |> Array.mapi((idx, _) => {
           let today =
             Js.Date.make()
@@ -77,7 +75,7 @@ let dateForm = (
             ~date=idx + 1 |> float_of_int,
             (),
           )
-          let isLeaveDay = switch schedules |> List.find(schedule =>
+          let isLeaveDay = switch schedules |> List.find((schedule: RememberMeType.schedule) =>
             schedule.date === (datetime |> Js.Date.valueOf)
           ) {
           | _leaveDay => true
@@ -92,26 +90,25 @@ let dateForm = (
                 key={`dropdown-item-date-${idx->Belt.Int.toString}-${datetime->Js.Date.toLocaleString}`}
                 className="dropdown-item"
                 onClick={_ => onChangeDate(datetime |> Js.Date.valueOf)}>
-                {string(idx + 1 |> string_of_int)}
+                {React.string(idx + 1 |> string_of_int)}
               </a>
-            : null
+            : React.null
         })
-        |> array}
+        |> React.array}
       </div>
     </div>
   </div>
   <div className="col-6 col-md-4 p-1">
     <div className="dropdown show dropdown-request-leave">
-      {cloneElement(
+      {React.cloneElement(
         <a className="btn dropdown-toggle" role="button" id="dropdown-month">
-          {string(targetMonth |> int_of_float |> RememberMeUtils.mapFullMonthInt)}
+          {React.string(targetMonth |> int_of_float |> RememberMeUtils.mapFullMonthInt)}
         </a>,
-        ~props={
+        {
           "data-toggle": "dropdown",
           "aria-haspopup": "true",
           "aria-expanded": "false",
         },
-        [],
       )}
       <div className="dropdown-menu" ariaLabelledby="dropdown-month">
         {months
@@ -128,26 +125,25 @@ let dateForm = (
               )
               onChangeDate(datetime |> Js.Date.valueOf)
             }}>
-            {string(month |> RememberMeUtils.mapFullMonthStr)}
+            {React.string(month |> RememberMeUtils.mapFullMonthStr)}
           </a>
         )
         |> Array.of_list
-        |> array}
+        |> React.array}
       </div>
     </div>
   </div>
   <div className="col-3 col-md-3 p-1">
     <div className="dropdown show dropdown-request-leave">
-      {cloneElement(
+      {React.cloneElement(
         <a className="btn dropdown-toggle" role="button" id="dropdown-year">
-          {string(targetYear |> int_of_float |> string_of_int)}
+          {React.string(targetYear |> int_of_float |> string_of_int)}
         </a>,
-        ~props={
+        {
           "data-toggle": "dropdown",
           "aria-haspopup": "true",
           "aria-expanded": "false",
         },
-        [],
       )}
       <div className="dropdown-menu" ariaLabelledby="dropdown-year">
         {years
@@ -159,11 +155,11 @@ let dateForm = (
               let datetime = Js.Date.makeWithYMD(~year, ~month=targetMonth, ~date=targetDate, ())
               onChangeDate(datetime |> Js.Date.valueOf)
             }}>
-            {string(year |> int_of_float |> string_of_int)}
+            {React.string(year |> int_of_float |> string_of_int)}
           </a>
         )
         |> Array.of_list
-        |> array}
+        |> React.array}
       </div>
     </div>
   </div>
@@ -242,7 +238,7 @@ let make = (~schedulesHoliday, ~schedulesLeave, ~onRefresh) => {
   })
 
   <div className="container mt-4 request-form-container">
-    <div className="row"> <p> {string("Create Form")} </p> </div>
+    <div className="row"> <p> {React.string("Create Form")} </p> </div>
     <form
       className="row justify-content-center pt-5 pb-2"
       style={ReactDOM.Style.make(~backgroundColor="white", ~borderTop="2px solid #FFA227", ())}
@@ -270,12 +266,12 @@ let make = (~schedulesHoliday, ~schedulesLeave, ~onRefresh) => {
               | _ => "/images/vacation_blue.svg"
               }}
             />
-            {string(menu |> RememberMeUtils.requestMenuToStr)}
+            {React.string(menu |> RememberMeUtils.requestMenuToStr)}
           </button>
         </div>
       )
       |> Array.of_list
-      |> array}
+      |> React.array}
       <div className="col-12 pt-3">
         <p>
           {
@@ -325,7 +321,7 @@ let make = (~schedulesHoliday, ~schedulesLeave, ~onRefresh) => {
           )}
         </div>
         <div className="row mt-4">
-          <div className="col-12 col-md-4 col-note"> {string("Note:")} </div>
+          <div className="col-12 col-md-4 col-note"> {React.string("Note:")} </div>
           <div className="col-12 col-md-8">
             <textarea
               rows=2
@@ -336,7 +332,7 @@ let make = (~schedulesHoliday, ~schedulesLeave, ~onRefresh) => {
           </div>
         </div>
         <div className="row mt-3">
-          <div className="col-12 col-md-4 col-note"> {string("Remote:")} </div>
+          <div className="col-12 col-md-4 col-note"> {React.string("Remote:")} </div>
           <div className="col-12 col-md-8">
             <input
               type_="checkbox" onInput={e => dispatch(ChangeIsRemote(Utils.boolFromCheckbox(e)))}
@@ -384,7 +380,7 @@ let make = (~schedulesHoliday, ~schedulesLeave, ~onRefresh) => {
             type_="submit"
             className="btn btn-rounded btn-form- btn-form-active m-auto"
             style={ReactDOM.Style.make(~maxWidth="120px", ())}>
-            {string("Submit")}
+            {React.string("Submit")}
           </button>
         </div>
         {switch state.formType {
@@ -392,7 +388,7 @@ let make = (~schedulesHoliday, ~schedulesLeave, ~onRefresh) => {
           <div className="row mt-3">
             <div className="col"> <img src="/images/coconut.svg" /> </div>
           </div>
-        | _ => null
+        | _ => React.null
         }}
       </div>
     </form>
@@ -408,6 +404,6 @@ let make = (~schedulesHoliday, ~schedulesLeave, ~onRefresh) => {
             }
           }}
         />
-      : null}
+      : React.null}
   </div>
 }

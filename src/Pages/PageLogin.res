@@ -1,4 +1,3 @@
-open ReasonReact
 @bs.val external decodeURIComponent: string => string = "decodeURIComponent"
 
 let regex = Js.Re.fromStringWithFlags("next=([^&#]*)", ~flags="g")
@@ -23,10 +22,10 @@ let make = (~queryString="") => {
         <LoginContainer ?afterLoginUrl />
       </div>
       <div className="col-12 text-center link-signup">
-        <u> <Link href=Links.register> {string("Sign up")} </Link> </u>
+        <u> <Link href=Links.register> {React.string("Sign up")} </Link> </u>
         <br />
         <br />
-        <u> <Link href=Links.forgot> {string("Forgot password?")} </Link> </u>
+        <u> <Link href=Links.forgot> {React.string("Forgot password?")} </Link> </u>
       </div>
     </div>
   </div>

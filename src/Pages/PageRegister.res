@@ -1,4 +1,4 @@
-open ReasonReact
+
 
 let regex = Js.Re.fromStringWithFlags("next=([^&#]*)", ~flags="g")
 
@@ -9,7 +9,7 @@ let make = () =>
     <div className="row row-register-container justify-content-center">
       <div className="col-12 col-sm-12 col-md-5 col-lg-4 col-xl-3"> <RegisterContainer /> </div>
       <div className="col-12 text-center link-login">
-        <a id="signup_login" href=Links.login className="text-blue"> {"Log In" |> string} </a>
+        <a id="signup_login" href=Links.login className="text-blue"> {"Log In" -> React.string} </a>
       </div>
     </div>
   </div>

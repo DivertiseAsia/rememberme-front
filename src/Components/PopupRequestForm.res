@@ -1,4 +1,3 @@
-open ReasonReact
 open RememberMeType
 
 @react.component
@@ -8,7 +7,7 @@ let make = (~isSick=true, ~loadState: loadState, ~onConfirm) => <>
   | Failed(errMsg) =>
     <div className="container p-4 popup-container popup-container-fail">
       <div className="row">
-        <div className="col-12 text-center"> <h5> {string("Something went wrong !")} </h5> </div>
+        <div className="col-12 text-center"> <h5> {React.string("Something went wrong !")} </h5> </div>
       </div>
       {if errMsg != "" {
         <div className="row">
@@ -20,7 +19,7 @@ let make = (~isSick=true, ~loadState: loadState, ~onConfirm) => <>
         React.null
       }}
       <div className="row">
-        <div className="col-12 text-center"> <p> {string("Please try again.")} </p> </div>
+        <div className="col-12 text-center"> <p> {React.string("Please try again.")} </p> </div>
       </div>
       <div className="row row-btn">
         <div className="col-12 text-center">
@@ -29,7 +28,7 @@ let make = (~isSick=true, ~loadState: loadState, ~onConfirm) => <>
             className="btn btn-rounded btn-form- btn-form-active m-auto"
             onClick=onConfirm
             style={ReactDOM.Style.make(~maxWidth="120px", ())}>
-            {string("OK")}
+            {React.string("OK")}
           </button>
         </div>
       </div>
@@ -42,8 +41,8 @@ let make = (~isSick=true, ~loadState: loadState, ~onConfirm) => <>
       <div className="row row-text">
         <div className="col-12 text-center" style={ReactDOM.Style.make(~display="contents", ())}>
           {isSick
-            ? <div className="m-auto"> <h5> {string("Get well soon !")} </h5> </div>
-            : <div className="m-auto"> <h5> {string("Waiting for approve")} </h5> </div>}
+            ? <div className="m-auto"> <h5> {React.string("Get well soon !")} </h5> </div>
+            : <div className="m-auto"> <h5> {React.string("Waiting for approve")} </h5> </div>}
         </div>
       </div>
       <div className="row row-btn">
@@ -53,7 +52,7 @@ let make = (~isSick=true, ~loadState: loadState, ~onConfirm) => <>
             className="btn btn-rounded btn-form- btn-form-active m-auto"
             onClick=onConfirm
             style={ReactDOM.Style.make(~maxWidth="120px", ())}>
-            {string("OK")}
+            {React.string("OK")}
           </button>
         </div>
       </div>

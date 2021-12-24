@@ -1,7 +1,6 @@
-open ReasonReact
 open RememberMeType
 
-let str = ReasonReact.string
+let str = React.string
 
 let months = list{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 
@@ -64,7 +63,7 @@ let make = () => {
             src="/images/calendar.svg"
             style={ReactDOM.Style.make(~width="35px", ~height="35px", ())}
           />
-          {string(" " ++ (state.targetYear |> Js.Float.toString))}
+          {React.string(" " ++ (state.targetYear |> Js.Float.toString))}
         </button>
         {state.openDropdown
           ? <>
@@ -79,14 +78,14 @@ let make = () => {
                       dispatch(ChangeYear(year))
                       dispatch(ToggleDropdown(false))
                     }}>
-                    {string(year |> int_of_float |> string_of_int)}
+                    {React.string(year |> int_of_float |> string_of_int)}
                   </div>
                 )
                 |> Array.of_list
-                |> array}
+                |> React.array}
               </div>
             </>
-          : null}
+          : React.null}
       </div>
     </div>
     <div className="row mt-2">
@@ -107,7 +106,7 @@ let make = () => {
         </div>
       )
       |> Array.of_list
-      |> array}
+      |> React.array}
     </div>
   </div>
 }

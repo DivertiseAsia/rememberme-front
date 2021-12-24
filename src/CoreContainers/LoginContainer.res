@@ -1,4 +1,3 @@
-open ReasonReact
 open RequestUtils
 open Utils
 
@@ -50,7 +49,7 @@ let make = (~afterLoginUrl: option<string>=?) => {
         }
 
         Loaded(true)->SetLoginState->dispatch
-        afterLoginUrl->Belt.Option.getWithDefault(Links.home)->ReasonReact.Router.push
+        afterLoginUrl->Belt.Option.getWithDefault(Links.home)->RescriptReactRouter.push
       },
       ~failAction=json => json->Json.stringify->Failed->SetLoginState->dispatch,
     )->ignore
@@ -71,9 +70,9 @@ let make = (~afterLoginUrl: option<string>=?) => {
         }}
       />
       {switch state.loginState {
-      | Loaded(true) => <div className="text-info"> {string("Logged in. Redirecting..")} </div>
-      | Failed(x) when x != "" => x |> getErrorMsgFromJson |> array
-      | _ => ReasonReact.null
+      | Loaded(true) => <div className="text-info"> {React.string("Logged in. Redirecting..")} </div>
+      | Failed(x) when x != "" => x |> getErrorMsgFromJson |> React.array
+      | _ => React.null
       }}
     </div>
   }

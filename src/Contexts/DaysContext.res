@@ -1,5 +1,10 @@
 open RememberMeType
 
+type birthDay = RememberMeType.birthDay
+type event = RememberMeType.event
+type holiday = RememberMeType.holiday
+
+
 type dayContext<'a> = {
   data: 'a,
   fetchData: unit => unit,
@@ -7,9 +12,9 @@ type dayContext<'a> = {
 }
 
 type days = {
-  events: dayContext<apiState<list<RememberMeApi.event>>>,
-  holidayList: dayContext<apiState<list<RememberMeApi.holiday>>>,
-  birthDayList: dayContext<apiState<list<RememberMeApi.birthDay>>>,
+  events: dayContext<apiState<list<event>>>,
+  holidayList: dayContext<apiState<list<holiday>>>,
+  birthDayList: dayContext<apiState<list<birthDay>>>,
   allLeaveList: dayContext<apiState<list<RememberMeApi.leaveDetail>>>,
   userLeaveList: dayContext<apiState<list<RememberMeApi.leaveDetail>>>,
 }

@@ -1,11 +1,12 @@
-open ReasonReact
+open React
 open RememberMeApi
 open Utils
 
-let str = ReasonReact.string
+let str = React.string
 
 type email = string
 type password = string
+type profile = RememberMeType.profile
 type confirmPassword = password
 type firstName = string
 type lastName = string

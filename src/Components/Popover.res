@@ -1,4 +1,3 @@
-open ReasonReact
 
 @react.component
 let make = (~onClose) => <>
@@ -8,8 +7,8 @@ let make = (~onClose) => <>
     <div className="row">
       <div
         className="col-12 text-center mt-2 mb-2 cursor-pointer"
-        onClick={_ => Router.push("profile")}>
-        {string("My Profile")}
+        onClick={_ => RescriptReactRouter.push("profile")}>
+        {React.string("My Profile")}
       </div>
       <div
         className="col-12 text-center mt-2 mb-2 cursor-pointer"
@@ -18,9 +17,9 @@ let make = (~onClose) => <>
             open Dom.Storage
             localStorage |> removeItem("token")
           }
-          Router.push("")
+          RescriptReactRouter.push("")
         }}>
-        {string("Sign Out")}
+        {React.string("Sign Out")}
       </div>
     </div>
   </div>
