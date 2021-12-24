@@ -209,8 +209,8 @@ let make = () => {
     None
   }, [isLoggedIn])
   React.useEffect1(_ => {
-    switch state.holidayApiState {
-    | Loaded(holidayList) => {
+    switch (state.holidayApiState, isLoggedIn) {
+    | (Loaded(holidayList), true) => {
         let holidayInfo = ["[Holiday]\n"]
         let filteredHoliday =
           holidayList->Belt.List.keep(holiday =>
@@ -237,8 +237,8 @@ let make = () => {
     None
   }, [state.holidayApiState])
   React.useEffect1(_ => {
-    switch state.eventsApiState {
-    | Loaded(eventList) => {
+    switch (state.eventsApiState, isLoggedIn) {
+    | (Loaded(eventList), true) => {
         let eventInfo = ["[Events]\n"]
         let filteredEvents = eventList->Belt.List.keep(event => event.date->Utils.Date.isToday)
         switch filteredEvents {
@@ -262,8 +262,8 @@ let make = () => {
     None
   }, [state.eventsApiState])
   React.useEffect1(_ => {
-    switch state.allLeaveListApiState {
-    | Loaded(leaveList) => {
+    switch (state.allLeaveListApiState, isLoggedIn) {
+    | (Loaded(leaveList), true) => {
         let leaveInfo = ["[Leaves]\n"]
         let filteredLeaves = leaveList->Belt.List.keep(leave => {
           leave.fromDate->Js.Date.valueOf <= Js.Date.now() &&
