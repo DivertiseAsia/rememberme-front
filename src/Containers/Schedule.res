@@ -23,7 +23,11 @@ type action =
 let findAllSchedules = (schedules, key, today) => {
   let lastEndDate = [0.]
   schedules
-  |> List.filter((schedule: schedule) => schedule.date >= today)
+  |> List.filter((schedule: schedule) => {
+    let yearFromSchedule = schedule.date->Js.Date.fromFloat->Js.Date.getFullYear
+    let yearFromToday = today->Js.Date.fromFloat->Js.Date.getFullYear
+    yearFromSchedule === yearFromToday
+  })
   |> List.sort((schedule1: schedule, schedule2: schedule) =>
     compare(schedule1.date, schedule2.date)
   )
@@ -255,13 +259,14 @@ let make = (
       )
       |> List.map((requestLeave: leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
       |> List.concat
-      let schedules = List.append(schedulesHoliday, schedulesLeave)
+
       <RequestForm
         onRefresh={_ => {
           dispatch(ChangeContentForm(Idle))
           onRefresh()
         }}
-        schedules
+        schedulesHoliday
+        schedulesLeave
       />
     | MyForm => <RequestLeavePanel requestLeaves=userLeaveList onRefresh />
     }}

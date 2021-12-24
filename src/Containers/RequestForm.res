@@ -1,6 +1,8 @@
 open RememberMeType
 
 let requestMenus = list{Sick, Vacation}
+let allSickLeaveRequests = 7
+let allVacationLeaveRequests = 10
 
 let months: list<month> = list{Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec}
 let years: list<float> = list{
@@ -164,7 +166,7 @@ let dateForm = (
 </>
 
 @react.component
-let make = (~schedules, ~onRefresh) => {
+let make = (~schedulesHoliday, ~schedulesLeave, ~onRefresh) => {
   let (state, dispatch) = React.useReducer((state, action) =>
     switch action {
     | ChangeFormType(formType) => {...state, formType: formType}
@@ -227,6 +229,14 @@ let make = (~schedules, ~onRefresh) => {
       ~failAction=json => json->Json.stringify->OnSubmitRequestLeaveFailed->dispatch,
     )
   }
+
+  let schedules = List.append(schedulesHoliday, schedulesLeave)
+  let schedulesLeaveCurrentYear = schedulesLeave |> List.filter((schedule: schedule) => {
+    let yearFromSchedule = schedule.date->Js.Date.fromFloat->Js.Date.getFullYear
+    let yearFromToday = Js.Date.now()->Js.Date.fromFloat->Js.Date.getFullYear
+    yearFromSchedule === yearFromToday
+  })
+
   <div className="container mt-4 request-form-container">
     <div className="row"> <p> {React.string("Create Form")} </p> </div>
     <form
@@ -262,8 +272,33 @@ let make = (~schedules, ~onRefresh) => {
       )
       |> Array.of_list
       |> React.array}
+      <div className="col-12 pt-3">
+        <p>
+          {
+            let availableDays = switch state.formType {
+            | Sick =>
+              allSickLeaveRequests -
+              List.filter(
+                (schedule: schedule) =>
+                  Js.String.includes("sick", schedule.title->Js.String.toLowerCase),
+                schedulesLeaveCurrentYear,
+              )->List.length
+            | Vacation =>
+              allVacationLeaveRequests -
+              List.filter(
+                (schedule: schedule) =>
+                  Js.String.includes("vacation", schedule.title->Js.String.toLowerCase),
+                schedulesLeaveCurrentYear,
+              )->List.length
+            }
+            `Available: ${(
+                availableDays >= 0 ? availableDays : 0
+              )->string_of_int} Day${availableDays > 1 ? "s" : ""}`->React.string
+          }
+        </p>
+      </div>
       <div className="col-12">
-        <div className="row mt-5 pl-2 pr-2">
+        <div className="row pl-2 pr-2">
           <div className="timeline-point timeline-start" />
           {dateForm(
             ~schedules,
