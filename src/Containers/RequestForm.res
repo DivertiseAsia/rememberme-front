@@ -2,6 +2,8 @@ open ReasonReact
 open RememberMeType
 
 let requestMenus = list{Sick, Vacation}
+let allSickLeaveRequests = 7
+let allVacationLeaveRequests = 10
 
 let months: list<month> = list{Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec}
 let years: list<float> = list{
@@ -86,11 +88,11 @@ let dateForm = (
               (datetime |> Js.Date.valueOf >= today &&
               (!RememberMeUtils.validateWeekend(datetime) && !isLeaveDay))
           isValidate
-            ? <a 
-                key=`dropdown-item-date-${idx->Belt.Int.toString}-${datetime->Js.Date.toLocaleString}` 
-                className="dropdown-item" 
+            ? <a
+                key={`dropdown-item-date-${idx->Belt.Int.toString}-${datetime->Js.Date.toLocaleString}`}
+                className="dropdown-item"
                 onClick={_ => onChangeDate(datetime |> Js.Date.valueOf)}>
-                  {string(idx + 1 |> string_of_int)}
+                {string(idx + 1 |> string_of_int)}
               </a>
             : null
         })
@@ -168,7 +170,7 @@ let dateForm = (
 </>
 
 @react.component
-let make = (~schedules, ~onRefresh) => {
+let make = (~schedulesHoliday, ~schedulesLeave, ~onRefresh) => {
   let (state, dispatch) = React.useReducer((state, action) =>
     switch action {
     | ChangeFormType(formType) => {...state, formType: formType}
@@ -231,13 +233,23 @@ let make = (~schedules, ~onRefresh) => {
       ~failAction=json => json->Json.stringify->OnSubmitRequestLeaveFailed->dispatch,
     )
   }
+
+  let schedules = List.append(schedulesHoliday, schedulesLeave)
+  let schedulesLeaveCurrentYear = schedulesLeave |> List.filter((schedule: schedule) => {
+    let yearFromSchedule = schedule.date->Js.Date.fromFloat->Js.Date.getFullYear
+    let yearFromToday = Js.Date.now()->Js.Date.fromFloat->Js.Date.getFullYear
+    yearFromSchedule === yearFromToday
+  })
+
   <div className="container mt-4 request-form-container">
     <div className="row"> <p> {string("Create Form")} </p> </div>
     <form
       className="row justify-content-center pt-5 pb-2"
       style={ReactDOM.Style.make(~backgroundColor="white", ~borderTop="2px solid #FFA227", ())}
-      onSubmit={e => {ReactEvent.Form.preventDefault(e); onSubmit()}}
-      >
+      onSubmit={e => {
+        ReactEvent.Form.preventDefault(e)
+        onSubmit()
+      }}>
       {requestMenus
       |> List.map((menu: formType) =>
         <div
@@ -264,8 +276,33 @@ let make = (~schedules, ~onRefresh) => {
       )
       |> Array.of_list
       |> array}
+      <div className="col-12 pt-3">
+        <p>
+          {
+            let availableDays = switch state.formType {
+            | Sick =>
+              allSickLeaveRequests -
+              List.filter(
+                (schedule: schedule) =>
+                  Js.String.includes("sick", schedule.title->Js.String.toLowerCase),
+                schedulesLeaveCurrentYear,
+              )->List.length
+            | Vacation =>
+              allVacationLeaveRequests -
+              List.filter(
+                (schedule: schedule) =>
+                  Js.String.includes("vacation", schedule.title->Js.String.toLowerCase),
+                schedulesLeaveCurrentYear,
+              )->List.length
+            }
+            `Available: ${(
+                availableDays >= 0 ? availableDays : 0
+              )->string_of_int} Day${availableDays > 1 ? "s" : ""}`->React.string
+          }
+        </p>
+      </div>
       <div className="col-12">
-        <div className="row mt-5 pl-2 pr-2">
+        <div className="row pl-2 pr-2">
           <div className="timeline-point timeline-start" />
           {dateForm(
             ~schedules,

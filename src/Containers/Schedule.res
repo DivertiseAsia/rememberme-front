@@ -260,13 +260,14 @@ let make = (
       )
       |> List.map((requestLeave: leaveDetail) => requestLeave |> RememberMeUtils.splitRequestLeave)
       |> List.concat
-      let schedules = List.append(schedulesHoliday, schedulesLeave)
+
       <RequestForm
         onRefresh={_ => {
           dispatch(ChangeContentForm(Idle))
           onRefresh()
         }}
-        schedules
+        schedulesHoliday
+        schedulesLeave
       />
     | MyForm => <RequestLeavePanel requestLeaves=userLeaveList onRefresh />
     }}
