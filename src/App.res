@@ -211,7 +211,7 @@ let make = () => {
   React.useEffect1(_ => {
     switch (state.holidayApiState, isLoggedIn) {
     | (Loaded(holidayList), true) => {
-        let holidayInfo = ["[Holiday]\n"]
+        let holidayInfo = ["[ Holiday ]\n"]
         let filteredHoliday =
           holidayList->Belt.List.keep(holiday =>
             holiday.date->Js.Date.fromFloat->Utils.Date.isToday
@@ -222,9 +222,9 @@ let make = () => {
             filteredHoliday
             ->Belt.List.mapWithIndex((index, holiday) => {
               if index === 0 {
-                holidayInfo[0] = holiday.name
+                holidayInfo[0] = holidayInfo[0] ++ (index+1)->string_of_int ++ ". " ++ holiday.name
               } else {
-                holidayInfo[0] = holidayInfo[0] ++ "\n " ++ holiday.name
+                holidayInfo[0] = holidayInfo[0] ++ "\n"  ++ (index+1)->string_of_int ++ ". " ++ holiday.name
               }
             })
             ->ignore
@@ -239,7 +239,7 @@ let make = () => {
   React.useEffect1(_ => {
     switch (state.eventsApiState, isLoggedIn) {
     | (Loaded(eventList), true) => {
-        let eventInfo = ["[Events]\n"]
+        let eventInfo = ["[ All Events Today]\n"]
         let filteredEvents = eventList->Belt.List.keep(event => event.date->Utils.Date.isToday)
         switch filteredEvents {
         | list{} => ()
@@ -247,9 +247,9 @@ let make = () => {
             filteredEvents
             ->Belt.List.mapWithIndex((index, event) => {
               if index === 0 {
-                eventInfo[0] = event.name
+                eventInfo[0] = eventInfo[0] ++ (index+1)->string_of_int ++ ". " ++ event.name 
               } else {
-                eventInfo[0] = eventInfo[0] ++ "\n " ++ event.name
+                eventInfo[0] = eventInfo[0] ++ "\n"  ++ (index+1)->string_of_int ++ ". " ++ event.name
               }
             })
             ->ignore
@@ -262,12 +262,15 @@ let make = () => {
     None
   }, [state.eventsApiState])
   React.useEffect1(_ => {
+    
     switch (state.allLeaveListApiState, isLoggedIn) {
     | (Loaded(leaveList), true) => {
-        let leaveInfo = ["[Leaves]\n"]
+        let leaveInfo = ["[ All Leaves Today ]\n"]
         let filteredLeaves = leaveList->Belt.List.keep(leave => {
-          leave.fromDate->Js.Date.valueOf <= Js.Date.now() &&
-          leave.toDate->Js.Date.valueOf >= Js.Date.now() &&
+          let toDate = Js.Date.setHoursMSMs(leave.toDate, ~hours=23., ~minutes=59., ~seconds=59., ~milliseconds=999., ())
+          
+          ReDate.isBefore(toDate->Js.Date.fromFloat, Js.Date.make()) &&
+          ReDate.isAfter(leave.fromDate, Js.Date.make()) &&
           leave.status === Approve
         })
         switch filteredLeaves {
@@ -276,9 +279,9 @@ let make = () => {
             filteredLeaves
             ->Belt.List.mapWithIndex((index, leave) => {
               if index === 0 {
-                leaveInfo[0] = leave.user
+                leaveInfo[0] = leaveInfo[0] ++ (index+1)->string_of_int ++ ". " ++ leave.user
               } else {
-                leaveInfo[0] = leaveInfo[0] ++ "\n " ++ leave.user
+                leaveInfo[0] = leaveInfo[0] ++ "\n"  ++ (index+1)->string_of_int ++ ". " ++ leave.user
               }
             })
             ->ignore
