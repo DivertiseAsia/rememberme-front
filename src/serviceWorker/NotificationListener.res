@@ -17,14 +17,16 @@ let requestPermission = () => {
 }
 
 let showNotification = %raw(`
-  function showNotification (infos) {
+  function showNotification (title, body) {
       navigator.serviceWorker.ready.then(function(registration) {
-      registration.showNotification(infos);
+      registration.showNotification(title, {
+          body: body,
+        });
     })
   }
 `)
 
-let showDailyNoti = (dailyInfoText, dailyType) => {
+let showDailyNoti = (dailyInfoText, dailyType, title) => {
   switch self->navigator->ServiceWorkerLoader.swOpt {
   | Some(_serviceWorker) =>
     switch Dom.Storage.getItem(
@@ -49,7 +51,7 @@ let showDailyNoti = (dailyInfoText, dailyType) => {
           Config.LocalStorageInfo.dailyReportValueFormate(~dateStr, ~dailyType),
           Dom.Storage.localStorage,
         )
-        dailyInfoText->showNotification->ignore
+        showNotification(title, dailyInfoText)->ignore
       }
     }
   | None => Js.log("service worker cannot be found.")

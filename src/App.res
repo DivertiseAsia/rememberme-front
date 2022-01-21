@@ -211,7 +211,6 @@ let make = () => {
   React.useEffect1(_ => {
     switch (state.holidayApiState, isLoggedIn) {
     | (Loaded(holidayList), true) => {
-        let holidayInfo = ["[ Holiday ]\n"]
         let filteredHoliday =
           holidayList->Belt.List.keep(holiday =>
             holiday.date->Js.Date.fromFloat->Utils.Date.isToday
@@ -219,16 +218,20 @@ let make = () => {
         switch filteredHoliday {
         | list{} => ()
         | _ => {
+            let holidayTitle = "Holiday"
+            let holidayInfo = [""]
             filteredHoliday
             ->Belt.List.mapWithIndex((index, holiday) => {
               if index === 0 {
-                holidayInfo[0] = holidayInfo[0] ++ (index+1)->string_of_int ++ ". " ++ holiday.name
+                holidayInfo[0] =
+                  holidayInfo[0] ++ (index + 1)->string_of_int ++ ". " ++ holiday.name
               } else {
-                holidayInfo[0] = holidayInfo[0] ++ "\n"  ++ (index+1)->string_of_int ++ ". " ++ holiday.name
+                holidayInfo[0] =
+                  holidayInfo[0] ++ "\n" ++ (index + 1)->string_of_int ++ ". " ++ holiday.name
               }
             })
             ->ignore
-            NotificationListener.showDailyNoti(holidayInfo[0], "holiday")
+            NotificationListener.showDailyNoti(holidayInfo[0], "holiday", holidayTitle)
           }
         }
       }
@@ -239,21 +242,23 @@ let make = () => {
   React.useEffect1(_ => {
     switch (state.eventsApiState, isLoggedIn) {
     | (Loaded(eventList), true) => {
-        let eventInfo = ["[ All Events Today]\n"]
         let filteredEvents = eventList->Belt.List.keep(event => event.date->Utils.Date.isToday)
         switch filteredEvents {
         | list{} => ()
         | _ => {
+            let eventTitle = `All Events Today (${filteredEvents->List.length->string_of_int})`
+            let eventInfo = [""]
             filteredEvents
             ->Belt.List.mapWithIndex((index, event) => {
               if index === 0 {
-                eventInfo[0] = eventInfo[0] ++ (index+1)->string_of_int ++ ". " ++ event.name 
+                eventInfo[0] = eventInfo[0] ++ (index + 1)->string_of_int ++ ". " ++ event.name
               } else {
-                eventInfo[0] = eventInfo[0] ++ "\n"  ++ (index+1)->string_of_int ++ ". " ++ event.name
+                eventInfo[0] =
+                  eventInfo[0] ++ "\n" ++ (index + 1)->string_of_int ++ ". " ++ event.name
               }
             })
             ->ignore
-            NotificationListener.showDailyNoti(eventInfo[0], "event")
+            NotificationListener.showDailyNoti(eventInfo[0], "event", eventTitle)
           }
         }
       }
@@ -262,13 +267,18 @@ let make = () => {
     None
   }, [state.eventsApiState])
   React.useEffect1(_ => {
-    
     switch (state.allLeaveListApiState, isLoggedIn) {
     | (Loaded(leaveList), true) => {
-        let leaveInfo = ["[ All Leaves Today ]\n"]
         let filteredLeaves = leaveList->Belt.List.keep(leave => {
-          let toDate = Js.Date.setHoursMSMs(leave.toDate, ~hours=23., ~minutes=59., ~seconds=59., ~milliseconds=999., ())
-          
+          let toDate = Js.Date.setHoursMSMs(
+            leave.toDate,
+            ~hours=23.,
+            ~minutes=59.,
+            ~seconds=59.,
+            ~milliseconds=999.,
+            (),
+          )
+
           ReDate.isBefore(toDate->Js.Date.fromFloat, Js.Date.make()) &&
           ReDate.isAfter(leave.fromDate, Js.Date.make()) &&
           leave.status === Approve
@@ -276,16 +286,19 @@ let make = () => {
         switch filteredLeaves {
         | list{} => ()
         | _ => {
+            let leaveTitle = `All Leaves Today (${filteredLeaves->List.length->string_of_int})`
+            let leaveInfo = [""]
             filteredLeaves
             ->Belt.List.mapWithIndex((index, leave) => {
               if index === 0 {
-                leaveInfo[0] = leaveInfo[0] ++ (index+1)->string_of_int ++ ". " ++ leave.user
+                leaveInfo[0] = leaveInfo[0] ++ (index + 1)->string_of_int ++ ". " ++ leave.user
               } else {
-                leaveInfo[0] = leaveInfo[0] ++ "\n"  ++ (index+1)->string_of_int ++ ". " ++ leave.user
+                leaveInfo[0] =
+                  leaveInfo[0] ++ "\n" ++ (index + 1)->string_of_int ++ ". " ++ leave.user
               }
             })
             ->ignore
-            NotificationListener.showDailyNoti(leaveInfo[0], "leave")
+            NotificationListener.showDailyNoti(leaveInfo[0], "leave", leaveTitle)
           }
         }
       }
