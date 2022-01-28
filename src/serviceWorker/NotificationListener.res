@@ -21,6 +21,7 @@ let showNotification = %raw(`
       navigator.serviceWorker.ready.then(function(registration) {
       registration.showNotification(title, {
           body: body,
+          icon: "/images/logo.png",
         });
     })
   }
