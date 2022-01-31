@@ -208,7 +208,7 @@ let make = () => {
     }
     None
   }, [isLoggedIn])
-  React.useEffect1(_ => {
+  React.useEffect2(_ => {
     switch (state.holidayApiState, isLoggedIn) {
     | (Loaded(holidayList), true) => {
         let filteredHoliday =
@@ -238,8 +238,8 @@ let make = () => {
     | _ => ()
     }
     None
-  }, [state.holidayApiState])
-  React.useEffect1(_ => {
+  }, (state.holidayApiState, token))
+  React.useEffect2(_ => {
     switch (state.eventsApiState, isLoggedIn) {
     | (Loaded(eventList), true) => {
         let filteredEvents = eventList->Belt.List.keep(event => event.date->Utils.Date.isToday)
@@ -265,8 +265,8 @@ let make = () => {
     | _ => ()
     }
     None
-  }, [state.eventsApiState])
-  React.useEffect1(_ => {
+  }, (state.eventsApiState, token))
+  React.useEffect2(_ => {
     switch (state.allLeaveListApiState, isLoggedIn) {
     | (Loaded(leaveList), true) => {
         let filteredLeaves = leaveList->Belt.List.keep(leave => {
@@ -305,7 +305,7 @@ let make = () => {
     | _ => ()
     }
     None
-  }, [state.allLeaveListApiState])
+  }, (state.allLeaveListApiState, token))
 
   <ProfileContext.Provider
     value={(

@@ -1,4 +1,3 @@
-
 @react.component
 let make = (~onClose) => <>
   <div className="popover-bg" onClick=onClose />
@@ -15,8 +14,9 @@ let make = (~onClose) => <>
         onClick={_ => {
           {
             open Dom.Storage
-            localStorage |> removeItem("token")
+            localStorage->clear
           }
+
           RescriptReactRouter.push("")
         }}>
         {React.string("Sign Out")}
