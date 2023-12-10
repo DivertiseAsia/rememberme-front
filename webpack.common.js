@@ -1,14 +1,21 @@
 const path = require('path');
-const GitRevisionPlugin = require('git-revision-webpack-plugin');
+const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const HtmlWebpackExcludeAssetsPlugin = require('html-webpack-exclude-assets-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const gitRevisionPlugin = new GitRevisionPlugin({ branch: true });
 const outputDir = path.join(__dirname, "build/");
 
 let versioning = null;
+
+const isMobile = process.env.MOBILE_BUILD || false;
+let publicPath = isMobile ? '' : '/';
+if (process.env.PUBLIC_PATH) {
+  publicPath = process.env.PUBLIC_PATH;
+}
+console.log(`Public path for app will be: "${publicPath}"`);
+
 try {
   versioning = JSON.stringify({
     VERSION: gitRevisionPlugin.version(),
@@ -26,13 +33,14 @@ try {
 module.exports = {
   entry: {
     'index': './lib/js/src/Index.bs.js',
-    'style': path.join(__dirname, 'public', 'css', 'style.scss'),
-    'sw': "./lib/js/src/serviceWorker/ServiceWorkerListener.bs.js",
+    'style': path.join(__dirname, 'public', 'css', 'style.scss')
   },
   output: {
     path: outputDir,
-    publicPath: '/',
-    filename: '[name].js'.toLowerCase(),
+    publicPath,
+    filename: '[name].[chunkhash].js'.toLowerCase(),
+    chunkFilename: '[name].[chunkhash].chunk.js'.toLowerCase(),
+    clean: true
   },
   stats: 'minimal',
   plugins: [
@@ -45,29 +53,35 @@ module.exports = {
       excludeAssets: [/style.js/]
     }),
     new MiniCssExtractPlugin({
-      filename: '[name].[hash].css',
-      chunkFilename: '[id].[hash].css',
+      filename: '[name].[contenthash].css',
+      chunkFilename: '[id].[contenthash].css',
     }),
-    new HtmlWebpackExcludeAssetsPlugin(),
-    new CopyWebpackPlugin([
-      { from: 'public' },
-      { from: 'public/images/favicon.png' }
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'public/images/favicon.png' },
+      ]
+    }),
   ],
   module: {
     rules: [{
       test: /\.(jpe?g|png|gif|svg|pdf|ico)$/,
-      use: [{
-        loader: 'file-loader',
-        options: {
-          name: '[path][name]-[hash:6].[ext]'
-        },
-      },]
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/[hash][ext][query]'
+      }
     },
     {
       use: 'babel-loader',
       test: /\.js$/,
-      exclude: /node_modules/,
+      exclude: /node_modules\/(?!react-intl|intl-messageformat|@formatjs\/icu-messageformat-parser)/,
+    },
+    {
+      test: /\.json$/,
+      type: 'json',
+    },
+    {
+      test: /\.css$/,
+      use: ['style-loader', 'css-loader'],
     },
     {
       test: /\.scss$/,

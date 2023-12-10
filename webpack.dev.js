@@ -1,4 +1,4 @@
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
 const webpack = require('webpack');
 const environments = require('./environments');
@@ -6,6 +6,7 @@ const environments = require('./environments');
 const API_SERVER = process.env.API_SERVER === 'staging'
   ? environments.staging.API_URL
   : environments.dev.API_URL;
+
 const envVars = environments.dev;
 
 console.log('WPDEV - will use api server:' + API_SERVER);

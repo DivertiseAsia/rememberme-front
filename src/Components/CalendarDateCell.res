@@ -125,7 +125,7 @@ let make = (~extraClassName="", ~cell: cell, ~children=?) => {
               id={`popper-event-details-${date->Js.Date.toDateString}`}
               className={"popper-event-details"}
               _open={anchorEl->Belt.Option.isSome}
-              anchorEl
+              // anchorEl TODO:Fix -> broken during upgrade
               placement="top"
               modifiers={
                 "arrow": {
