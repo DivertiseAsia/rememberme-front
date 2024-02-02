@@ -4,4 +4,4 @@ This project is **unmaintained**.
 
 refactor/upgrade contains some changes that are untested that allow for compilation.
 
-You must run https://github.com/DivertiseAsia/remember-me-server and it should use firebase for some functionality.
+You must run https://github.com/DivertiseAsia/rememberme-server and it should use firebase for some functionality.
